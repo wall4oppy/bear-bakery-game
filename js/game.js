@@ -7681,7 +7681,26 @@ document.addEventListener('DOMContentLoaded', function() {
             container.appendChild(startButton);
             
             // 添加返回按鈕
-            this.addBackButton(container);
+            const backButton = document.createElement('button');
+            backButton.textContent = '← 返回';
+            backButton.style.cssText = `
+                position: absolute;
+                top: 20px;
+                left: 20px;
+                padding: 8px 16px;
+                background-color: #8b4513;
+                color: white;
+                border: 2px solid #654321;
+                border-radius: 5px;
+                cursor: pointer;
+                font-family: 'Zpix', monospace;
+                font-size: 12px;
+                z-index: 1000;
+            `;
+            backButton.addEventListener('click', () => {
+                ContentManager.showContent('main-menu');
+            });
+            container.appendChild(backButton);
             
             windowContent.appendChild(container);
         },
