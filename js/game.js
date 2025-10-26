@@ -10083,6 +10083,34 @@ document.addEventListener('DOMContentLoaded', function() {
                  return response;
              }
          } else if (msg.includes('景氣燈號') || msg.includes('景氣') || msg.includes('燈號')) {
+             // 檢查是否詢問特定顏色的燈號
+             if (msg.includes('綠燈') || msg.includes('綠色')) {
+                 const trafficLight = templates.traffic_light || [];
+                 const greenResponses = trafficLight.filter(response => response.includes('綠燈'));
+                 if (greenResponses.length > 0) {
+                     const response = greenResponses[Math.floor(Math.random() * greenResponses.length)];
+                     console.log(`✅ 使用綠燈模板: "${response}"`);
+                     return response;
+                 }
+             } else if (msg.includes('紅燈') || msg.includes('紅色')) {
+                 const trafficLight = templates.traffic_light || [];
+                 const redResponses = trafficLight.filter(response => response.includes('紅燈'));
+                 if (redResponses.length > 0) {
+                     const response = redResponses[Math.floor(Math.random() * redResponses.length)];
+                     console.log(`✅ 使用紅燈模板: "${response}"`);
+                     return response;
+                 }
+             } else if (msg.includes('藍燈') || msg.includes('藍色')) {
+                 const trafficLight = templates.traffic_light || [];
+                 const blueResponses = trafficLight.filter(response => response.includes('藍燈'));
+                 if (blueResponses.length > 0) {
+                     const response = blueResponses[Math.floor(Math.random() * blueResponses.length)];
+                     console.log(`✅ 使用藍燈模板: "${response}"`);
+                     return response;
+                 }
+             }
+             
+             // 一般景氣燈號問題
              const economy = templates.economy || [];
              if (economy.length > 0) {
                  const response = economy[Math.floor(Math.random() * economy.length)];
