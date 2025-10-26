@@ -1,5 +1,5 @@
 @echo off
-echo 正在整理小熊哥麵包店文件結構...
+echo 正在整理小熊哥麵包坊文件結構...
 
 :: 創建目錄結構
 if not exist "assets" mkdir assets

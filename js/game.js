@@ -10701,9 +10701,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                   VirtualPlayersSystem.simulateRound(event);
                               }
                               
-                              GameFlowManager.eventsCompleted++;
-                              GameFlowManager.saveProgress();
-                              
                               console.log(`   ✅ 完成! 收入: ${salesResult.totalRevenue.toLocaleString()}, 銷售量: ${salesResult.totalSalesVolume}`);
                           }
                           
