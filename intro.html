@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小熊哥麵包店 - 前導劇情</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐻</text></svg>">
+    <style>
+        /* 像素風格字體 */
+        @font-face {
+            font-family: 'Zpix';
+            src: url('assets/fonts/Zpix.ttf') format('truetype');
+            font-display: swap;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Zpix', 'Press Start 2P', monospace;
+            background-color: #000;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .intro-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .video-player {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background-color: #000;
+        }
+        
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        .skip-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(139, 69, 19, 0.8);
+            border: 3px solid #8b4513;
+            border-radius: 8px;
+            color: #fff;
+            font-family: 'Zpix', 'Press Start 2P', monospace;
+            font-size: 12px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 20;
+            pointer-events: auto;
+            box-shadow: 
+                inset -2px -2px 0px rgba(0,0,0,0.3),
+                inset 2px 2px 0px rgba(255,255,255,0.3);
+        }
+        
+        .skip-button:hover {
+            background-color: rgba(160, 82, 45, 0.9);
+            transform: translateY(-2px);
+        }
+        
+        .skip-button:active {
+            transform: translateY(1px);
+        }
+        
+        .loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 30;
+        }
+        
+        .loading-text {
+            color: #f5e5c5;
+            font-size: 18px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 0px #8b4513;
+        }
+        
+        .loading-dots {
+            color: #daa520;
+            font-size: 14px;
+        }
+        
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        
+        @keyframes dots {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+            100% { content: ''; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 1s ease-in;
+        }
+        
+        .fade-out {
+            animation: fadeOut 1s ease-out;
+        }
+        
+        .transition-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            z-index: 25;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .transition-overlay.show {
+            opacity: 1;
+            animation: smoothFade 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        @keyframes smoothFade {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="intro-container">
+        <!-- 載入畫面 -->
+        <div class="loading-screen" id="loadingScreen">
+            <div class="loading-text">載入劇情影片中</div>
+            <div class="loading-dots"></div>
+        </div>
+        
+        <!-- 影片播放器 -->
+        <video class="video-player" id="videoPlayer" preload="auto" muted>
+            <!-- 影片源會在 JavaScript 中動態設置 -->
+        </video>
+        
+        <!-- 跳過按鈕 -->
+        <button class="skip-button" id="skipButton">跳過劇情 (ESC)</button>
+    </div>
+
+    <script>
+        class IntroManager {
+            constructor() {
+                this.videos = [
+                    'assets/videos/前導劇情.mp4'
+                ];
+                this.videoTitles = [
+                    '前導劇情'
+                ];
+                this.currentVideoIndex = 0;
+                this.videoPlayer = document.getElementById('videoPlayer');
+                this.loadingScreen = document.getElementById('loadingScreen');
+                this.skipButton = document.getElementById('skipButton');
+                this.introContainer = document.querySelector('.intro-container');
+                
+                this.init();
+            }
+            
+            init() {
+                // 設置事件監聽器
+                this.videoPlayer.addEventListener('ended', () => this.playNextVideo());
+                // 移除載入相關事件監聽器，避免顯示載入痕跡
+                
+                this.skipButton.addEventListener('click', () => this.skipIntro());
+                
+                // 鍵盤事件
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.skipIntro();
+                    } else if (e.key === ' ') {
+                        e.preventDefault();
+                        this.togglePlayPause();
+                    }
+                });
+                
+                // 預載入所有影片
+                this.preloadAllVideos().then(() => {
+                    // 隱藏載入畫面
+                    this.hideLoadingScreen();
+                    
+                    // 播放第一個影片（帶過渡動畫）
+                    this.playCurrentVideoWithSmoothTransition();
+                });
+            }
+            
+            // 隱藏載入畫面
+            hideLoadingScreen() {
+                this.loadingScreen.style.display = 'none';
+            }
+            
+            // 預載入所有影片
+            preloadAllVideos() {
+                return new Promise((resolve) => {
+                    let loadedCount = 0;
+                    const totalVideos = this.videos.length;
+                    
+                    // 為每個影片創建臨時video元素進行預載入
+                    this.videos.forEach((videoSrc, index) => {
+                        const tempVideo = document.createElement('video');
+                        tempVideo.preload = 'auto';
+                        tempVideo.muted = true;
+                        tempVideo.src = videoSrc;
+                        
+                        tempVideo.addEventListener('canplaythrough', () => {
+                            loadedCount++;
+                            console.log(`影片 ${index + 1} 預載入完成 (${loadedCount}/${totalVideos})`);
+                            
+                            if (loadedCount === totalVideos) {
+                                console.log('所有影片預載入完成');
+                                resolve();
+                            }
+                        });
+                        
+                        // 如果載入失敗，也要計數避免卡住
+                        tempVideo.addEventListener('error', () => {
+                            loadedCount++;
+                            console.warn(`影片 ${index + 1} 預載入失敗`);
+                            
+                            if (loadedCount === totalVideos) {
+                                resolve();
+                            }
+                        });
+                        
+                        // 開始載入
+                        tempVideo.load();
+                    });
+                });
+            }
+            
+            playCurrentVideo() {
+                const currentVideo = this.videos[this.currentVideoIndex];
+                console.log(`播放影片 ${this.currentVideoIndex + 1}: ${currentVideo}`);
+                
+                // 由於影片已經預載入，直接設置src並播放
+                this.videoPlayer.src = currentVideo;
+                this.videoPlayer.currentTime = 0;
+                
+                // 立即播放，不需要等待載入
+                this.videoPlayer.play().catch(error => {
+                    console.warn('自動播放失敗:', error);
+                    // 如果自動播放失敗，顯示提示
+                    this.showPlayPrompt();
+                });
+            }
+            
+            showPlayPrompt() {
+                const prompt = document.createElement('div');
+                prompt.style.cssText = `
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background-color: rgba(139, 69, 19, 0.9);
+                    border: 3px solid #8b4513;
+                    border-radius: 8px;
+                    color: #fff;
+                    font-family: 'Zpix', 'Press Start 2P', monospace;
+                    font-size: 14px;
+                    padding: 20px;
+                    text-align: center;
+                    z-index: 15;
+                    cursor: pointer;
+                `;
+                prompt.innerHTML = '點擊播放劇情影片<br><small>按 ESC 跳過</small>';
+                
+                prompt.addEventListener('click', () => {
+                    this.videoPlayer.play();
+                    prompt.remove();
+                });
+                
+                document.body.appendChild(prompt);
+            }
+            
+            playNextVideo() {
+                this.currentVideoIndex++;
+                
+                if (this.currentVideoIndex < this.videos.length) {
+                    // 還有更多影片，播放下一個（帶流暢過渡）
+                    this.playCurrentVideoWithSmoothTransition();
+                } else {
+                    // 所有影片播放完畢，跳轉到遊戲
+                    this.completeIntro();
+                }
+            }
+            
+            playCurrentVideoWithSmoothTransition() {
+                const currentVideo = this.videos[this.currentVideoIndex];
+                console.log(`切換到影片 ${this.currentVideoIndex + 1}: ${currentVideo}`);
+                
+                // 先設置新影片源
+                this.videoPlayer.src = currentVideo;
+                this.videoPlayer.currentTime = 0;
+                
+                // 同時顯示過渡動畫並播放新影片
+                this.showSmoothTransition();
+                
+                // 立即播放新影片
+                this.videoPlayer.play().catch(error => {
+                    console.warn('播放失敗:', error);
+                });
+            }
+            
+            showSmoothTransition() {
+                // 創建流暢的過渡覆蓋層
+                const transitionOverlay = document.createElement('div');
+                transitionOverlay.className = 'transition-overlay';
+                
+                this.introContainer.appendChild(transitionOverlay);
+                
+                // 立即顯示過渡動畫
+                transitionOverlay.classList.add('show');
+                
+                // 快速移除過渡層，讓新影片立即顯示
+                setTimeout(() => {
+                    if (transitionOverlay.parentNode) {
+                        transitionOverlay.parentNode.removeChild(transitionOverlay);
+                    }
+                }, 500); // 0.5秒後移除，確保流暢過渡
+            }
+            
+            skipIntro() {
+                this.completeIntro();
+            }
+            
+            togglePlayPause() {
+                if (this.videoPlayer.paused) {
+                    this.videoPlayer.play();
+                } else {
+                    this.videoPlayer.pause();
+                }
+            }
+            
+            completeIntro() {
+                // 添加淡出效果
+                document.body.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    // 直接跳轉到遊戲頁面
+                    window.location.href = 'game.html';
+                }, 1000);
+            }
+        }
+        
+        // 頁面載入完成後初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            new IntroManager();
+        });
+    </script>
+</body>
+</html>

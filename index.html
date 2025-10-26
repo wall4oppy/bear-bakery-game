@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小熊哥麵包店</title>
+    <style>
+        /* 像素風格字體 */
+        @font-face {
+            font-family: 'Zpix';
+            src: url('assets/fonts/Zpix.ttf') format('truetype');
+            font-display: swap;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #000;
+            position: relative;
+        }
+        
+        .game-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+        
+        .start-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, calc(-50% + 200px)) scale(1.5);
+            background: transparent;
+            border: none;
+            padding: 15px 30px;
+            color: #fff;
+            font-family: 'Zpix', 'Arial', sans-serif;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 
+                2px 2px 0px #333,
+                -2px -2px 0px #333,
+                2px -2px 0px #333,
+                -2px 2px 0px #333,
+                0px 2px 0px #333,
+                0px -2px 0px #333,
+                2px 0px 0px #333,
+                -2px 0px 0px #333;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+        
+        .start-button:hover {
+            transform: translate(-50%, calc(-50% + 200px)) scale(1.575);
+        }
+        
+        .start-button:active {
+            transform: translate(-50%, calc(-50% + 200px)) scale(1.425);
+        }
+    </style>
+</head>
+<body>
+    <img src="assets/images/灰色開始遊戲.png" alt="開始遊戲" class="game-image">
+    <button class="start-button" onclick="startGame()">PRESSㅤSTART</button>
+    
+    <script>
+        function startGame() {
+            // 跳轉到 intro.html
+            window.location.href = 'intro.html';
+        }
+    </script>
+</body>
+</html>
