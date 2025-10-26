@@ -1,0 +1,27 @@
+# GitHub Pages 配置
+title: 小熊哥捲土重來
+description: 像素風格麵包店經營遊戲
+baseurl: ""
+url: "https://wall4oppy.github.io"
+
+# 插件設置
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+
+# 排除文件
+exclude:
+  - README.md
+  - .gitignore
+  - .github/
+
+# 包含文件
+include:
+  - _redirects
+
+# 默認設置
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
