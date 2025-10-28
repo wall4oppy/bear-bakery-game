@@ -1,5 +1,53 @@
 // 遊戲主頁面功能
 document.addEventListener('DOMContentLoaded', function() {
+    // ================= 日誌過濾器（整理控制台輸出） =================
+    (function setupConsoleFilter() {
+        const originalLog = console.log.bind(console);
+        const originalInfo = console.info.bind(console);
+        const originalWarn = console.warn.bind(console);
+        const originalError = console.error.bind(console);
+
+        const MODES = { OFF: 'off', MIN: 'minimal', VERBOSE: 'verbose' };
+        const emojiWhitelist = /[✅⚠️❌📦🏆🎯🎉📊🍯📈📉]/; // 重要訊息常用圖示
+
+        const state = {
+            mode: (localStorage.getItem('logMode') || MODES.MIN).toLowerCase()
+        };
+
+        function shouldPrint(args) {
+            if (state.mode === MODES.OFF) return false;
+            if (state.mode === MODES.VERBOSE) return true;
+            // minimal 模式：只有包含重點 emoji 的訊息才輸出
+            const joined = args.map(a => (typeof a === 'string' ? a : '')).join(' ');
+            return emojiWhitelist.test(joined);
+        }
+
+        console.log = function(...args) {
+            if (shouldPrint(args)) originalLog(...args);
+        };
+        // info 與 warn/error 保持輸出（重要）
+        console.info = function(...args) {
+            if (shouldPrint(args) || state.mode !== MODES.OFF) originalInfo(...args);
+        };
+        console.warn = originalWarn;
+        console.error = originalError;
+
+        window.setLogMode = function(mode) {
+            const m = String(mode || '').toLowerCase();
+            if ([MODES.OFF, MODES.MIN, MODES.VERBOSE].includes(m)) {
+                state.mode = m;
+                localStorage.setItem('logMode', m);
+                originalInfo(`🔧 LogMode 已切換為: ${m}`);
+            } else {
+                originalWarn('無效的 LogMode，請使用: off|minimal|verbose');
+            }
+        };
+
+        window.getLogMode = function() { return state.mode; };
+        // 初始化提示（僅首次載入時在 minimal 也會顯示）
+        originalInfo(`🔧 LogMode: ${state.mode}（可呼叫 window.setLogMode('off'|'minimal'|'verbose') 切換）`);
+    })();
+    // ================= 日誌過濾器結束 =================
     // ========== 虛擬玩家系統 ==========
     const VirtualPlayersSystem = {
         players: [],
@@ -654,6 +702,24 @@ document.addEventListener('DOMContentLoaded', function() {
             return shuffled.slice(0, Math.min(count, shuffled.length));
         },
         
+        // 獲取混合題目（五類各5題，共25題）
+        getMixedQuestions() {
+            const mixedQuestions = [];
+            const questionsPerCategory = 5;
+            
+            this.categories.forEach(category => {
+                const categoryQuestions = this.questions.filter(q => q.category === category);
+                if (categoryQuestions.length > 0) {
+                    const shuffled = [...categoryQuestions].sort(() => Math.random() - 0.5);
+                    const selected = shuffled.slice(0, Math.min(questionsPerCategory, categoryQuestions.length));
+                    mixedQuestions.push(...selected);
+                }
+            });
+            
+            // 打亂所有題目的順序
+            return mixedQuestions.sort(() => Math.random() - 0.5);
+        },
+        
         // 記錄測驗結果
         recordAttempt(category, correctCount, totalCount) {
             const correctRate = correctCount / totalCount;
@@ -709,7 +775,8 @@ document.addEventListener('DOMContentLoaded', function() {
         currentCategory: null,
         questions: [],
         currentQuestionIndex: 0,
-        answers: [], // 記錄用戶答案 [{questionIndex, userAnswer, isCorrect, question}]
+    answers: [], // 記錄用戶答案 [{questionIndex, userAnswer, isCorrect, question}]
+    rewardGranted: false, // 本次測驗是否已發獎
         startTime: null,
         timeLimit: 15 * 60 * 1000, // 15分鐘（毫秒）
         timerInterval: null,
@@ -718,12 +785,13 @@ document.addEventListener('DOMContentLoaded', function() {
         start(category) {
             this.isActive = true;
             this.currentCategory = category;
-            this.questions = QuestionBank.getQuestionsByCategory(category, 10);
+            this.questions = QuestionBank.getMixedQuestions(); // 使用混合題目（25題）
             this.currentQuestionIndex = 0;
             this.answers = [];
             this.startTime = Date.now();
+            this.rewardGranted = false;
             
-            console.log(`🎯 開始測驗: ${category}, 共 ${this.questions.length} 題`);
+            console.log(`開始測驗: 混合題目, 共 ${this.questions.length} 題`);
             
             // 開始計時器
             this.startTimer();
@@ -807,15 +875,16 @@ document.addEventListener('DOMContentLoaded', function() {
             // 記錄到類別進度
             QuestionBank.recordAttempt(this.currentCategory, correctCount, totalCount);
             
-            // 計算獎勵
+            // 計算獎勵（基於答對率）
             let reward = 0;
-            if (correctCount === 10) reward = 5000;
-            else if (correctCount >= 9) reward = 3500;
-            else if (correctCount >= 8) reward = 2000;
-            else if (correctCount >= 7) reward = 1000;
+            if (correctRate === 1.0) reward = 5000; // 全對
+            else if (correctRate >= 0.9) reward = 3500; // 90%以上
+            else if (correctRate >= 0.8) reward = 2000; // 80%以上
+            else if (correctRate >= 0.7) reward = 1000; // 70%以上
             
-            if (reward > 0) {
-                GameResources.addResource('honey', reward);
+            if (reward > 0 && !this.rewardGranted) {
+                GameResources.addResource('honey', reward); // 右上角資源會即時更新
+                this.rewardGranted = true;
             }
             
             // 檢查答題成就
@@ -1201,11 +1270,11 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log(`   地區: ${this.currentRoundData.regionType} - ${this.currentRoundData.district}`);
             
             // 顯示當前事件總數
-            console.log(`   📊 當前事件數: ${this.currentRoundData.events.length}/7`);
+            console.log(`   📊 當前事件數: ${this.currentRoundData.events.length}/${GameFlowManager.totalEventsPerRound}`);
             
-            // 只有真實的事件（非進貨）才檢查是否完成 7 個事件
-            if (!isStockingEvent && this.currentRoundData.events.length >= 7) {
-                console.log('✅ 已完成7個事件，準備生成財務報表');
+            // 只有真實的事件（非進貨）才檢查是否完成所有事件
+            if (!isStockingEvent && this.currentRoundData.events.length >= GameFlowManager.totalEventsPerRound) {
+                console.log(`✅ 已完成${GameFlowManager.totalEventsPerRound}個事件，準備生成財務報表`);
                 this.generateRoundReport();
             }
         },
@@ -1215,8 +1284,11 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('📊 開始生成財務報表...');
             console.log('   當前輪次數據:', JSON.stringify(this.currentRoundData, null, 2));
             
+            // 使用 GameFlowManager.currentRound 作為輪次號碼，確保一致性
+            const currentRoundNumber = GameFlowManager.currentRound;
+            
             const report = {
-                roundNumber: this.history.length + 1,
+                roundNumber: currentRoundNumber,
                 timestamp: new Date().toISOString(),
                 regionType: this.currentRoundData.regionType,
                 district: this.currentRoundData.district,
@@ -1279,11 +1351,36 @@ document.addEventListener('DOMContentLoaded', function() {
             if (saved) {
                 try {
                     this.history = JSON.parse(saved);
+                    console.log('✅ 財務報表載入成功，共', this.history.length, '個報表');
                 } catch (e) {
-                    console.warn('載入財務報表失敗');
+                    console.warn('載入財務報表失敗:', e);
                     this.history = [];
                 }
+            } else {
+                console.log('📊 沒有找到財務報表歷史記錄');
             }
+        },
+        
+        // 手動修復財務報表（調試用）
+        fixFinancialReport() {
+            console.log('🔧 開始修復財務報表...');
+            console.log('   當前輪次:', GameFlowManager.currentRound);
+            console.log('   已完成事件:', GameFlowManager.eventsCompleted);
+            console.log('   當前輪次事件數:', this.currentRoundData.events.length);
+            console.log('   報表歷史數量:', this.history.length);
+            
+            // 如果當前輪次有足夠的事件但沒有報表，強制生成
+            if (this.currentRoundData.events.length >= GameFlowManager.totalEventsPerRound) {
+                const hasReport = this.history.some(report => report.roundNumber === GameFlowManager.currentRound);
+                if (!hasReport) {
+                    console.log('  → 強制生成缺失的財務報表');
+                    this.generateRoundReport();
+                    return true;
+                }
+            }
+            
+            console.log('  ✅ 財務報表狀態正常');
+            return false;
         },
         
         // 顯示報表 UI
@@ -1305,7 +1402,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 animation: fadeIn 0.3s ease-in;
             `;
             modal.innerHTML = `
-                <div class="modal-content" style="
+                <div class="modal-content custom-scrollbar" style="
                     background-color: transparent;
                     border: 4px solid #8b4513;
                     border-radius: 12px;
@@ -1576,7 +1673,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 標題
         const title = document.createElement('h2');
-        title.textContent = '歡迎來到小熊哥麵包店！';
+        title.textContent = '歡迎來到小熊哥麵包坊！';
         title.style.cssText = `
             color: #8b4513;
             font-family: 'Zpix', 'Press Start 2P', monospace;
@@ -1691,7 +1788,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 300);
                 
                 // 顯示歡迎訊息
-                showMessage(`歡迎，${playerName}！開始你的麵包店之旅吧！`, 'success');
+                showMessage(`歡迎，${playerName}！開始你的麵包坊之旅吧！`, 'success');
             } else {
                 showMessage('請輸入你的名字！', 'error');
             }
@@ -1770,7 +1867,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${playerName}_小熊哥麵包店存檔_${new Date().toLocaleDateString()}.json`;
+        a.download = `${playerName}_小熊哥麵包坊存檔_${new Date().toLocaleDateString()}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -2317,7 +2414,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 創建小熊頭像
         const bearIcon = document.createElement('img');
-        bearIcon.src = 'assets/images/dreamina-2025-10-07-9873-學習stardew valley的畫風生成小熊,溫暖麵包店像素風,不需要場景_CocoAI_20251007_162855.PNG';
+        bearIcon.src = 'assets/images/dreamina-2025-10-07-9873-學習stardew valley的畫風生成小熊,溫暖麵包坊像素風,不需要場景_CocoAI_20251007_162855.PNG';
         bearIcon.alt = '小熊頭像';
         bearIcon.style.cssText = `
             width: 60px;
@@ -2508,6 +2605,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 載入財務報表
     FinancialReport.loadReport();
+    
+    // 確保進貨按鈕狀態正確恢復
+    setTimeout(() => {
+        if (window.updateStockButtonState) {
+            window.updateStockButtonState();
+        }
+    }, 100);
     
     // 玩家資料點擊事件 - 打開設定畫面
         const playerInfo = document.querySelector('.player-info');
@@ -2963,14 +3067,16 @@ document.addEventListener('DOMContentLoaded', function() {
             subContentArea.className = 'sub-content-area';
             subContentArea.style.cssText = `
                 flex: 1;
-                padding: 0;
+                padding: 16px 20px;
                 background-color: rgba(255, 255, 255, 0.5);
                 display: flex;
                 flex-direction: column;
                 color: #654321;
                 font-family: 'Zpix', 'Press Start 2P', monospace;
                 font-size: 20px;
+                overflow-y: auto;
             `;
+            subContentArea.classList.add('custom-scrollbar');
             
             // 頭像選項
             const avatarOptionsForSelection = [
@@ -2992,7 +3098,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 title.style.cssText = `
                     font-size: 23px;
                     font-weight: bold;
-                    margin-bottom: 24px;
+                    margin-bottom: 20px;
                     text-align: center;
                     color: #654321;
                 `;
@@ -3002,10 +3108,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 avatarGrid.style.cssText = `
                     display: grid;
                     grid-template-columns: repeat(3, 1fr);
-                    gap: 16px;
+                    gap: 14px;
                     width: 100%;
                     height: fit-content;
-                    padding: 20px;
+                    padding: 16px;
                     box-sizing: border-box;
                     justify-items: center;
                     align-items: center;
@@ -3115,6 +3221,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     { id: 'reputation_200', title: '聲望之星', description: '聲望達到 200', icon: '⭐', category: 'resource', condition: { type: 'reputation', value: 200 } },
                     { id: 'medals_50', title: '勳章收集家', description: '勳章數量達到 50', icon: '🏅', category: 'resource', condition: { type: 'medals', value: 50 } },
                     
+                    // 麵包數量相關成就
+                    { id: 'bread_100', title: '麵包學徒', description: '累積販售 100 個麵包', icon: '🥖', category: 'resource', condition: { type: 'total_bread', value: 100 } },
+                    { id: 'bread_500', title: '麵包師傅', description: '累積販售 500 個麵包', icon: '🥐', category: 'resource', condition: { type: 'total_bread', value: 500 } },
+                    { id: 'bread_1000', title: '麵包大師', description: '累積販售 1,000 個麵包', icon: '🍞', category: 'resource', condition: { type: 'total_bread', value: 1000 } },
+                    { id: 'bread_5000', title: '麵包傳奇', description: '累積販售 5,000 個麵包', icon: '🥨', category: 'resource', condition: { type: 'total_bread', value: 5000 } },
+                    { id: 'bread_10000', title: '麵包之神', description: '累積販售 10,000 個麵包', icon: '👑', category: 'resource', condition: { type: 'total_bread', value: 10000 } },
+                    
                     // 答題成就
                     { id: 'correct_10', title: '初學者', description: '答對 10 題', icon: '📚', category: 'quiz', condition: { type: 'correct_answers', value: 10 } },
                     { id: 'correct_50', title: '學習者', description: '答對 50 題', icon: '🎓', category: 'quiz', condition: { type: 'correct_answers', value: 50 } },
@@ -3123,21 +3236,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     { id: 'perfect_quiz', title: '完美主義者', description: '單次測驗答對 10 題', icon: '💯', category: 'quiz', condition: { type: 'perfect_quiz', value: 1 } },
                     { id: 'streak_20', title: '連勝王', description: '連續答對 20 題', icon: '🔥', category: 'quiz', condition: { type: 'streak', value: 20 } },
                     
-                    // 扭蛋成就
-                    { id: 'gashapon_5', title: '扭蛋新手', description: '進行 5 次扭蛋', icon: '🎰', category: 'gashapon', condition: { type: 'gashapon_count', value: 5 } },
-                    { id: 'gashapon_20', title: '扭蛋達人', description: '進行 20 次扭蛋', icon: '🎲', category: 'gashapon', condition: { type: 'gashapon_count', value: 20 } },
-                    { id: 'lucky_draw', title: '幸運兒', description: '單次扭蛋獲得 3 個獎品', icon: '🍀', category: 'gashapon', condition: { type: 'lucky_draw', value: 1 } },
-                    { id: 'gashapon_50', title: '扭蛋收藏家', description: '進行 50 次扭蛋', icon: '🎪', category: 'gashapon', condition: { type: 'gashapon_count', value: 50 } },
-                    
                     // 排行榜成就
                     { id: 'top_5', title: '競爭者', description: '在排行榜中進入前 5 名', icon: '🏆', category: 'leaderboard', condition: { type: 'top_rank', value: 5 } },
                     { id: 'top_3', title: '挑戰者', description: '在排行榜中進入前 3 名', icon: '🥉', category: 'leaderboard', condition: { type: 'top_rank', value: 3 } },
                     { id: 'champion', title: '冠軍', description: '在排行榜中獲得第 1 名', icon: '👑', category: 'leaderboard', condition: { type: 'top_rank', value: 1 } },
                     
-                    // 特殊成就
+                    // 特殊成就（包含原扭蛋成就）
                     { id: 'login_7', title: '堅持不懈', description: '連續登入 7 天', icon: '📅', category: 'special', condition: { type: 'login_streak', value: 7 } },
                     { id: 'quiz_10', title: '勤奮學習', description: '完成 10 次測驗', icon: '📖', category: 'special', condition: { type: 'quiz_completed', value: 10 } },
-                    { id: 'chat_5', title: '社交達人', description: '使用聊天室 5 次', icon: '💬', category: 'special', condition: { type: 'chat_used', value: 5 } }
+                    { id: 'chat_5', title: '社交達人', description: '使用聊天室 5 次', icon: '💬', category: 'special', condition: { type: 'chat_used', value: 5 } },
+                    { id: 'gashapon_5', title: '扭蛋新手', description: '進行 5 次扭蛋', icon: '🎰', category: 'special', condition: { type: 'gashapon_count', value: 5 } },
+                    { id: 'gashapon_20', title: '扭蛋達人', description: '進行 20 次扭蛋', icon: '🎲', category: 'special', condition: { type: 'gashapon_count', value: 20 } },
+                    { id: 'lucky_draw', title: '幸運兒', description: '單次扭蛋獲得 3 個獎品', icon: '🍀', category: 'special', condition: { type: 'lucky_draw', value: 1 } },
+                    { id: 'gashapon_50', title: '扭蛋收藏家', description: '進行 50 次扭蛋', icon: '🎪', category: 'special', condition: { type: 'gashapon_count', value: 50 } }
                 ],
                 
                 // 載入成就進度
@@ -3167,7 +3278,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (achievement.condition.type === type) {
                             const currentValue = this.progress[achievement.id] || 0;
                             
-                            if (type === 'total_honey') {
+                            if (type === 'total_honey' || type === 'total_bread') {
                                 this.progress[achievement.id] = Math.max(currentValue, value);
                             } else if (type === 'correct_answers' || type === 'gashapon_count') {
                                 this.progress[achievement.id] = currentValue + value;
@@ -3226,8 +3337,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 categoryTabs.className = 'category-tabs';
                 categoryTabs.style.cssText = `
                     display: flex;
-                    gap: 14px;
-                    margin-bottom: 24px;
+                    gap: 12px;
+                    margin-bottom: 20px;
+                    margin-top: -30px;
                     justify-content: center;
                     flex-wrap: wrap;
                 `;
@@ -3236,7 +3348,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     { id: 'all', name: '全部', icon: '🏆' },
                     { id: 'resource', name: '資源', icon: '💰' },
                     { id: 'quiz', name: '答題', icon: '📚' },
-                    { id: 'gashapon', name: '扭蛋', icon: '🎰' },
                     { id: 'leaderboard', name: '排行榜', icon: '🏆' },
                     { id: 'special', name: '特殊', icon: '⭐' }
                 ];
@@ -3295,11 +3406,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     overflow-y: auto;
                     display: flex;
                     flex-direction: column;
-                    gap: 14px;
-                    padding: 0 12px;
+                    gap: 12px;
+                    padding: 0 8px;
                     width: 100%;
                     box-sizing: border-box;
                 `;
+                achievementList.classList.add('custom-scrollbar');
                 
                 subContentArea.appendChild(categoryTabs);
                 subContentArea.appendChild(achievementList);
@@ -3329,7 +3441,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     achievementItem.style.cssText = `
                         display: flex;
                         align-items: center;
-                        padding: 14px;
+                        padding: 12px 16px;
                         background-color: ${isUnlocked ? 'rgba(255, 215, 0, 0.3)' : 'rgba(255, 255, 255, 0.3)'};
                         border: 2px solid ${isUnlocked ? '#ffd700' : '#8b4513'};
                         border-radius: 10px;
@@ -3342,8 +3454,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     const icon = document.createElement('div');
                     icon.textContent = achievement.icon;
                     icon.style.cssText = `
-                        font-size: 29px;
-                        margin-right: 14px;
+                        font-size: 28px;
+                        margin-right: 12px;
                         filter: ${isUnlocked ? 'none' : 'grayscale(100%)'};
                         flex-shrink: 0;
                     `;
@@ -3354,7 +3466,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         flex: 1;
                         display: flex;
                         flex-direction: column;
-                        gap: 5px;
+                        gap: 4px;
                         min-width: 0;
                     `;
                 
@@ -3379,11 +3491,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     const progressBar = document.createElement('div');
                     progressBar.style.cssText = `
                         width: 100%;
-                        height: 10px;
+                        height: 8px;
                         background-color: #d4a574;
-                        border-radius: 5px;
+                        border-radius: 4px;
                         overflow: hidden;
-                        margin-top: 5px;
+                        margin-top: 4px;
                     `;
                     
                     const progressFill = document.createElement('div');
@@ -3404,7 +3516,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         font-size: 12px;
                         color: ${isUnlocked ? '#654321' : '#8b4513'};
                         text-align: right;
-                        margin-top: 3px;
+                        margin-top: 2px;
                     `;
                     
                     info.appendChild(title);
@@ -3488,7 +3600,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const gameSettingsTitle = document.createElement('h3');
             gameSettingsTitle.textContent = '遊戲設定';
             gameSettingsTitle.style.cssText = `
-                font-size: 19.2px;
+                font-size: 23.04px;
                 color: #654321;
                 margin-bottom: 15px;
                 border-bottom: 2px solid #d4a574;
@@ -3498,12 +3610,20 @@ document.addEventListener('DOMContentLoaded', function() {
             // 音效開關
             const soundOption = createToggleOption('音效', 'soundEnabled', true);
             
+            // 音效音量滑桿
+            const soundVolumeOption = createVolumeSliderOption('音效音量', 'soundVolume', 0.5);
+            
             // 音樂開關
             const musicOption = createToggleOption('背景音樂', 'musicEnabled', true);
             
+            // 音樂音量滑桿
+            const musicVolumeOption = createVolumeSliderOption('音樂音量', 'musicVolume', 0.5);
+            
             gameSettingsSection.appendChild(gameSettingsTitle);
             gameSettingsSection.appendChild(soundOption);
+            gameSettingsSection.appendChild(soundVolumeOption);
             gameSettingsSection.appendChild(musicOption);
+            gameSettingsSection.appendChild(musicVolumeOption);
             
             gameSettingsPanel.appendChild(gameSettingsSection);
             
@@ -3657,7 +3777,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const MusicManager = {
         audio: null,
         isEnabled: true,
-        volume: 0.5,
+        volume: parseFloat(localStorage.getItem('musicVolume')) || 0.5, // 預設音量 50%
         
         // 初始化音樂管理器
         init() {
@@ -3694,6 +3814,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         },
+
+        // 設定音樂音量
+        setVolume(volume) {
+            this.volume = Math.max(0, Math.min(1, volume)); // 限制在 0-1 範圍
+            localStorage.setItem('musicVolume', this.volume.toString());
+            if (this.audio) {
+                this.audio.volume = this.volume;
+            }
+        },
         
         // 播放音樂
         async play() {
@@ -3723,6 +3852,411 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
+    // 音效管理器（WebAudio 合成多種音效）
+    const SoundManager = {
+        audioContext: null,
+        isEnabled: localStorage.getItem('soundEnabled') !== 'false',
+        volume: parseFloat(localStorage.getItem('soundVolume')) || 0.5, // 預設音量 50%
+        initialized: false,
+        lastPlayTime: 0, // 防止音效重疊
+
+        init() {
+            // 僅在首次互動或顯式呼叫時初始化
+            if (this.initialized) return;
+            try {
+                const Ctor = window.AudioContext || window.webkitAudioContext;
+                if (!Ctor) return; // 瀏覽器不支援
+                this.audioContext = new Ctor();
+                this.initialized = true;
+            } catch (e) {
+                // 安全失敗
+            }
+        },
+
+        setEnabled(enabled) {
+            this.isEnabled = enabled;
+        },
+
+        setVolume(volume) {
+            this.volume = Math.max(0, Math.min(1, volume)); // 限制在 0-1 範圍
+            localStorage.setItem('soundVolume', this.volume.toString());
+        },
+
+        resumeIfNeeded() {
+            if (this.audioContext && this.audioContext.state === 'suspended') {
+                this.audioContext.resume().catch(() => {});
+            }
+        },
+
+        // 基礎音效生成函數
+        makeBeep(frequency, start, duration, gain = 0.08, type = 'square') {
+            if (!this.audioContext) return;
+            const osc = this.audioContext.createOscillator();
+            const amp = this.audioContext.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(frequency, start);
+            // 應用音量控制
+            const finalGain = gain * this.volume;
+            amp.gain.setValueAtTime(finalGain, start);
+            amp.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+            osc.connect(amp).connect(this.audioContext.destination);
+            osc.start(start);
+            osc.stop(start + duration + 0.01);
+        },
+
+        // 播放音效（防止重疊）
+        playSound(soundFunction) {
+            if (!this.isEnabled) return;
+            if (!this.audioContext) this.init();
+            if (!this.audioContext) return;
+
+            // 防止音效重疊（50ms 內不重複播放）
+            const now = Date.now();
+            if (now - this.lastPlayTime < 50) return;
+            this.lastPlayTime = now;
+
+            this.resumeIfNeeded();
+            soundFunction();
+        },
+
+        // 導覽按鈕音效（清脆的咔嗒聲）
+        playNavClick() {
+            this.playSound(() => {
+                const now = this.audioContext.currentTime;
+                this.makeBeep(2200, now, 0.03);
+                this.makeBeep(1600, now + 0.03, 0.025);
+            });
+        },
+
+        // 確認按鈕音效（上升音調）
+        playConfirm() {
+            this.playSound(() => {
+                const now = this.audioContext.currentTime;
+                this.makeBeep(800, now, 0.1, 0.06);
+                this.makeBeep(1200, now + 0.05, 0.1, 0.06);
+                this.makeBeep(1600, now + 0.1, 0.1, 0.06);
+            });
+        },
+
+        // 取消按鈕音效（下降音調）
+        playCancel() {
+            this.playSound(() => {
+                const now = this.audioContext.currentTime;
+                this.makeBeep(1600, now, 0.1, 0.06);
+                this.makeBeep(1200, now + 0.05, 0.1, 0.06);
+                this.makeBeep(800, now + 0.1, 0.1, 0.06);
+            });
+        },
+
+        // 成功音效（歡快的上升音階）
+        playSuccess() {
+            this.playSound(() => {
+                const now = this.audioContext.currentTime;
+                this.makeBeep(523, now, 0.15, 0.08); // C5
+                this.makeBeep(659, now + 0.1, 0.15, 0.08); // E5
+                this.makeBeep(784, now + 0.2, 0.2, 0.08); // G5
+            });
+        },
+
+        // 錯誤音效（低沉的震動聲）
+        playError() {
+            this.playSound(() => {
+                const now = this.audioContext.currentTime;
+                this.makeBeep(200, now, 0.3, 0.1, 'sawtooth');
+                this.makeBeep(150, now + 0.1, 0.2, 0.08, 'sawtooth');
+            });
+        },
+
+        // 扭蛋機音效（神秘的金屬聲）
+        playGashapon() {
+            this.playSound(() => {
+                const now = this.audioContext.currentTime;
+                this.makeBeep(300, now, 0.2, 0.07, 'triangle');
+                this.makeBeep(600, now + 0.1, 0.15, 0.05, 'triangle');
+                this.makeBeep(900, now + 0.2, 0.1, 0.03, 'triangle');
+            });
+        },
+
+        // 進貨音效（收銀機聲）
+        playStock() {
+            this.playSound(() => {
+                const now = this.audioContext.currentTime;
+                this.makeBeep(1000, now, 0.05, 0.06);
+                this.makeBeep(1200, now + 0.05, 0.05, 0.06);
+                this.makeBeep(800, now + 0.1, 0.1, 0.08);
+            });
+        },
+
+        // 答題音效（思考的滴答聲）
+        playQuiz() {
+            this.playSound(() => {
+                const now = this.audioContext.currentTime;
+                this.makeBeep(1000, now, 0.08, 0.05);
+                this.makeBeep(1200, now + 0.1, 0.08, 0.05);
+                this.makeBeep(1400, now + 0.2, 0.1, 0.06);
+            });
+        },
+
+        // 排行榜音效（勝利號角）
+        playLeaderboard() {
+            this.playSound(() => {
+                const now = this.audioContext.currentTime;
+                this.makeBeep(523, now, 0.2, 0.07); // C5
+                this.makeBeep(659, now + 0.15, 0.2, 0.07); // E5
+                this.makeBeep(784, now + 0.3, 0.25, 0.08); // G5
+            });
+        },
+
+        // 聊天音效（輕快的通知聲）
+        playChat() {
+            this.playSound(() => {
+                const now = this.audioContext.currentTime;
+                this.makeBeep(800, now, 0.1, 0.05);
+                this.makeBeep(1000, now + 0.05, 0.1, 0.05);
+            });
+        },
+
+        // 設定音效（齒輪轉動聲）
+        playSettings() {
+            this.playSound(() => {
+                const now = this.audioContext.currentTime;
+                this.makeBeep(400, now, 0.1, 0.06, 'sawtooth');
+                this.makeBeep(500, now + 0.05, 0.1, 0.06, 'sawtooth');
+                this.makeBeep(600, now + 0.1, 0.1, 0.06, 'sawtooth');
+            });
+        },
+
+        // 關閉音效（簡短的關閉聲）
+        playClose() {
+            this.playSound(() => {
+                const now = this.audioContext.currentTime;
+                this.makeBeep(1000, now, 0.05, 0.04);
+                this.makeBeep(800, now + 0.05, 0.05, 0.04);
+            });
+        },
+
+        // 預設點擊音效（向後兼容）
+        playClick() {
+            this.playNavClick();
+        }
+    };
+
+    // 全域按鈕音效輔助函數
+    function addClickSoundToButton(button) {
+        if (!button) return;
+        button.addEventListener('click', function() {
+            if (typeof SoundManager === 'undefined') return;
+            
+            // 根據按鈕類型和內容決定音效
+            const buttonId = this.id || '';
+            const buttonClass = this.className || '';
+            const buttonText = this.textContent || '';
+            
+            // 導覽按鈕
+            if (buttonId.startsWith('nav')) {
+                if (buttonId === 'navGashapon') {
+                    SoundManager.playGashapon();
+                } else if (buttonId === 'navStock') {
+                    SoundManager.playStock();
+                } else if (buttonId === 'navMarketing') {
+                    SoundManager.playQuiz();
+                } else if (buttonId === 'navLeaderboard') {
+                    SoundManager.playLeaderboard();
+                } else if (buttonId === 'navChat') {
+                    SoundManager.playChat();
+                } else {
+                    SoundManager.playNavClick();
+                }
+            }
+            // 排行榜相關按鈕
+            else if (buttonClass.includes('leaderboard')) {
+                if (buttonClass.includes('close') || buttonText.includes('關閉')) {
+                    SoundManager.playClose();
+                } else if (buttonClass.includes('refresh') || buttonText.includes('刷新')) {
+                    SoundManager.playNavClick();
+                } else {
+                    SoundManager.playNavClick();
+                }
+            }
+            // 確認按鈕
+            else if (buttonText.includes('確認') || buttonText.includes('確定') || buttonText.includes('綁定') || buttonText.includes('保存')) {
+                SoundManager.playConfirm();
+            }
+            // 取消按鈕
+            else if (buttonText.includes('取消') || buttonText.includes('關閉') || buttonClass.includes('close')) {
+                SoundManager.playCancel();
+            }
+            // 設定相關按鈕
+            else if (buttonClass.includes('settings') || buttonText.includes('設定') || buttonText.includes('設置')) {
+                SoundManager.playSettings();
+            }
+            // 成功相關按鈕
+            else if (buttonText.includes('成功') || buttonText.includes('完成') || buttonText.includes('獲得')) {
+                SoundManager.playSuccess();
+            }
+            // 錯誤相關按鈕
+            else if (buttonText.includes('錯誤') || buttonText.includes('失敗') || buttonText.includes('重試')) {
+                SoundManager.playError();
+            }
+            // 隨機/抽獎按鈕
+            else if (buttonText.includes('隨機') || buttonText.includes('抽獎') || buttonText.includes('扭蛋')) {
+                SoundManager.playGashapon();
+            }
+            // 預設音效
+            else {
+                SoundManager.playNavClick();
+            }
+        });
+    }
+
+    // 為所有按鈕添加音效的函數
+    function addClickSoundToAllButtons() {
+        // 靜態按鈕
+        const staticButtons = document.querySelectorAll('button, .button, .btn, [role="button"]');
+        staticButtons.forEach(addClickSoundToButton);
+        
+        // 動態按鈕（使用 MutationObserver 監聽新增的按鈕）
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeType === 1) { // Element node
+                        // 檢查新增的節點本身是否為按鈕
+                        if (node.tagName === 'BUTTON' || node.classList.contains('button') || node.classList.contains('btn')) {
+                            addClickSoundToButton(node);
+                        }
+                        // 檢查新增節點內的按鈕
+                        const buttons = node.querySelectorAll ? node.querySelectorAll('button, .button, .btn, [role="button"]') : [];
+                        buttons.forEach(addClickSoundToButton);
+                    }
+                });
+            });
+        });
+        
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+
+    // 創建音量滑桿選項
+    function createVolumeSliderOption(label, storageKey, defaultValue = 0.5) {
+        const option = document.createElement('div');
+        option.style.cssText = `
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 16.8px;
+            color: #654321;
+        `;
+        
+        const labelSpan = document.createElement('span');
+        labelSpan.textContent = label;
+        
+        const sliderContainer = document.createElement('div');
+        sliderContainer.style.cssText = `
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        `;
+        
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.min = '0';
+        slider.max = '1';
+        slider.step = '0.1';
+        slider.value = localStorage.getItem(storageKey) || defaultValue;
+        slider.style.cssText = `
+            width: 120px;
+            height: 6px;
+            background: #d4a574;
+            outline: none;
+            border-radius: 3px;
+            -webkit-appearance: none;
+            appearance: none;
+            cursor: pointer;
+        `;
+        
+        // 添加滑桿滑塊樣式
+        const style = document.createElement('style');
+        style.textContent = `
+            input[type="range"]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 18px;
+                height: 18px;
+                background: #8b4513;
+                border: 2px solid #daa520;
+                border-radius: 50%;
+                cursor: pointer;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            }
+            
+            input[type="range"]::-moz-range-thumb {
+                width: 18px;
+                height: 18px;
+                background: #8b4513;
+                border: 2px solid #daa520;
+                border-radius: 50%;
+                cursor: pointer;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            }
+            
+            input[type="range"]::-webkit-slider-track {
+                background: transparent;
+            }
+            
+            input[type="range"]::-moz-range-track {
+                background: transparent;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // 自訂滑桿樣式
+        slider.style.background = `linear-gradient(to right, #daa520 0%, #daa520 ${slider.value * 100}%, #d4a574 ${slider.value * 100}%, #d4a574 100%)`;
+        
+        const volumeDisplay = document.createElement('span');
+        volumeDisplay.style.cssText = `
+            font-size: 14px;
+            color: #654321;
+            min-width: 30px;
+            text-align: center;
+        `;
+        volumeDisplay.textContent = Math.round(slider.value * 100) + '%';
+        
+        // 滑桿事件監聽
+        slider.addEventListener('input', function() {
+            const value = parseFloat(this.value);
+            volumeDisplay.textContent = Math.round(value * 100) + '%';
+            
+            // 更新滑桿背景色
+            this.style.background = `linear-gradient(to right, #daa520 0%, #daa520 ${value * 100}%, #d4a574 ${value * 100}%, #d4a574 100%)`;
+            
+            // 保存設定
+            localStorage.setItem(storageKey, value.toString());
+            
+            // 更新對應的音量管理器
+            if (storageKey === 'soundVolume' && typeof SoundManager !== 'undefined') {
+                SoundManager.setVolume(value);
+            } else if (storageKey === 'musicVolume' && typeof MusicManager !== 'undefined') {
+                MusicManager.setVolume(value);
+            }
+            
+            // 播放測試音效（僅音效滑桿）
+            if (storageKey === 'soundVolume' && typeof SoundManager !== 'undefined') {
+                SoundManager.playNavClick();
+            }
+        });
+        
+        sliderContainer.appendChild(slider);
+        sliderContainer.appendChild(volumeDisplay);
+        
+        option.appendChild(labelSpan);
+        option.appendChild(sliderContainer);
+        
+        return option;
+    }
+
     // 創建切換開關選項
     function createToggleOption(label, storageKey, defaultValue) {
         const option = document.createElement('div');
@@ -3731,7 +4265,7 @@ document.addEventListener('DOMContentLoaded', function() {
             justify-content: space-between;
             align-items: center;
             margin-bottom: 12px;
-            font-size: 14px;
+            font-size: 16.8px;
             color: #654321;
         `;
         
@@ -3782,6 +4316,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 MusicManager.setEnabled(newState);
                 if (newState) {
                     MusicManager.play();
+                }
+            }
+            // 如果是音效設定，更新音效管理器
+            if (storageKey === 'soundEnabled') {
+                if (typeof SoundManager !== 'undefined') {
+                    SoundManager.setEnabled(newState);
+                    if (newState) {
+                        SoundManager.init();
+                    }
                 }
             }
         });
@@ -4159,6 +4702,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 顯示訊息功能
     function showMessage(message, type = 'info') {
+        // 播放對應音效
+        if (typeof SoundManager !== 'undefined') {
+            if (type === 'success') {
+                SoundManager.playSuccess();
+            } else if (type === 'error') {
+                SoundManager.playError();
+            } else {
+                SoundManager.playNavClick();
+            }
+        }
+        
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${type}`;
         messageDiv.innerHTML = message;
@@ -4399,6 +4953,44 @@ document.addEventListener('DOMContentLoaded', function() {
         selectedOption: null,
         eventCompleted: false, // 防止重複完成同一事件
         
+        // 保存事件狀態到 localStorage
+        saveEventState() {
+            const eventState = {
+                currentEvent: this.currentEvent,
+                currentStage: this.currentStage,
+                selectedOption: this.selectedOption,
+                eventCompleted: this.eventCompleted
+            };
+            localStorage.setItem('eventFlowState', JSON.stringify(eventState));
+        },
+        
+        // 從 localStorage 恢復事件狀態
+        loadEventState() {
+            try {
+                const savedState = localStorage.getItem('eventFlowState');
+                if (savedState) {
+                    const eventState = JSON.parse(savedState);
+                    this.currentEvent = eventState.currentEvent;
+                    this.currentStage = eventState.currentStage || 0;
+                    this.selectedOption = eventState.selectedOption;
+                    this.eventCompleted = eventState.eventCompleted || false;
+                    return true;
+                }
+            } catch (error) {
+                console.error('❌ 恢復事件狀態失敗:', error);
+            }
+            return false;
+        },
+        
+        // 清除事件狀態
+        clearEventState() {
+            localStorage.removeItem('eventFlowState');
+            this.currentEvent = null;
+            this.currentStage = 0;
+            this.selectedOption = null;
+            this.eventCompleted = false;
+        },
+        
         // 內嵌題庫數據（解決 file:// CORS 問題）
         embeddedEventsData: {
             "regions": {
@@ -4412,7 +5004,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         },
                         "story": {
                             "image": "assets/images/劇情.png",
-                            "text": "清晨的陽光灑落在住宅區的小路上，你剛把進貨的麵包擺上架，卻聞到另一股香氣——不是來自你的店，而是從樹懶媽媽家傳來的。\n她剛出爐的「自製麵包」吸引了鄰居們聚集，孩子們嚷著：「下次要不要直接跟樹懶媽媽買就好？」\n小熊愣在攤位前，第一次感覺到「不是只有麵包店能賣麵包」。"
+                            "text": "清晨的陽光灑落在住宅區的小路上，你剛把進貨的麵包擺上架，卻聞到另一股香氣——不是來自你的店，而是從樹懶媽媽家傳來的。\n她剛出爐的「自製麵包」吸引了鄰居們聚集，孩子們嚷著：「下次要不要直接跟樹懶媽媽買就好？」\n小熊愣在攤位前，第一次感覺到「不是只有麵包坊能賣麵包」。"
                         },
                         "event": {
                             "title": "鄰居競爭",
@@ -4491,12 +5083,21 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 依目前階段顯示對應畫面（用於返回事件時）
         showCurrentStage() {
+            // 先嘗試恢復事件狀態
             if (!this.currentEvent) {
-                // 若尚未有事件，則啟動當前地區的事件流程
-                if (GameFlowManager.selectedRegion) {
-                    this.startEventFlow(GameFlowManager.selectedRegion);
+                const stateRestored = this.loadEventState();
+                if (stateRestored && this.currentEvent) {
+                    console.log('✅ 已恢復事件狀態，當前階段:', this.currentStage);
+                } else {
+                    // 若尚未有事件，只有在已選地區且已選行政區時才啟動事件流程
+                    if (GameFlowManager.selectedRegion && GameFlowManager.selectedDistrict) {
+                        this.startEventFlow(GameFlowManager.selectedRegion);
+                    } else {
+                        // 回到地區選擇
+                        ContentManager.showContent('region-select');
+                    }
+                    return;
                 }
-                return;
             }
             switch (this.currentStage) {
                 case 0:
@@ -4569,6 +5170,9 @@ document.addEventListener('DOMContentLoaded', function() {
             this.currentStage = 0;
             this.selectedOption = null;
             this.eventCompleted = false;
+            
+            // 保存事件狀態
+            this.saveEventState();
             
             // 顯示第一個畫面：景氣燈號
             this.showEconomicSignal();
@@ -4676,6 +5280,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.currentStage = 1;
                 // 防呆：若當前事件不存在則不繼續
                 if (!this.currentEvent) return;
+                // 保存狀態
+                this.saveEventState();
                 this.showStory();
             });
             
@@ -4825,6 +5431,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     // 對話結束，進入事件畫面
                 this.currentStage = 2;
+                // 保存狀態
+                this.saveEventState();
                 this.showEvent();
                 }
             });
@@ -4852,6 +5460,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 box-sizing: border-box;
                 overflow-y: auto;
             `;
+            eventContainer.classList.add('custom-scrollbar');
             
             // 事件卡片
             const eventCard = document.createElement('div');
@@ -4942,6 +5551,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 optionButton.addEventListener('click', () => {
                     this.selectedOption = option;
                     this.currentStage = 3;
+                    // 保存狀態
+                    this.saveEventState();
                     this.showFeedbackAndLesson();
                 });
                 
@@ -4976,6 +5587,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 box-sizing: border-box;
                 overflow-y: auto;
             `;
+            feedbackContainer.classList.add('custom-scrollbar');
             
             // 結果卡片容器
             const resultCard = document.createElement('div');
@@ -5003,7 +5615,7 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             
             const feedbackTitle = document.createElement('h3');
-            feedbackTitle.textContent = '📊 即時反饋';
+            feedbackTitle.innerHTML = '<img src="assets/images/蜜蜂鼠標.png" style="width: 18px; height: 18px; vertical-align: middle; margin-right: 6px;">即時反饋';
             feedbackTitle.style.cssText = `
                 font-family: 'Zpix', 'Press Start 2P', monospace;
                 font-size: 18px;
@@ -5055,7 +5667,7 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             
             const resourceTitle = document.createElement('h4');
-            resourceTitle.textContent = '💰 資源變化';
+            resourceTitle.innerHTML = '<img src="assets/images/蜂蜜幣.png" style="width: 18px; height: 18px; vertical-align: middle; margin-right: 6px;">資源變化';
             resourceTitle.style.cssText = `
                 font-family: 'Zpix', 'Press Start 2P', monospace;
                 font-size: 18px;
@@ -5072,12 +5684,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const honeyChangeDiv = document.createElement('div');
             honeyChangeDiv.style.cssText = 'margin-bottom: 10px;';
             honeyChangeDiv.innerHTML = `
-                🍯 選項成本(蜂蜜幣)：<span id="honey-change-value" style="color: ${honeyColor}; font-weight: bold; font-size: 16px;">0 HBC</span>
+                <img src="assets/images/蜂蜜幣.png" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 4px;">選項成本(蜂蜜幣)：<span id="honey-change-value" style="color: ${honeyColor}; font-weight: bold; font-size: 16px;">0 HBC</span>
             `;
             
             // 客流量星星區域
             const trafficDiv = document.createElement('div');
-            trafficDiv.innerHTML = `👥 客流量：<span id="traffic-stars"></span>`;
+            trafficDiv.innerHTML = `<img src="assets/images/客流量.png" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 4px;">客流量：<span id="traffic-stars"></span>`;
             
             resourceSection.appendChild(resourceTitle);
             resourceSection.appendChild(honeyChangeDiv);
@@ -5110,7 +5722,7 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             
             const lessonTitle = document.createElement('h3');
-            lessonTitle.innerHTML = '🐻 小熊哥的行銷教室';
+            lessonTitle.innerHTML = '<img src="assets/images/小熊哥.png" style="width: 18px; height: 18px; vertical-align: middle; margin-right: 6px;">小熊哥的行銷教室';
             lessonTitle.style.cssText = `
                 font-family: 'Zpix', 'Press Start 2P', monospace;
                 font-size: 18px;
@@ -5176,6 +5788,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.currentEvent = null;
                 this.selectedOption = null;
                 this.effectsApplied = false; // 重置標記供下次使用
+                
+                // 清除事件狀態
+                this.clearEventState();
                 
                 const regionEvents = this.eventsData?.regions?.[GameFlowManager.selectedRegion] || [];
                 if (GameFlowManager.eventsCompleted >= Math.max(GameFlowManager.totalEventsPerRound, regionEvents.length)) {
@@ -5379,12 +5994,18 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 恢復事件流程（從當前階段繼續）
         resumeEventFlow() {
-            // 如果沒有當前事件，重新開始
+            // 先嘗試恢復事件狀態
             if (!this.currentEvent) {
-                if (GameFlowManager.selectedRegion) {
-                    this.startEventFlow(GameFlowManager.selectedRegion);
+                const stateRestored = this.loadEventState();
+                if (stateRestored && this.currentEvent) {
+                    console.log('✅ 已恢復事件狀態，當前階段:', this.currentStage);
+                } else {
+                    // 如果沒有當前事件，重新開始
+                    if (GameFlowManager.selectedRegion) {
+                        this.startEventFlow(GameFlowManager.selectedRegion);
+                    }
+                    return;
                 }
-                return;
             }
             
             // 根據當前階段恢復對應畫面
@@ -5492,11 +6113,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.eventsCompleted = parseInt(savedEvents) || 0;
                 this.hasStocked = savedStocked === 'true';
                 
+                // 若尚未選擇行政區，返回地區選擇畫面
+                if (!this.selectedDistrict) {
+                    ContentManager.showContent('region-select');
+                    return;
+                }
+                
                 // 如果已完成7個事件，顯示財務報表
                 if (this.eventsCompleted >= this.totalEventsPerRound) {
                     ContentManager.showContent('financial-report');
                 } else {
-                    // 繼續進行事件
+                    // 繼續進行事件（恢復到正確的階段）
                     ContentManager.showContent('event');
                 }
             } else {
@@ -6117,6 +6744,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 box-sizing: border-box;
                 overflow-y: auto;
             `;
+            feedbackContainer.classList.add('custom-scrollbar');
             
             // 即時反饋區塊
             const feedbackBlock = document.createElement('div');
@@ -6282,7 +6910,7 @@ document.addEventListener('DOMContentLoaded', function() {
             eventContent.className = 'event-content';
             eventContent.innerHTML = `
                 <p style="color: #8b4513; font-size: 14px; text-align: center; margin-bottom: 15px; line-height: 1.6;">
-                    麵包店正在營業中...<br>
+                    麵包坊正在營業中...<br>
                     等待顧客上門或事件發生
                 </p>
                 <div style="
@@ -6383,7 +7011,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const events = [
                 {
                     title: '顧客上門',
-                    message: '一位顧客走進麵包店，想要購買麵包！',
+                    message: '一位顧客走進麵包坊，想要購買麵包！',
                     type: 'customer'
                 },
                 {
@@ -6634,6 +7262,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 position: relative;
                 overflow-y: auto;
             `;
+            districtContainer.classList.add('custom-scrollbar');
             
             // 標題
             const title = document.createElement('h2');
@@ -6811,7 +7440,12 @@ document.addEventListener('DOMContentLoaded', function() {
         showEventContent() {
             // 使用新的事件流程系統
             if (GameFlowManager.selectedRegion) {
-                EventFlowManager.startEventFlow(GameFlowManager.selectedRegion);
+                // 先嘗試恢復事件狀態，如果沒有則開始新事件
+                if (EventFlowManager.currentEvent) {
+                    EventFlowManager.showCurrentStage();
+                } else {
+                    EventFlowManager.startEventFlow(GameFlowManager.selectedRegion);
+                }
             } else {
                 // 如果沒有選擇地區，顯示地區選擇
                 this.showContent('region-select');
@@ -6829,14 +7463,25 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('  當前輪次事件數量:', FinancialReport.currentRoundData.events.length);
             console.log('  報表歷史:', FinancialReport.history);
             
+            // 自動修復財務報表問題
+            FinancialReport.fixFinancialReport();
+            
             // 如果當前輪次數據有 7 個事件但還沒生成報表，強制生成
             // 檢查當前輪次是否已經有對應的報表
             const currentRoundNumber = GameFlowManager.currentRound;
             const hasReportForCurrentRound = FinancialReport.history.some(report => report.roundNumber === currentRoundNumber);
             
             console.log('  是否已有當前輪次報表:', hasReportForCurrentRound);
+            console.log('  當前輪次事件數量:', FinancialReport.currentRoundData.events.length);
+            console.log('  需要的事件數量:', GameFlowManager.totalEventsPerRound);
             
-            if (FinancialReport.currentRoundData.events.length >= 7 && !hasReportForCurrentRound) {
+            // 強制生成報表的條件：
+            // 1. 當前輪次事件數量達到要求
+            // 2. 且沒有對應的報表
+            // 3. 且當前輪次數據不為空
+            if (FinancialReport.currentRoundData.events.length >= GameFlowManager.totalEventsPerRound && 
+                !hasReportForCurrentRound && 
+                FinancialReport.currentRoundData.events.length > 0) {
                 console.log('  → 強制生成財務報表');
                 FinancialReport.generateRoundReport();
             }
@@ -6853,10 +7498,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (currentRoundReport) {
                     latestReport = currentRoundReport;
+                    console.log('  ✅ 找到當前輪次報表:', currentRoundReport.roundNumber);
                 } else {
                     // 如果找不到當前輪次報表，使用最後一個報表
                     latestReport = FinancialReport.history[FinancialReport.history.length - 1];
+                    console.log('  ⚠️ 找不到當前輪次報表，使用最新報表:', latestReport.roundNumber);
                 }
+            } else {
+                console.log('  ❌ 沒有任何財務報表歷史');
             }
             
             console.log('🔍 UI顯示用的報表數據:');
@@ -6883,6 +7532,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 position: relative;
                 overflow-y: auto;
             `;
+            reportContainer.classList.add('custom-scrollbar');
             
             // 標題
             const title = document.createElement('h2');
@@ -7014,6 +7664,47 @@ document.addEventListener('DOMContentLoaded', function() {
                 position: relative;
             `;
             
+            // 返回按鈕（樣式與行銷題庫一致）
+            const backButton = document.createElement('button');
+            backButton.innerHTML = '<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 16px; height: 16px; vertical-align: middle;"><path d="M20 11v2H8v2H6v-2H4v-2h2V9h2v2h12zM10 8v2H8v-2h2zm0 0h2v2h-2v-2z" fill="currentColor"/></svg>';
+            backButton.style.cssText = `
+                position: absolute;
+                top: 20px;
+                left: 20px;
+                padding: 8px 16px;
+                background-color: #8b4513;
+                color: white;
+                border: 2px solid #654321;
+                border-radius: 5px;
+                cursor: pointer;
+                font-family: 'Zpix', monospace;
+                font-size: 12px;
+                z-index: 1000;
+            `;
+            backButton.addEventListener('click', () => {
+                // 未選地區或尚未選行政區 → 回地區選擇
+                if (!GameFlowManager.selectedRegion || !GameFlowManager.selectedDistrict) {
+                    ContentManager.showContent('region-select');
+                    return;
+                }
+                
+                // 已選地區與行政區，根據當前狀態導航
+                const hasStocked = localStorage.getItem('hasStocked') === 'true';
+                const eventsCompleted = parseInt(localStorage.getItem('eventsCompleted') || '0');
+                const totalEventsPerRound = 7;
+                
+                if (eventsCompleted >= totalEventsPerRound) {
+                    // 已完成7個事件 → 財務報表
+                    ContentManager.showContent('financial-report');
+                } else if (!hasStocked) {
+                    // 未進貨 → 進貨頁面
+                    ContentManager.showContent('stock');
+                } else {
+                    // 已進貨但未完成事件 → 事件流程
+                    ContentManager.showContent('event');
+                }
+            });
+            
             const gashaponGif = document.createElement('img');
             gashaponGif.src = 'assets/videos/扭蛋機.gif';
             gashaponGif.alt = '扭蛋機';
@@ -7032,6 +7723,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 showGashaponDrawModal();
             });
             
+            gashaponContainer.appendChild(backButton);
             gashaponContainer.appendChild(gashaponGif);
             windowContent.appendChild(gashaponContainer);
         },
@@ -7174,8 +7866,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 `;
                 quantityDisplay.textContent = product.quantity;
                 
-                // 檢查是否已進貨
-                if (GameFlowManager.hasStocked) {
+                // 檢查是否已進貨（從 localStorage 重新讀取確保狀態同步）
+                const hasStocked = localStorage.getItem('hasStocked') === 'true';
+                GameFlowManager.hasStocked = hasStocked;
+                
+                if (hasStocked) {
                     // 已進貨 - 禁用按鈕
                     decreaseBtn.disabled = true;
                     increaseBtn.disabled = true;
@@ -7300,83 +7995,43 @@ document.addEventListener('DOMContentLoaded', function() {
                 box-sizing: border-box;
             `;
             
-            // 左側提示文字
+            // 左側提示文字（提醒樣式）
             const tipText = document.createElement('div');
             tipText.innerHTML = `
                 <div style="
                     display: flex;
                     align-items: center;
-                    gap: 7.2px;
-                    background: linear-gradient(135deg, rgba(255, 248, 220, 0.9) 0%, rgba(250, 235, 215, 0.9) 100%);
-                    border: 2.7px solid #daa520;
-                    border-radius: 10.8px;
-                    padding: 9px 14.4px;
-                    height: 45px;
-                    box-sizing: border-box;
-                    box-shadow: 
-                        0 3.6px 7.2px rgba(218, 165, 32, 0.3),
-                        inset 0 1.8px 3.6px rgba(255, 255, 255, 0.5);
-                    position: relative;
-                    overflow: hidden;
+                    gap: 8px;
+                    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+                    border: 2px solid #ffc107;
+                    border-radius: 8px;
+                    padding: 8px 12px;
+                    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+                    animation: pulse-warning 2s ease-in-out infinite;
                 ">
-                    <span style="
-                        font-size: 21.6px;
-                        animation: bounce 2s ease-in-out infinite;
-                        filter: drop-shadow(1.8px 1.8px 3.6px rgba(0, 0, 0, 0.3));
-                    ">📦</span>
-                    <div style="
-                        color: #5a3a20;
-                        font-size: 16.2px;
+                    <svg viewBox="0 0 16 16" width="18" height="18" xmlns="http://www.w3.org/2000/svg" style="display:inline-block; color: #856404; image-rendering: pixelated; flex-shrink: 0;">
+                            <g fill="currentColor" shape-rendering="crispEdges">
+                                <rect x="7" y="2" width="2" height="9"/>
+                                <rect x="7" y="12" width="2" height="2"/>
+                            </g>
+                        </svg>
+                        <span style="
+                        color: #856404;
                         font-weight: bold;
-                        text-shadow: 0.9px 0.9px 1.8px rgba(255, 255, 255, 0.8);
-                        line-height: 1.4;
-                        position: relative;
-                        z-index: 2;
-                    ">
-                        <span style="
-                            background: linear-gradient(45deg, #5a3a20, #daa520, #5a3a20);
-                            background-size: 200% 200%;
-                            -webkit-background-clip: text;
-                            -webkit-text-fill-color: transparent;
-                            background-clip: text;
-                            animation: gradient 3s ease-in-out infinite;
-                        ">每一種麵包最低進貨數量建議在</span>
-                        <span style="
-                            color: #dc143c;
-                            font-size: 19.8px;
-                            text-shadow: 1.8px 1.8px 3.6px rgba(220, 20, 60, 0.3);
-                            animation: pulse 2s ease-in-out infinite;
-                        ">1400以上</span>
-                    </div>
-                    <div style="
-                        position: absolute;
-                        top: -50%;
-                        right: -50%;
-                        width: 100px;
-                        height: 100px;
-                        background: radial-gradient(circle, rgba(218, 165, 32, 0.1) 0%, transparent 70%);
-                        border-radius: 50%;
-                        animation: rotate 8s linear infinite;
-                    "></div>
+                        font-size: 13px;
+                        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+                    ">每一種麵包最低進貨數量建議在 <span style="color: #dc3545; font-size: 14px;">1400以上</span></span>
                 </div>
                 <style>
-                    @keyframes bounce {
-                        0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-                        40% { transform: translateY(-5px); }
-                        60% { transform: translateY(-3px); }
-                    }
-                    @keyframes gradient {
-                        0% { background-position: 0% 50%; }
-                        50% { background-position: 100% 50%; }
-                        100% { background-position: 0% 50%; }
-                    }
-                    @keyframes pulse {
-                        0%, 100% { transform: scale(1); }
-                        50% { transform: scale(1.05); }
-                    }
-                    @keyframes rotate {
-                        from { transform: rotate(0deg); }
-                        to { transform: rotate(360deg); }
+                    @keyframes pulse-warning {
+                        0%, 100% { 
+                            transform: scale(1);
+                            box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+                        }
+                        50% { 
+                            transform: scale(1.02);
+                            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.5);
+                        }
                     }
                 </style>
             `;
@@ -7389,8 +8044,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const purchaseBtn = document.createElement('button');
             purchaseBtn.textContent = '進貨';
             
-            // 檢查是否已經進貨
-            if (GameFlowManager.hasStocked) {
+            // 檢查是否已經進貨（從 localStorage 重新讀取確保狀態同步）
+            const hasStocked = localStorage.getItem('hasStocked') === 'true';
+            GameFlowManager.hasStocked = hasStocked;
+            
+            if (hasStocked) {
                 // 已進貨 - 禁用按鈕
                 purchaseBtn.disabled = true;
                 purchaseBtn.textContent = '已進貨';
@@ -7409,6 +8067,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     height: 45px;
                     box-sizing: border-box;
                     opacity: 0.6;
+                    transform: scale(0.9);
                 `;
             } else {
                 // 未進貨 - 正常按鈕
@@ -7426,24 +8085,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 flex-shrink: 0;
                 height: 45px;
                 box-sizing: border-box;
+                transform: scale(0.9);
             `;
             
             purchaseBtn.addEventListener('mouseenter', () => {
                 purchaseBtn.style.background = 'linear-gradient(135deg, #d4a574 0%, #bf9270 100%)';
-                purchaseBtn.style.transform = 'translateY(-2px)';
+                purchaseBtn.style.transform = 'scale(0.9) translateY(-2px)';
                 purchaseBtn.style.boxShadow = '0 6px 12px rgba(0,0,0,0.4)';
             });
             
             purchaseBtn.addEventListener('mouseleave', () => {
                 purchaseBtn.style.background = 'linear-gradient(135deg, #c99a6e 0%, #a67c52 100%)';
-                purchaseBtn.style.transform = 'translateY(0)';
+                purchaseBtn.style.transform = 'scale(0.9) translateY(0)';
                 purchaseBtn.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
             });
             }
             
-            // 只在未進貨時才添加點擊事件
-            if (!GameFlowManager.hasStocked) {
+            // 只在未進貨時才添加點擊事件（使用最新的狀態檢查）
+            if (!hasStocked) {
             purchaseBtn.addEventListener('click', () => {
+                // 再次檢查進貨狀態，防止重複進貨
+                const currentStockedStatus = localStorage.getItem('hasStocked') === 'true';
+                if (currentStockedStatus) {
+                    showMessage('本輪已經進貨過了！', 'warning');
+                    return;
+                }
                 
                 // 收集進貨數量
                 const quantities = stockContainer.querySelectorAll('span[style*="min-width: 50px"]');
@@ -7464,7 +8130,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // 檢查蜂蜜幣是否足夠
                 if (totalCost > GameResources.resources.honey) {
-                    showMessage(`蜂蜜幣不足！需要 ${totalCost.toLocaleString()} 🍯，目前只有 ${GameResources.resources.honey.toLocaleString()} 🍯`, 'error');
+                    showMessage(`蜂蜜幣不足！需要 ${totalCost.toLocaleString()} <img src="assets/images/蜂蜜幣.png" style="width: 16px; height: 16px; vertical-align: middle; margin: 0 2px;">，目前只有 ${GameResources.resources.honey.toLocaleString()} <img src="assets/images/蜂蜜幣.png" style="width: 16px; height: 16px; vertical-align: middle; margin: 0 2px;">`, 'error');
                     return;
                 }
                 
@@ -7503,7 +8169,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 // 顯示成功訊息
-                showMessage(`進貨成功！總成本：${actualCost.toLocaleString()} 🍯，剩餘蜂蜜幣：${GameResources.resources.honey.toLocaleString()} 🍯`, 'success');
+                showMessage(`進貨成功！總成本：${actualCost.toLocaleString()} <img src="assets/images/蜂蜜幣.png" style="width: 16px; height: 16px; vertical-align: middle; margin: 0 2px;">，剩餘蜂蜜幣：${GameResources.resources.honey.toLocaleString()} <img src="assets/images/蜂蜜幣.png" style="width: 16px; height: 16px; vertical-align: middle; margin: 0 2px;">`, 'success');
                 
                 // 重置數量到預設值
                 quantities.forEach(qtyElement => {
@@ -7559,46 +8225,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 box-sizing: border-box;
                 overflow-y: auto;
             `;
+            container.classList.add('custom-scrollbar');
             
-            // 標題
-            const title = document.createElement('h1');
-            title.textContent = '🎓 行銷知識小測驗';
-            title.style.cssText = 'color: #8b4513; font-size: 18px; margin-bottom: 10px; text-align: center;';
+            // 已移除標題和「當前類別顯示」區塊，保留更簡潔的開始畫面
             
-            // 當前類別顯示
-            const categoryInfo = document.createElement('div');
-            categoryInfo.style.cssText = `
-                background: linear-gradient(135deg, #d4a574 0%, #e6b566 100%);
-                color: #fff;
-                padding: 10px 20px;
-                border-radius: 10px;
-                margin-bottom: 12px;
-                font-size: 15px;
-                font-weight: bold;
-                box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-            `;
-            categoryInfo.textContent = `📚 ${currentCategory}`;
-            
-            // 進度顯示
-            const progressInfo = document.createElement('div');
-            progressInfo.style.cssText = `
-                background-color: rgba(245, 229, 197, 0.9);
-                border: 3px solid #8b4513;
-                border-radius: 10px;
-                padding: 12px;
-                margin-bottom: 12px;
-                width: 100%;
-                max-width: 500px;
-            `;
-            progressInfo.innerHTML = `
-                <p style="color: #654321; font-size: 14px; margin-bottom: 6px; line-height: 1.4;">
-                    📊 已完成測驗: ${categoryStatus.attempts} 次 | 達標次數: ${categoryStatus.qualified}/1
-                </p>
-                ${categoryStatus.qualified >= 1 ? 
-                    '<p style="color: #2e8b57; font-size: 13px;">✅ 此類別已達標，可進入下一類別</p>' :
-                    '<p style="color: #dc143c; font-size: 13px;">⚠️ 待定...</p>'
-                }
-            `;
             
             // 規則說明
             const rulesBox = document.createElement('div');
@@ -7607,53 +8237,77 @@ document.addEventListener('DOMContentLoaded', function() {
                 border: 3px solid #8b4513;
                 border-radius: 10px;
                 padding: 15px;
+                margin-top: 5px;
                 margin-bottom: 12px;
                 width: 100%;
                 max-width: 500px;
                 text-align: left;
             `;
+            rulesBox.classList.add('custom-scrollbar');
             rulesBox.innerHTML = `
-                <h3 style="color: #8b4513; font-size: 15px; margin-bottom: 10px;">📋 小測驗規則</h3>
+                <h2 style="color: #8b4513; font-size: 20px; margin-bottom: 15px; text-align: center; border-bottom: 2px solid #8b4513; padding-bottom: 8px;">📋 行銷題庫規則</h2>
                 
-                <p style="color: #654321; font-size: 13px; margin-bottom: 6px;">📊 <strong>題目數：</strong>25題</p>
-                <p style="color: #654321; font-size: 13px; margin-bottom: 10px;">✅ <strong>結束條件：</strong>答完題目即結束</p>
+                <div style="margin-bottom: 15px;">
+                    <h3 style="color: #8b4513; font-size: 16px; margin-bottom: 8px;"><img src="assets/images/釘子.png" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 4px;">基本設定</h3>
+                    <p style="color: #654321; font-size: 14px; margin-bottom: 4px; margin-left: 15px;">• 答題時間：<strong>不限時間</strong></p>
+                    <p style="color: #654321; font-size: 14px; margin-bottom: 4px; margin-left: 15px;">• 題目總數：<strong>25題</strong></p>
+                    <p style="color: #654321; font-size: 14px; margin-bottom: 0; margin-left: 15px;">• 結束條件：<strong>答完所有題目</strong></p>
+                </div>
                 
+                <div style="margin-bottom: 15px;">
+                    <h3 style="color: #8b4513; font-size: 16px; margin-bottom: 8px;">🎯 題目分類</h3>
+                    <p style="color: #654321; font-size: 14px; margin-bottom: 8px; margin-left: 15px;">本測驗分為五大類別，每類隨機出5題：</p>
+                    <div style="margin-left: 20px;">
+                        <p style="color: #654321; font-size: 13px; margin-bottom: 3px;"><span style="display: inline-block; width: 16px; height: 16px; background: #4CAF50; color: white; text-align: center; line-height: 16px; font-size: 11px; font-weight: bold; border-radius: 2px; margin-right: 6px;">1</span> 行銷理論與管理</p>
+                        <p style="color: #654321; font-size: 13px; margin-bottom: 3px;"><span style="display: inline-block; width: 16px; height: 16px; background: #2196F3; color: white; text-align: center; line-height: 16px; font-size: 11px; font-weight: bold; border-radius: 2px; margin-right: 6px;">2</span> 行銷策略與企劃</p>
+                        <p style="color: #654321; font-size: 13px; margin-bottom: 3px;"><span style="display: inline-block; width: 16px; height: 16px; background: #FF9800; color: white; text-align: center; line-height: 16px; font-size: 11px; font-weight: bold; border-radius: 2px; margin-right: 6px;">3</span> 市場研究</p>
+                        <p style="color: #654321; font-size: 13px; margin-bottom: 3px;"><span style="display: inline-block; width: 16px; height: 16px; background: #9C27B0; color: white; text-align: center; line-height: 16px; font-size: 11px; font-weight: bold; border-radius: 2px; margin-right: 6px;">4</span> 全球與國際行銷</p>
+                        <p style="color: #654321; font-size: 13px; margin-bottom: 0;"><span style="display: inline-block; width: 16px; height: 16px; background: #F44336; color: white; text-align: center; line-height: 16px; font-size: 11px; font-weight: bold; border-radius: 2px; margin-right: 6px;">5</span> 數位與網路行銷</p>
+                    </div>
+                </div>
                 
-                <hr style="border: 1px solid #deb887; margin: 10px 0;">
-                <p style="color: #654321; font-size: 13px; margin-bottom: 6px;"><strong>🎯 學習進行順序</strong></p>
-                <p style="color: ${currentCategory === '行銷理論與管理' ? '#d4a574' : '#654321'}; font-size: 12px; margin-bottom: 3px;">
-                    1️⃣ 行銷理論與管理 ${QuestionBank.getCategoryStatus('行銷理論與管理').completed ? '✅' : ''}
-                </p>
-                <p style="color: ${currentCategory === '行銷策略與企劃' ? '#d4a574' : '#654321'}; font-size: 12px; margin-bottom: 3px;">
-                    2️⃣ 行銷策略與企劃 ${QuestionBank.getCategoryStatus('行銷策略與企劃').completed ? '✅' : ''}
-                </p>
-                <p style="color: ${currentCategory === '市場研究' ? '#d4a574' : '#654321'}; font-size: 12px; margin-bottom: 3px;">
-                    3️⃣ 市場研究 ${QuestionBank.getCategoryStatus('市場研究').completed ? '✅' : ''}
-                </p>
-                <p style="color: ${currentCategory === '全球與國際行銷' ? '#d4a574' : '#654321'}; font-size: 12px; margin-bottom: 3px;">
-                    4️⃣ 全球與國際行銷 ${QuestionBank.getCategoryStatus('全球與國際行銷').completed ? '✅' : ''}
-                </p>
-                <p style="color: ${currentCategory === '數位與網路行銷' ? '#d4a574' : '#654321'}; font-size: 12px; margin-bottom: 6px;">
-                    5️⃣ 數位與網路行銷 ${QuestionBank.getCategoryStatus('數位與網路行銷').completed ? '✅' : ''}
-                </p>
-                <p style="color: #dc143c; font-size: 12px; margin-top: 6px; line-height: 1.3;">
-                    💡 待定...
-                </p>
+                <div style="margin-bottom: 15px;">
+                    <h3 style="color: #8b4513; font-size: 16px; margin-bottom: 8px;"><img src="assets/images/燈泡.png" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 6px;">即時回饋</h3>
+                    <p style="color: #654321; font-size: 14px; margin-bottom: 6px; margin-left: 15px;">每題作答後立即顯示：</p>
+                    <div style="margin-left: 20px;">
+                        <p style="color: #654321; font-size: 13px; margin-bottom: 3px;">• 正確答案與詳細解析</p>
+                        <p style="color: #654321; font-size: 13px; margin-bottom: 3px;">• 本題相關行銷概念</p>
+                        <p style="color: #654321; font-size: 13px; margin-bottom: 0;">• 建議複習方向</p>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <h3 style="color: #8b4513; font-size: 16px; margin-bottom: 8px;"><img src="assets/images/報表.png" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 6px;">測驗結果</h3>
+                    <p style="color: #654321; font-size: 14px; margin-bottom: 6px; margin-left: 15px;">答題結束後系統將顯示：</p>
+                    <div style="margin-left: 20px;">
+                        <p style="color: #654321; font-size: 13px; margin-bottom: 3px;">• 五大類別能力雷達圖</p>
+                        <p style="color: #654321; font-size: 13px; margin-bottom: 0;">• 個人化職業建議與學習方向</p>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 0;">
+                    <h3 style="color: #8b4513; font-size: 16px; margin-bottom: 8px;"><img src="assets/images/蜂蜜幣.png" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 6px;">獎勵機制</h3>
+                    <div style="margin-left: 15px;">
+                        <p style="color: #654321; font-size: 13px; margin-bottom: 3px;">答對率達 <strong style="color: #daa520;">70%</strong> → +1000 蜂蜜幣</p>
+                        <p style="color: #654321; font-size: 13px; margin-bottom: 3px;">答對率達 <strong style="color: #daa520;">80%</strong> → +2000 蜂蜜幣</p>
+                        <p style="color: #654321; font-size: 13px; margin-bottom: 3px;">答對率達 <strong style="color: #daa520;">90%</strong> → +3500 蜂蜜幣</p>
+                        <p style="color: #654321; font-size: 13px; margin-bottom: 0;">全對 <strong style="color: #daa520;">100%</strong> → +5000 蜂蜜幣</p>
+                    </div>
+                </div>
             `;
             
-            // 開始按鈕
+            // 開始按鈕（樣式與返回按鈕一致）
             const startButton = document.createElement('button');
-            startButton.textContent = '🎯 開始測驗';
+            startButton.textContent = '開始測驗';
             startButton.style.cssText = `
-                padding: 14px 35px;
-                background: linear-gradient(135deg, #daa520 0%, #b8860b 100%);
-                border: 4px solid #8b4513;
-                border-radius: 10px;
-                color: #fff;
-                font-size: 15px;
-                font-weight: bold;
+                padding: 10px 20px;
+                background-color: #8b4513;
+                color: white;
+                border: 2px solid #654321;
+                border-radius: 5px;
                 cursor: pointer;
-                transition: all 0.3s ease;
+                font-family: 'Zpix', monospace;
+                font-size: 14px;
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
                 margin-bottom: 10px;
             `;
@@ -7674,15 +8328,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             // 組裝
-            container.appendChild(title);
-            container.appendChild(categoryInfo);
-            container.appendChild(progressInfo);
             container.appendChild(rulesBox);
             container.appendChild(startButton);
             
             // 添加返回按鈕
             const backButton = document.createElement('button');
-            backButton.textContent = '← 返回';
+            backButton.innerHTML = '<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 16px; height: 16px; vertical-align: middle;"><path d="M20 11v2H8v2H6v-2H4v-2h2V9h2v2h12zM10 8v2H8v-2h2zm0 0h2v2h-2v-2z" fill="currentColor"/></svg>';
             backButton.style.cssText = `
                 position: absolute;
                 top: 20px;
@@ -7730,7 +8381,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 position: relative;
             `;
             
-            // 頂部控制欄（計時器、進度、關閉按鈕）
+            // 頂部控制欄（進度、關閉按鈕）
             const topBar = document.createElement('div');
             topBar.style.cssText = `
                 display: flex;
@@ -7739,16 +8390,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 margin-bottom: 10px;
                 padding: 0 5px;
             `;
-            
-            // 計時器
-            const timer = document.createElement('div');
-            timer.id = 'quizTimer';
-            timer.style.cssText = `
-                color: #8b4513;
-                font-size: 16px;
-                font-weight: bold;
-            `;
-            timer.textContent = '⏱ 15:00';
             
             // 進度顯示
             const progressDisplay = document.createElement('div');
@@ -7783,7 +8424,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            topBar.appendChild(timer);
             topBar.appendChild(progressDisplay);
             topBar.appendChild(closeButton);
             
@@ -7799,6 +8439,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 display: flex;
                 flex-direction: column;
             `;
+            
+            // 滾動條樣式已在頁面載入時全域注入
+            
+            // 添加 CSS 類別
+            questionCard.classList.add('custom-scrollbar');
             
             // 題目文字
             const questionText = document.createElement('p');
@@ -7816,6 +8461,7 @@ document.addEventListener('DOMContentLoaded', function() {
             optionsContainer.style.cssText = 'display: flex; flex-direction: column; gap: 8px; flex: 1;';
             
             let selectedAnswer = null;
+            let answerSubmitted = false;
             
             // 創建選項按鈕
             question.options.forEach((option, index) => {
@@ -7835,6 +8481,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 `;
                 
                 optionButton.addEventListener('click', () => {
+                    if (answerSubmitted) return;
+                    
                     // 移除其他選項的選中狀態
                     optionsContainer.querySelectorAll('button').forEach(btn => {
                         btn.style.backgroundColor = '#fff';
@@ -7852,10 +8500,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 optionsContainer.appendChild(optionButton);
             });
             
-            // 下一題按鈕
-            const nextButton = document.createElement('button');
-            nextButton.textContent = '下一題';
-            nextButton.style.cssText = `
+            // 提交按鈕
+            const submitButton = document.createElement('button');
+            submitButton.textContent = '提交答案';
+            submitButton.style.cssText = `
                 padding: 12px 30px;
                 background: linear-gradient(135deg, #d4a574 0%, #c99a6e 100%);
                 border: 3px solid #b8895f;
@@ -7869,49 +8517,129 @@ document.addEventListener('DOMContentLoaded', function() {
                 box-shadow: 0 3px 6px rgba(0,0,0,0.15);
             `;
             
-            nextButton.addEventListener('mouseenter', () => {
-                nextButton.style.background = 'linear-gradient(135deg, #e6b566 0%, #d4a574 100%)';
-                nextButton.style.transform = 'translateY(-2px)';
-                nextButton.style.boxShadow = '0 4px 8px rgba(0,0,0,0.25)';
+            submitButton.addEventListener('mouseenter', () => {
+                submitButton.style.background = 'linear-gradient(135deg, #e6b566 0%, #d4a574 100%)';
+                submitButton.style.transform = 'translateY(-2px)';
+                submitButton.style.boxShadow = '0 4px 8px rgba(0,0,0,0.25)';
             });
             
-            nextButton.addEventListener('mouseleave', () => {
-                nextButton.style.background = 'linear-gradient(135deg, #d4a574 0%, #c99a6e 100%)';
-                nextButton.style.transform = 'translateY(0)';
-                nextButton.style.boxShadow = '0 3px 6px rgba(0,0,0,0.15)';
+            submitButton.addEventListener('mouseleave', () => {
+                submitButton.style.background = 'linear-gradient(135deg, #d4a574 0%, #c99a6e 100%)';
+                submitButton.style.transform = 'translateY(0)';
+                submitButton.style.boxShadow = '0 3px 6px rgba(0,0,0,0.15)';
             });
             
-            nextButton.addEventListener('click', () => {
+            submitButton.addEventListener('click', () => {
                 if (selectedAnswer === null) {
                     showMessage('請先選擇一個答案！', 'warning');
                     return;
                 }
                 
+                if (answerSubmitted) return;
+                answerSubmitted = true;
+                
                 // 提交答案
                 const isCorrect = QuizMode.submitAnswer(QuizMode.currentQuestionIndex, selectedAnswer);
                 
-                // 顯示反饋
+                // 顯示對錯結果
+                const resultDisplay = document.createElement('div');
+                resultDisplay.style.cssText = `
+                    margin-top: 15px;
+                    padding: 15px;
+                    border-radius: 8px;
+                    text-align: center;
+                    font-size: 18px;
+                    font-weight: bold;
+                `;
+                
                 if (isCorrect) {
-                    showMessage('✅ 答對了！', 'success');
+                    resultDisplay.style.backgroundColor = '#d4edda';
+                    resultDisplay.style.border = '2px solid #28a745';
+                    resultDisplay.style.color = '#155724';
+                    resultDisplay.innerHTML = '⭕ 答對了！';
                 } else {
-                    showMessage(`❌ 答錯了！正確答案是選項 ${question.answer}`, 'error');
+                    resultDisplay.style.backgroundColor = '#f8d7da';
+                    resultDisplay.style.border = '2px solid #dc3545';
+                    resultDisplay.style.color = '#721c24';
+                    resultDisplay.innerHTML = '❌ 答錯了！';
                 }
                 
-                // 延遲後進入下一題
-                setTimeout(() => {
+                // 顯示正確答案
+                const correctAnswerDisplay = document.createElement('div');
+                correctAnswerDisplay.style.cssText = `
+                    margin-top: 10px;
+                    padding: 10px;
+                    background-color: #fff3cd;
+                    border: 1px solid #ffeaa7;
+                    border-radius: 5px;
+                    font-size: 14px;
+                `;
+                correctAnswerDisplay.innerHTML = `<strong>正確答案：</strong>選項 ${question.answer}. ${question.options[question.answer - 1]}`;
+                
+                // 顯示解析（如果有的話）
+                const explanationDisplay = document.createElement('div');
+                explanationDisplay.style.cssText = `
+                    margin-top: 10px;
+                    padding: 10px;
+                    background-color: #e7f3ff;
+                    border: 1px solid #b3d9ff;
+                    border-radius: 5px;
+                    font-size: 14px;
+                    line-height: 1.5;
+                `;
+                explanationDisplay.innerHTML = `
+                    <strong>解析：</strong>${question.explanation || '此題目暫無詳細解析。'}<br>
+                    <strong>本題概念：</strong>${question.concept || '此題目暫無概念說明。'}<br>
+                    <strong>建議複習方向：</strong>${question.review || '建議複習相關章節內容。'}
+                `;
+                
+                // 下一題按鈕
+                const nextButton = document.createElement('button');
+                nextButton.textContent = '下一題';
+                nextButton.style.cssText = `
+                    padding: 12px 30px;
+                    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                    border: 3px solid #1e7e34;
+                    border-radius: 8px;
+                    color: #fff;
+                    font-size: 15px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    margin-top: 15px;
+                    transition: all 0.2s ease;
+                    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+                `;
+                
+                nextButton.addEventListener('click', () => {
                     const nextQuestion = QuizMode.nextQuestion();
                     if (nextQuestion) {
                         this.showQuizQuestionScreen();
                     } else {
                         this.showQuizResultScreen();
                     }
-                }, 1000);
+                });
+                
+                // 隱藏提交按鈕，顯示結果
+                submitButton.style.display = 'none';
+                questionCard.appendChild(resultDisplay);
+                questionCard.appendChild(correctAnswerDisplay);
+                questionCard.appendChild(explanationDisplay);
+                questionCard.appendChild(nextButton);
+                
+                // 自動滑動到解析部分
+                setTimeout(() => {
+                    explanationDisplay.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start',
+                        inline: 'nearest'
+                    });
+                }, 300);
             });
             
             // 組裝題目卡片
             questionCard.appendChild(questionText);
             questionCard.appendChild(optionsContainer);
-            questionCard.appendChild(nextButton);
+            questionCard.appendChild(submitButton);
             
             // 組裝主容器
             container.appendChild(topBar);
@@ -7933,6 +8661,53 @@ document.addEventListener('DOMContentLoaded', function() {
                 answers: QuizMode.answers
             };
             
+            // 計算各類別答對率
+            const categoryStats = {};
+            QuestionBank.categories.forEach(category => {
+                const categoryAnswers = result.answers.filter(a => a.question.category === category);
+                const correctCount = categoryAnswers.filter(a => a.isCorrect).length;
+                const totalCount = categoryAnswers.length;
+                categoryStats[category] = {
+                    correctCount,
+                    totalCount,
+                    correctRate: totalCount > 0 ? correctCount / totalCount : 0
+                };
+            });
+            
+            // 找出最高分的類別
+            const topCategory = Object.keys(categoryStats).reduce((a, b) => 
+                categoryStats[a].correctRate > categoryStats[b].correctRate ? a : b
+            );
+            
+			// 職業建議資料（對齊命名：career_guidance）
+			const career_guidance = {
+                '行銷理論與管理': {
+                    representative_jobs: ['行銷經理', '品牌經理', '產品經理', '行銷總監'],
+                    required_skills: ['行銷策略規劃', '品牌管理', '市場分析', '團隊領導'],
+                    student_recommendations: ['修習行銷管理課程', '學習品牌建立策略', '了解消費者行為', '培養領導能力']
+                },
+                '行銷策略與企劃': {
+                    representative_jobs: ['行銷企劃專員', '活動企劃', '行銷策略師', '企劃經理'],
+                    required_skills: ['企劃能力', '創意思維', '專案管理', '溝通協調'],
+                    student_recommendations: ['學習企劃書撰寫', '培養創意思考', '了解專案管理', '提升溝通技巧']
+                },
+                '市場研究': {
+                    representative_jobs: ['市場研究員', '數據分析師', '消費者洞察專員', '研究經理'],
+                    required_skills: ['數據分析', '統計方法', '問卷設計', '報告撰寫'],
+                    student_recommendations: ['學習統計學', '掌握數據分析工具', '了解研究方法', '提升報告撰寫能力']
+                },
+                '全球與國際行銷': {
+                    representative_jobs: ['國際行銷專員', '海外業務', '跨國品牌經理', '國際貿易專員'],
+                    required_skills: ['外語能力', '跨文化溝通', '國際貿易', '全球市場分析'],
+                    student_recommendations: ['加強外語能力', '了解國際貿易', '學習跨文化溝通', '關注全球市場趨勢']
+                },
+                '數位與網路行銷': {
+                    representative_jobs: ['數位行銷專員', '社群媒體經理', 'SEO專員', '電商營運'],
+                    required_skills: ['數位工具操作', '社群媒體管理', 'SEO/SEM', '數據分析'],
+                    student_recommendations: ['學習數位行銷工具', '了解社群媒體策略', '掌握SEO技巧', '培養數據分析能力']
+                }
+            };
+            
             const container = document.createElement('div');
             container.style.cssText = `
                 width: 100%;
@@ -7944,11 +8719,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 box-sizing: border-box;
                 overflow-y: auto;
             `;
+            container.classList.add('custom-scrollbar');
             
             // 標題
-            const title = document.createElement('h1');
-            title.textContent = '📊 測驗結果';
-            title.style.cssText = 'color: #8b4513; font-size: 20px; margin-bottom: 15px; text-align: center;';
+            const title = document.createElement('div');
+            title.style.cssText = 'display: flex; align-items: center; justify-content: center; margin-bottom: 15px;';
+            
+            const titleIcon = document.createElement('img');
+            titleIcon.src = 'assets/images/報表.png';
+            titleIcon.style.cssText = 'width: 24px; height: 24px; margin-right: 8px;';
+            titleIcon.alt = '報表';
+            
+            const titleText = document.createElement('h1');
+            titleText.textContent = '測驗結果';
+            titleText.style.cssText = 'color: #8b4513; font-size: 20px; margin: 0; display: inline;';
+            
+            title.appendChild(titleIcon);
+            title.appendChild(titleText);
             
             // 成績卡片
             const scoreCard = document.createElement('div');
@@ -7974,9 +8761,220 @@ document.addEventListener('DOMContentLoaded', function() {
                     答對率：${(result.correctRate * 100).toFixed(0)}%
                 </p>
                 <hr style="border: 1px solid #8b4513; margin: 12px 0;">
-                <p style="color: #daa520; font-size: 18px; font-weight: bold;">
-                    💰 獲得 ${result.reward} 蜂蜜幣
+                <p style="color: #daa520; font-size: 18px; font-weight: bold; display: flex; align-items: center; justify-content: center;">
+                    <img src="assets/images/蜂蜜幣.png" style="width: 20px; height: 20px; margin-right: 6px; vertical-align: middle;">
+                    獲得 ${result.reward} 蜂蜜幣
                 </p>
+            `;
+            
+            // 若沒有任何作答，顯示提示並跳過雷達圖與職業建議
+            const answeredCount = result.answers ? result.answers.length : 0;
+            const hasAnswered = answeredCount > 0;
+            
+            // 能力雷達圖
+            const radarSection = document.createElement('div');
+            radarSection.style.cssText = `
+                width: 100%;
+                max-width: 500px;
+                margin-bottom: 15px;
+                background-color: rgba(255, 255, 255, 0.95);
+                border: 3px solid #8b4513;
+                border-radius: 10px;
+                padding: 15px;
+            `;
+            
+            const radarTitle = document.createElement('h3');
+            radarTitle.textContent = '能力雷達圖';
+            radarTitle.style.cssText = 'color: #8b4513; font-size: 16px; margin-bottom: 10px; text-align: center;';
+            
+            if (!hasAnswered) {
+                const emptyMsg = document.createElement('p');
+                emptyMsg.style.cssText = 'color:#654321; font-size:14px; text-align:center; margin: 4px 0 2px;';
+                emptyMsg.textContent = '尚未作答，請完成至少一題以生成能力雷達圖。';
+                radarSection.appendChild(radarTitle);
+                radarSection.appendChild(emptyMsg);
+                
+                // 先將空狀態的雷達區塊加入
+                container.appendChild(title);
+                container.appendChild(scoreCard);
+                container.appendChild(radarSection);
+                
+                // 跳過後續雷達繪製與職業建議，直接返回
+                windowContent.innerHTML = '';
+                windowContent.appendChild(container);
+                return;
+            }
+            
+			// 使用 Canvas 畫出五邊形雷達圖
+			const radarWrapper = document.createElement('div');
+			radarWrapper.style.cssText = 'display:flex; justify-content:center;';
+			const canvas = document.createElement('canvas');
+			
+			// 處理高解析度螢幕的像素密度
+			const devicePixelRatio = window.devicePixelRatio || 1;
+			const baseWidth = 480;
+			const baseHeight = 360;
+			
+			// 設定實際 Canvas 尺寸（考慮像素密度）
+			canvas.width = baseWidth * devicePixelRatio;
+			canvas.height = baseHeight * devicePixelRatio;
+			
+			// 設定 CSS 顯示尺寸
+			canvas.style.width = baseWidth + 'px';
+			canvas.style.height = baseHeight + 'px';
+			canvas.style.maxWidth = '100%';
+			
+			radarWrapper.appendChild(canvas);
+			const ctx = canvas.getContext('2d');
+			
+			// 縮放 Canvas 以適應高解析度
+			ctx.scale(devicePixelRatio, devicePixelRatio);
+			
+			// 啟用高品質渲染
+			ctx.imageSmoothingEnabled = true;
+			ctx.imageSmoothingQuality = 'high';
+			
+			// 準備資料
+			const labels = QuestionBank.categories;
+			const values = labels.map(c => Math.round((categoryStats[c].correctRate || 0) * 100));
+			
+			// 幾何設定（使用基礎尺寸）
+			const cx = baseWidth / 2;
+			const cy = baseHeight / 2 + 10; // 略微下移，留給頂部標籤
+			const radius = Math.min(baseWidth, baseHeight) * 0.35;
+			const steps = 5; // 20%,40%,60%,80%,100%
+			const angleStep = (Math.PI * 2) / labels.length;
+			
+			// 助手：極座標轉直角
+			const toXY = (r, angle) => {
+				return { x: cx + r * Math.sin(angle), y: cy - r * Math.cos(angle) };
+			};
+			// 助手：像素貼齊（讓 1px 線條更銳利）
+			const snap = (v) => Math.round(v) + 0.5;
+			
+			// 畫同心多邊形網格（半像素貼齊，避免模糊）
+			ctx.lineWidth = 1;
+			ctx.strokeStyle = '#ddd';
+			ctx.lineCap = 'round';
+			ctx.lineJoin = 'round';
+			for (let s = 1; s <= steps; s++) {
+				const r = (radius * s) / steps;
+				ctx.beginPath();
+				for (let i = 0; i < labels.length; i++) {
+					const { x, y } = toXY(r, i * angleStep);
+					const sx = snap(x);
+					const sy = snap(y);
+					if (i === 0) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
+				}
+				ctx.closePath();
+				ctx.stroke();
+			}
+			
+			// 畫軸線（半像素貼齊）
+			ctx.strokeStyle = '#ccc';
+			ctx.lineWidth = 1;
+			for (let i = 0; i < labels.length; i++) {
+				const { x, y } = toXY(radius, i * angleStep);
+				const sx = snap(x);
+				const sy = snap(y);
+				ctx.beginPath();
+				ctx.moveTo(snap(cx), snap(cy));
+				ctx.lineTo(sx, sy);
+				ctx.stroke();
+			}
+			
+			// 畫百分比標示 (20% 間距)
+			ctx.fillStyle = '#666';
+			ctx.font = 'bold 14px "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif';
+			ctx.textAlign = 'left';
+			ctx.textBaseline = 'middle';
+			// 啟用文字平滑
+			ctx.textRenderingOptimization = 'optimizeQuality';
+			for (let s = 1; s <= steps; s++) {
+				const r = (radius * s) / steps;
+				ctx.fillText(`${s * 20}%`, Math.round(cx + 8), Math.round(cy - r));
+			}
+			
+			// 畫標籤
+			ctx.fillStyle = '#654321';
+			ctx.font = 'bold 15px "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif';
+			ctx.textAlign = 'center';
+			ctx.textBaseline = 'middle';
+			labels.forEach((label, i) => {
+				const pos = toXY(radius + 20, i * angleStep);
+				ctx.fillText(label, Math.round(pos.x), Math.round(pos.y));
+			});
+			
+			// 畫數據多邊形
+			ctx.beginPath();
+			values.forEach((val, i) => {
+				const r = (radius * val) / 100;
+				const { x, y } = toXY(r, i * angleStep);
+				if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+			});
+			ctx.closePath();
+			ctx.fillStyle = 'rgba(66, 133, 244, 0.4)';
+			ctx.strokeStyle = 'rgba(66, 133, 244, 1)';
+			ctx.lineWidth = 2.5;
+			ctx.lineCap = 'round';
+			ctx.lineJoin = 'round';
+			ctx.fill();
+			ctx.stroke();
+			
+			// 畫數據點
+			ctx.fillStyle = 'rgba(66, 133, 244, 1)';
+			values.forEach((val, i) => {
+				const r = (radius * val) / 100;
+				const { x, y } = toXY(r, i * angleStep);
+				ctx.beginPath();
+				ctx.arc(x, y, 4, 0, Math.PI * 2);
+				ctx.fill();
+			});
+			
+			// 將雷達圖加入版面
+			radarSection.appendChild(radarTitle);
+			radarSection.appendChild(radarWrapper);
+            
+            // 職業建議
+            const careerSection = document.createElement('div');
+            careerSection.style.cssText = `
+                width: 100%;
+                max-width: 500px;
+                margin-bottom: 15px;
+                background-color: rgba(255, 255, 255, 0.95);
+                border: 3px solid #8b4513;
+                border-radius: 10px;
+                padding: 15px;
+            `;
+            
+            const careerTitle = document.createElement('h3');
+            careerTitle.textContent = '💼 個人化職業建議';
+            careerTitle.style.cssText = 'color: #8b4513; font-size: 16px; margin-bottom: 10px; text-align: center;';
+            
+			const careerData_obj = career_guidance[topCategory];
+            careerSection.innerHTML = `
+                <div style="margin-bottom: 10px;">
+                    <strong style="color: #654321;">🏆 最強領域：</strong>
+                    <span style="color: #8b4513; font-weight: bold;">${topCategory}</span>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <strong style="color: #654321;">💼 代表職業：</strong>
+                    <div style="color: #654321; margin-top: 5px;">
+                        ${careerData_obj.representative_jobs.map(job => `• ${job}`).join('<br>')}
+                    </div>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <strong style="color: #654321;">🛠️ 所需技能：</strong>
+                    <div style="color: #654321; margin-top: 5px;">
+                        ${careerData_obj.required_skills.map(skill => `• ${skill}`).join('<br>')}
+                    </div>
+                </div>
+                <div>
+                    <strong style="color: #654321;">📚 建議學習方向：</strong>
+                    <div style="color: #654321; margin-top: 5px;">
+                        ${careerData_obj.student_recommendations.map(rec => `• ${rec}`).join('<br>')}
+                    </div>
+                </div>
             `;
             
             // 錯題回顧
@@ -8012,9 +9010,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         <p style="color: #dc143c; font-size: 12px; margin-bottom: 4px;">
                             ❌ 你的答案：${answer.question.options[answer.userAnswer - 1]}
                         </p>
-                        <p style="color: #2e8b57; font-size: 12px;">
+                        <p style="color: #2e8b57; font-size: 12px; margin-bottom: 4px;">
                             ✅ 正確答案：${answer.question.options[answer.question.answer - 1]}
                         </p>
+                        <div style="color: #654321; font-size: 12px; margin-top: 8px; padding: 8px; background-color: #f8f9fa; border-radius: 4px;">
+                            <strong>解析：</strong>${answer.question.explanation || '此題目暫無詳細解析。'}<br>
+                            <strong>本題概念：</strong>${answer.question.concept || '此題目暫無概念說明。'}<br>
+                            <strong>建議複習方向：</strong>${answer.question.review || '建議複習相關章節內容。'}
+                        </div>
                     `;
                     
                     reviewSection.appendChild(reviewItem);
@@ -8022,14 +9025,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 container.appendChild(title);
                 container.appendChild(scoreCard);
+                container.appendChild(radarSection);
+                container.appendChild(careerSection);
                 container.appendChild(reviewSection);
             } else {
                 container.appendChild(title);
                 container.appendChild(scoreCard);
+                container.appendChild(radarSection);
+                container.appendChild(careerSection);
                 
                 const perfectMsg = document.createElement('p');
                 perfectMsg.textContent = '🎊 完美答對！沒有錯題！';
-                perfectMsg.style.cssText = 'color: #2e8b57; font-size: 15px; margin-bottom: 15px;';
+                perfectMsg.style.cssText = 'color: #2e8b57; font-size: 15px; margin-bottom: 15px; text-align: center;';
                 container.appendChild(perfectMsg);
             }
             
@@ -8037,38 +9044,44 @@ document.addEventListener('DOMContentLoaded', function() {
             const buttonContainer = document.createElement('div');
             buttonContainer.style.cssText = 'display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; justify-content: center;';
             
-            // 再挑戰一次按鈕
+            // 重新測驗按鈕
             const retryButton = document.createElement('button');
-            retryButton.textContent = '🔄 再挑戰一次';
+            retryButton.textContent = '🔄 重新測驗';
             retryButton.style.cssText = `
                 padding: 12px 22px;
-                background-color: #4169e1;
-                border: 3px solid #191970;
+                background: linear-gradient(135deg, #d4a574 0%, #c99a6e 100%);
+                border: 3px solid #b8895f;
                 border-radius: 8px;
                 color: #fff;
                 font-size: 14px;
                 font-weight: bold;
                 cursor: pointer;
+                transition: all 0.2s ease;
+                box-shadow: 0 3px 6px rgba(0,0,0,0.15);
             `;
             retryButton.addEventListener('click', () => {
-                this.showQuizStartScreen();
+                const currentCategory = QuestionBank.getCurrentCategory();
+                QuizMode.start(currentCategory);
+                this.showQuizQuestionScreen();
             });
             
             // 返回按鈕
             const backButton = document.createElement('button');
-            backButton.textContent = '🏠 返回主畫面';
+            backButton.textContent = '🏠 返回主選單';
             backButton.style.cssText = `
                 padding: 12px 22px;
-                background-color: #8b4513;
-                border: 3px solid #654321;
+                background: linear-gradient(135deg, #8b4513 0%, #654321 100%);
+                border: 3px solid #5d3a1a;
                 border-radius: 8px;
                 color: #fff;
                 font-size: 14px;
                 font-weight: bold;
                 cursor: pointer;
+                transition: all 0.2s ease;
+                box-shadow: 0 3px 6px rgba(0,0,0,0.15);
             `;
             backButton.addEventListener('click', () => {
-                this.showQuizStartScreen();
+                ContentManager.showContent('main-menu');
             });
             
             buttonContainer.appendChild(retryButton);
@@ -8263,6 +9276,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 flex-direction: column;
                 gap: 12px;
             `;
+            chatArea.classList.add('custom-scrollbar');
             
             // 載入聊天記錄
             this.loadChatMessages(chatArea);
@@ -8432,20 +9446,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     0%, 80%, 100% { transform: translateY(0); }
                     40% { transform: translateY(-5px); }
                 }
-                #chatMessagesArea::-webkit-scrollbar {
-                    width: 8px;
-                }
-                #chatMessagesArea::-webkit-scrollbar-track {
-                    background: rgba(210, 180, 140, 0.2);
-                    border-radius: 4px;
-                }
-                #chatMessagesArea::-webkit-scrollbar-thumb {
-                    background: #8b4513;
-                    border-radius: 4px;
-                }
-                #chatMessagesArea::-webkit-scrollbar-thumb:hover {
-                    background: #a0522d;
-                }
+                /* 聊天區域使用統一滾動條樣式 */
             `;
             document.head.appendChild(style);
             
@@ -8487,7 +9488,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 100);
             } else {
                 // 如果沒有聊天記錄，顯示歡迎訊息
-                const welcomeMsg = this.createChatBubble('bear', '🐻 熊熊：嗨～歡迎來到熊熊烘焙屋，今天想吃點什麼甜甜的呀？');
+                const welcomeMsg = this.createChatBubble('bear', '嗨～我是小熊哥，歡迎來到熊熊烘焙屋，今天想吃點什麼甜甜的呀？');
                 chatArea.appendChild(welcomeMsg);
             }
         },
@@ -9077,7 +10078,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
-            // 關於麵包店的回應
+            // 關於麵包坊的回應
             if (msg.includes('麵包') || msg.includes('產品') || msg.includes('商品')) {
                 const responses = [
                     '我們店裡有各種美味的麵包！蜂蜜麵包、草莓麵包、核桃麵包等等，每一款都是精心製作的喔！',
@@ -9089,7 +10090,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // 關於遊戲玩法
             if (msg.includes('怎麼玩') || msg.includes('玩法') || msg.includes('規則')) {
-                return '歡迎來到小熊麵包店！你可以透過進貨、答題行銷、參與隨機事件來經營麵包店。努力賺取蜂蜜幣和熊點數，讓店鋪越來越興旺吧！';
+                return '歡迎來到小熊麵包坊！你可以透過進貨、答題行銷、參與隨機事件來經營麵包坊。努力賺取蜂蜜幣和熊點數，讓店鋪越來越興旺吧！';
             }
             
             // 關於進貨
@@ -9121,7 +10122,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (msg.includes('你好') || msg.includes('嗨') || msg.includes('哈囉') || msg.includes('hi') || msg.includes('hello')) {
                 const greetings = [
                     '你好！很高興見到你！有什麼可以幫助你的嗎？',
-                    '嗨！歡迎來到小熊麵包店！需要我的協助嗎？',
+                    '嗨！歡迎來到小熊麵包坊！需要我的協助嗎？',
                     '哈囉！今天想了解些什麼呢？'
                 ];
                 return greetings[Math.floor(Math.random() * greetings.length)];
@@ -9139,14 +10140,14 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // 幫助請求
             if (msg.includes('幫助') || msg.includes('幫忙') || msg.includes('help')) {
-                return '我可以回答關於麵包店經營、遊戲玩法、商品資訊等問題。你想了解什麼呢？';
+                return '我可以回答關於麵包坊經營、遊戲玩法、商品資訊等問題。你想了解什麼呢？';
             }
             
             // 預設回應
             const defaultResponses = [
                 '這是個有趣的問題！讓我想想該怎麼回答你...',
                 '嗯嗯，我明白了。你可以試著從進貨或答題開始經營店鋪喔！',
-                '有任何關於麵包店經營的問題都可以問我！比如進貨、行銷、商品等等。',
+                '有任何關於麵包坊經營的問題都可以問我！比如進貨、行銷、商品等等。',
                 '我會盡力幫助你！如果想了解遊戲玩法，可以問我「怎麼玩」喔！',
                 '很高興與你聊天！需要什麼協助嗎？'
             ];
@@ -9159,14 +10160,20 @@ document.addEventListener('DOMContentLoaded', function() {
     window.updateStockButtonState = function() {
         const stockButton = document.getElementById('navStock');
         if (stockButton) {
-            if (GameFlowManager.hasStocked) {
+            // 從 localStorage 重新讀取進貨狀態，確保狀態同步
+            const hasStocked = localStorage.getItem('hasStocked') === 'true';
+            GameFlowManager.hasStocked = hasStocked;
+            
+            if (hasStocked) {
                 stockButton.style.opacity = '0.5';
                 stockButton.style.cursor = 'not-allowed';
                 stockButton.style.filter = 'grayscale(50%)';
+                console.log('📦 進貨按鈕已禁用（已進貨）');
             } else {
                 stockButton.style.opacity = '1';
                 stockButton.style.cursor = 'pointer';
                 stockButton.style.filter = 'none';
+                console.log('📦 進貨按鈕已啟用（未進貨）');
             }
         }
     };
@@ -9240,10 +10247,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // 初始化虛擬玩家系統
     VirtualPlayersSystem.initialize();
     
+    // 暴露全局變數
     window.GameFlowManager = GameFlowManager;
     window.EventFlowManager = EventFlowManager;
     window.MusicManager = MusicManager;
+    window.SoundManager = SoundManager;
     window.CursorManager = CursorManager;
+    
+    // 確保在 DOM 載入後立即可用
+    console.log('🎵 音效和音樂管理器已初始化');
+    console.log('SoundManager:', typeof window.SoundManager);
+    console.log('MusicManager:', typeof window.MusicManager);
     window.resetPlayerState = resetPlayerState;
     window.BreadProducts = BreadProducts;
     window.StockingSystem = StockingSystem;
@@ -10284,7 +11298,7 @@ document.addEventListener('DOMContentLoaded', function() {
          // 使用回應模板
          if (msg.includes('你好') || msg.includes('嗨') || msg.includes('歡迎')) {
              const greetings = templates.greeting || [];
-             return greetings[Math.floor(Math.random() * greetings.length)] || `你好！歡迎來到小熊哥麵包店！`;
+             return greetings[Math.floor(Math.random() * greetings.length)] || `你好！歡迎來到小熊哥麵包坊！`;
          } else if (msg.includes('麵包') || msg.includes('產品') || msg.includes('商品') || msg.includes('什麼')) {
              const products = templates.products || [];
              return products[Math.floor(Math.random() * products.length)] || `我們店裡有各種美味的麵包！`;
@@ -10784,6 +11798,17 @@ document.addEventListener('DOMContentLoaded', function() {
       console.log('💡 提示：輸入 showVirtualPlayers() 可查看虛擬玩家狀態');
       console.log('💡 提示：輸入 diagnoseLeaderboard() 可診斷排行榜問題');
       console.log('💡 提示：輸入 quickFinishRound() 可快速完成一輪遊戲並跳轉到財務報表');
+    console.log('🔧 財務報表修復：輸入 fixFinancialReport() 可手動修復財務報表問題');
+    
+    // 全局調試函數
+    window.fixFinancialReport = function() {
+        if (window.FinancialReport) {
+            return FinancialReport.fixFinancialReport();
+        } else {
+            console.error('❌ FinancialReport 未初始化');
+            return false;
+        }
+    };
       console.log('💡 提示：輸入 testMultipleRounds(N) 可測試連續N輪遊戲（預設2輪）');
      console.log('💡 提示：輸入 checkKnowledgeStatus() 可檢查知識庫載入狀態');
     console.log('💡 提示：輸入 reloadBotKnowledge() 可重新載入機器人知識庫');
@@ -10807,6 +11832,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 初始化音樂管理器
     MusicManager.init();
+    
+    // 初始化音效管理器
+    SoundManager.init();
+    
+    // 為所有按鈕添加點擊音效
+    addClickSoundToAllButtons();
     
     // 初始化自訂游標管理器（可選）
     // CursorManager.init(); // 取消註解以啟用 JavaScript 游標系統
@@ -10849,7 +11880,12 @@ document.addEventListener('DOMContentLoaded', function() {
         bindEvents() {
             // 關閉按鈕事件
             this.closeBtns.forEach(btn => {
-                btn.addEventListener('click', () => this.close());
+                btn.addEventListener('click', () => {
+                    if (typeof SoundManager !== 'undefined') {
+                        SoundManager.playClick();
+                    }
+                    this.close();
+                });
             });
             
             // 點擊遮罩層關閉
@@ -10868,12 +11904,16 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // 刷新按鈕
             if (this.refreshBtn) {
-                this.refreshBtn.addEventListener('click', () => this.refresh());
+                this.refreshBtn.addEventListener('click', () => {
+                    this.refresh();
+                });
             }
             
             // 標籤切換
             this.tabs.forEach(tab => {
-                tab.addEventListener('click', () => this.switchTab(tab));
+                tab.addEventListener('click', () => {
+                    this.switchTab(tab);
+                });
             });
         },
         
@@ -11273,5 +12313,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // 將排行榜模態框暴露到全局
     window.LeaderboardModal = LeaderboardModal;
     
+    // 確保音效和音樂管理器立即可用
+    window.SoundManager = SoundManager;
+    window.MusicManager = MusicManager;
+    
     console.log('🏆 排行榜系統已初始化');
+    console.log('🎵 音效和音樂管理器已暴露到全局');
+    console.log('SoundManager:', typeof window.SoundManager);
+    console.log('MusicManager:', typeof window.MusicManager);
 });
