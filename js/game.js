@@ -1310,8 +1310,23 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log(`   📦 銷售量=${report.totalSalesVolume}, 滿意度=${report.satisfactionChange}, 聲望=${report.reputationChange}`);
             console.log('   完整報表:', report);
             
+            // 保存當前地區資訊到報表中，避免重置時丟失
+            const currentRegionType = this.currentRoundData.regionType;
+            const currentDistrict = this.currentRoundData.district;
+            
             // 重置當前輪次數據
             this.resetCurrentRound();
+            
+            // 如果報表中的地區資訊為 null，使用保存的地區資訊
+            if (!report.regionType || !report.district) {
+                if (currentRegionType && currentDistrict) {
+                    report.regionType = currentRegionType;
+                    report.district = currentDistrict;
+                    console.log(`   🔧 修復報表地區資訊: ${report.regionType} - ${report.district}`);
+                    // 重新儲存修復後的報表
+                    this.saveReport();
+                }
+            }
             
             return report;
         },
@@ -3859,6 +3874,8 @@ document.addEventListener('DOMContentLoaded', function() {
         volume: parseFloat(localStorage.getItem('soundVolume')) || 0.5, // 預設音量 50%
         initialized: false,
         lastPlayTime: 0, // 防止音效重疊
+        userGestureBound: false,
+        queuedSound: null,
 
         init() {
             // 僅在首次互動或顯式呼叫時初始化
@@ -3873,6 +3890,31 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         },
 
+        // 綁定一次性使用者手勢解鎖（click/touchstart/keydown）
+        bindUserGestureUnlock() {
+            if (this.userGestureBound) return;
+            this.userGestureBound = true;
+            const unlock = () => {
+                try {
+                    if (!this.initialized) this.init();
+                    if (this.audioContext && this.audioContext.state === 'suspended') {
+                        this.audioContext.resume().catch(() => {});
+                    }
+                    // 若有排隊的音效，在解鎖後立即播放
+                    if (this.queuedSound && this.audioContext && this.audioContext.state === 'running') {
+                        const fn = this.queuedSound;
+                        this.queuedSound = null;
+                        // 使用微任務確保在 resume 之後
+                        Promise.resolve().then(() => fn());
+                    }
+                } finally {
+                    ['pointerdown','click','touchstart','keydown'].forEach(evt => document.removeEventListener(evt, unlock, true));
+                    this.userGestureBound = false;
+                }
+            };
+            ['pointerdown','click','touchstart','keydown'].forEach(evt => document.addEventListener(evt, unlock, true));
+        },
+
         setEnabled(enabled) {
             this.isEnabled = enabled;
         },
@@ -3884,7 +3926,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         resumeIfNeeded() {
             if (this.audioContext && this.audioContext.state === 'suspended') {
-                this.audioContext.resume().catch(() => {});
+                // 不在非手勢情境直接 resume；改為綁定下次手勢再 resume
+                this.bindUserGestureUnlock();
             }
         },
 
@@ -3915,6 +3958,13 @@ document.addEventListener('DOMContentLoaded', function() {
             if (now - this.lastPlayTime < 50) return;
             this.lastPlayTime = now;
 
+            // 若在非使用者手勢情境導致 AudioContext 暫停，將音效排隊至解鎖後播放
+            if (this.audioContext.state === 'suspended') {
+                this.queuedSound = soundFunction;
+                this.resumeIfNeeded();
+                return;
+            }
+            
             this.resumeIfNeeded();
             soundFunction();
         },
@@ -6223,6 +6273,9 @@ document.addEventListener('DOMContentLoaded', function() {
             localStorage.removeItem('selectedCoefficient');
             this.saveProgress();
             
+            // 重置財務報表的當前輪次數據
+            FinancialReport.resetCurrentRound();
+            
             // 🤖 讓虛擬玩家也準備新一輪
             if (window.VirtualPlayersSystem) {
                 console.log('\n🔄 ========== 準備虛擬玩家進入第 ' + this.currentRound + ' 輪 ==========');
@@ -7503,6 +7556,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     // 如果找不到當前輪次報表，使用最後一個報表
                     latestReport = FinancialReport.history[FinancialReport.history.length - 1];
                     console.log('  ⚠️ 找不到當前輪次報表，使用最新報表:', latestReport.roundNumber);
+                }
+                
+                // 檢查並修復地區資訊為 null 的問題
+                if (latestReport && (!latestReport.regionType || !latestReport.district)) {
+                    console.log('  🔧 檢測到地區資訊缺失，嘗試修復...');
+                    // 嘗試從 GameFlowManager 獲取當前地區資訊
+                    if (GameFlowManager.selectedRegion && GameFlowManager.selectedDistrict) {
+                        latestReport.regionType = GameFlowManager.selectedRegion;
+                        latestReport.district = GameFlowManager.selectedDistrict;
+                        console.log(`  ✅ 已修復地區資訊: ${latestReport.regionType} - ${latestReport.district}`);
+                        // 重新儲存修復後的報表
+                        FinancialReport.saveReport();
+                    } else {
+                        console.log('  ⚠️ 無法修復地區資訊，GameFlowManager 中也沒有地區資料');
+                    }
                 }
             } else {
                 console.log('  ❌ 沒有任何財務報表歷史');
