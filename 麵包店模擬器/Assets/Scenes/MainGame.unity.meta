@@ -1,0 +1,80 @@
+# MainGame Scene Documentation
+
+## 場景概述
+這是麵包店模擬器的主要遊戲場景，包含完整的麵包店環境和遊戲系統。
+
+## 場景結構
+
+### GameManager (Root Object)
+- 包含 GameManager 腳本
+- 管理所有核心系統的引用
+- 處理遊戲狀態和流程控制
+
+### Systems (Empty GameObject)
+- EconomySystem
+- BakeryManager  
+- CustomerManager
+- EmployeeManager
+- AchievementSystem
+- SaveLoadSystem
+- SteamIntegration
+
+### Environment (Scene Environment)
+- BakeryBuilding (店鋪建築)
+- Counter (櫃檯區域)
+- OvenArea (烘焙區域)
+  - Oven_01 (烤箱位置)
+  - Oven_02 (烤箱位置) 
+  - Oven_03 (烤箱位置)
+  - Oven_04 (烤箱位置)
+- CustomerSpawnPoints (客戶生成點)
+- CustomerWaitingArea (客戶等待區)
+- Exit (出口位置)
+
+### UI (Canvas)
+- MainGameUI
+  - TopPanel (頂部資訊面板)
+    - MoneyDisplay
+    - DayDisplay
+    - CustomerSatisfactionBar
+  - BottomPanel (底部控制面板)
+    - ProductionButtons
+    - InventoryDisplay
+  - SidePanel (側邊功能面板)
+    - EmployeeButton
+    - AchievementButton
+    - SettingsButton
+- PauseMenu (暫停選單)
+- EmployeePanel (員工管理面板)
+- AchievementPanel (成就面板)
+- NotificationArea (通知區域)
+
+### Lighting
+- Main Directional Light (主要光源)
+- Fill Light (補光)
+- Point Lights (室內照明)
+
+### Audio
+- BackgroundMusic (背景音樂)
+- SFXManager (音效管理器)
+
+## 標籤設置
+- Player: 玩家相關物件
+- Customer: 客戶物件
+- Oven: 烤箱設備
+- Counter: 櫃檯區域
+- Exit: 出口位置
+- Ingredient: 材料物件
+- Bread: 麵包物件
+
+## 圖層設置
+- Default: 預設圖層
+- UI: 使用者介面
+- Customers: 客戶圖層
+- Equipment: 設備圖層
+- Interactables: 可互動物件
+
+## NavMesh 設置
+- 為客戶移動設置 NavMesh
+- 包含櫃檯、等待區域和出口的路徑
+- 設置障礙物以避免客戶進入非公共區域 

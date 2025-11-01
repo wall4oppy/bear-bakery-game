@@ -1,0 +1,69 @@
+{
+  "projectName": "麵包店模擬器",
+  "companyName": "BakerySimulatorStudio",
+  "productName": "Bakery Simulator",
+  "version": "1.0.0",
+  "unityVersion": "2022.3.12f1",
+  "targetPlatforms": [
+    "Windows",
+    "macOS", 
+    "Linux"
+  ],
+  "buildSettings": {
+    "scripting": {
+      "backend": "IL2CPP",
+      "apiCompatibilityLevel": ".NET Standard 2.1"
+    },
+    "graphics": {
+      "colorSpace": "Linear",
+      "renderPipeline": "URP"
+    },
+    "audio": {
+      "defaultSpeakerMode": "Stereo",
+      "dspBufferSize": "Good"
+    }
+  },
+  "inputSettings": {
+    "inputSystemPackage": "enabled",
+    "legacyInputManager": "disabled"
+  },
+  "quality": {
+    "defaultQualityLevel": 2,
+    "qualityLevels": [
+      {
+        "name": "低",
+        "pixelLightCount": 0,
+        "textureQuality": 3,
+        "shadowResolution": 0
+      },
+      {
+        "name": "中",
+        "pixelLightCount": 1,
+        "textureQuality": 1,
+        "shadowResolution": 1
+      },
+      {
+        "name": "高",
+        "pixelLightCount": 2,
+        "textureQuality": 0,
+        "shadowResolution": 2
+      }
+    ]
+  },
+  "tags": [
+    "Player",
+    "Customer",
+    "Oven",
+    "Counter",
+    "Exit",
+    "Ingredient",
+    "Bread"
+  ],
+  "layers": [
+    "Default",
+    "UI",
+    "Customers",
+    "Equipment",
+    "Interactables"
+  ]
+} 

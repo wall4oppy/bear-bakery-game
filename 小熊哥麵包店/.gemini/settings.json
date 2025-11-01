@@ -1,0 +1,5 @@
+{
+  "apiKey": "your-api-key-here",
+  "model": "gemini-2.5-pro",
+  "telemetry": false
+} 

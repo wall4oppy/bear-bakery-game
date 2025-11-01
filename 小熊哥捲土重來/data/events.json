@@ -1,0 +1,1123 @@
+{
+  "regions": {
+    "住宅區": [
+      {
+        "id": 1,
+        "title": "鄰居競爭",
+        "economicSignal": {
+          "level": "綠燈",
+          "message": "今日景氣：🟢綠燈（景氣平穩）",
+          "coefficientMessage": "每個選項會有相對應的係數會影響銷售量以及需要付出的銷貨成本，請玩家做好選擇。"
+        },
+        "story": {
+          "image": "assets/images/住宅區/[場景一：鄰居競爭].jpg",
+          "text": "清晨的陽光灑落在住宅區的小路上，你剛把進貨的麵包擺上架，卻聞到另一股香氣——不是來自你的店，而是從樹懶媽媽家傳來的。\n她剛出爐的「自製麵包」吸引了鄰居們聚集，孩子們嚷著：「下次要不要直接跟樹懶媽媽買就好？」\n小熊愣在攤位前，第一次感覺到「不是只有麵包店能賣麵包」。"
+        },
+        "event": {
+          "title": "鄰居競爭",
+          "description": "面對鄰居的自製麵包競爭，小熊該怎麼做？",
+          "marketingLesson": "● 差異化策略(Differentiation Strategy):透過強調「專業」和「安全」,與自製麵包形成明顯區隔。\n● 關係行銷(Relationship Marketing):加強與顧客的情感連結,提升黏著度。\n● 價格戰(Price War):雖能短期增加銷量,但會損害長期品牌形象。",
+          "options": [
+            {
+              "id": "A",
+              "text": "強調專業與品質：「推出『安心標章』：在店門口張貼食材來源與衛生證明，凸顯專業。」",
+              "feedback": "顧客看了標示後安心不少，媽媽們覺得小熊的店更可靠。雖然樹懶媽媽的麵包香氣誘人，但多數家庭還是傾向選擇專業店家。",
+              "coefficient": 1.0,
+              "effects": {
+                "honey": -2000,
+                "satisfaction": 3,
+                "reputation": 5
+              }
+            },
+            {
+              "id": "B",
+              "text": "打情感牌：「舉辦『社區好友日』：凡帶家人一起來購買，贈送一份小點心。」",
+              "feedback": "鄰居們覺得很窩心，孩子們拿著小點心笑嘻嘻。雖然支出增加，但人潮多了起來，小熊的店熱鬧不少。",
+              "coefficient": 1.2,
+              "effects": {
+                "honey": -1800,
+                "satisfaction": 8,
+                "reputation": 0
+              }
+            },
+            {
+              "id": "C",
+              "text": "直接壓低價格：「全品項降價 10%，吸引顧客回流。」",
+              "feedback": "短時間內人潮確實回流，但許多人開始期待小熊「永遠便宜」。長期來看，品牌價值被削弱，顧客只在意價格，不再在意品質。",
+              "coefficient": 0.7,
+              "effects": {
+                "honey": -3000,
+                "satisfaction": 0,
+                "reputation": -5
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "title": "活動促銷",
+        "economicSignal": {
+          "level": "紅燈",
+          "message": "今日景氣：🔴紅燈（市場熱絡）",
+          "coefficientMessage": "「我剛剛偷看了氣象報告，今天是『最適合賺錢的一天』欸～」"
+        },
+        "story": {
+          "image": "assets/images/住宅區/[場景二：活動促銷].jpg",
+          "text": "午後，微風帶著桂花香，你整理著貨架上的麵包。孩子們湊到門口，眼睛亮晶晶：「小熊，聽說今天有活動嗎？」\n街坊媽媽們也竊竊私語：「今年小熊的店會不會有新花樣？我們都在等呢！」\n小熊看著滿架的麵包，心裡正盤算：現在正值中秋期間，我需要靠促銷拉人氣？還是維持原價，靠巧思打動人心？"
+        },
+        "event": {
+          "title": "活動促銷",
+          "description": "選擇本次活動促銷的方式?",
+          "marketingLesson": "● 價格策略:短期折扣可拉動銷量,但需注意長期品牌價值。\n● 附加價值策略:不必降價也能增加顧客滿意度。",
+          "options": [
+            {
+              "id": "A",
+              "text": "節日限定促銷（買二送一）",
+              "feedback": "人潮湧進店裡，孩子們拉著父母大喊要買，店裡氣氛熱鬧非凡。顧客笑著說「小熊真會辦活動」，雖然單據堆滿收銀台，但利潤卻被壓縮了。",
+              "coefficient": 1.2,
+              "effects": {
+                "honey": -3000,
+                "satisfaction": 7,
+                "reputation": 0
+              }
+            },
+            {
+              "id": "B",
+              "text": "全品項折扣 10%",
+              "feedback": "年輕學生立刻成群搶購，上班族也覺得划算，但有熟客媽媽低聲說「小熊是不是只靠便宜取勝了？」氣氛雖熱鬧，卻多了一絲隱憂。",
+              "coefficient": 0.8,
+              "effects": {
+                "honey": -2000,
+                "satisfaction": 3,
+                "reputation": -1
+              }
+            },
+            {
+              "id": "C",
+              "text": "維持原價，推出附加價值（小禮袋或飲品）",
+              "feedback": "顧客拿到小禮袋時驚喜不已，孩子們抱著飲料笑著在門口分享麵包，整間店充滿溫暖氛圍。顧客心裡暗暗覺得「小熊很用心」，品牌形象大幅提升。",
+              "coefficient": 1.0,
+              "effects": {
+                "honey": -1500,
+                "satisfaction": 5,
+                "reputation": 3
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 3,
+        "title": "外送服務",
+        "economicSignal": {
+          "level": "綠燈",
+          "message": "今日景氣：🟢 綠燈（平穩）",
+          "coefficientMessage": "嘿嘿「聽說住宅區最近流行『買麵包送八卦』，要不要試試？」"
+        },
+        "story": {
+          "image": "assets/images/住宅區/[場景三：外送服用].jpg",
+          "text": "清晨，你剛整理完貨架，鄰居走來：「小熊，如果有外送就好了，下雨天也能買到麵包呢！」\n小熊看著窗外藍天：「外送能增加便利性，但人手與成本也不少……」\n員工建議：「可以先試小範圍外送，測試反應。」\n小熊默默記下心裡計畫，思索利弊。"
+        },
+        "event": {
+          "title": "外送服務",
+          "description": "小熊是否應該提供外送服務？",
+          "marketingLesson": "● 通路策略:便利性會影響顧客選擇,尤其在天氣或交通受限時。\n● 合作策略:與平台合作可快速擴大服務範圍,但需控制成本。",
+          "options": [
+            {
+              "id": "A",
+              "text": "建立外送平台",
+              "feedback": "顧客在手機上一鍵下單，雨天也能輕鬆享用麵包。便利性提升讓顧客黏著度增加，大家開始覺得「小熊的店很貼心」。",
+              "coefficient": 1.2,
+              "effects": {
+                "honey": -3800,
+                "satisfaction": 6,
+                "reputation": 3
+              }
+            },
+            {
+              "id": "B",
+              "text": "自行小規模外送",
+              "feedback": "附近住戶收到外送後笑著說：「小熊真細心！」雖然範圍有限，但人情味拉近了距離，顧客好感逐漸累積。",
+              "coefficient": 1.0,
+              "effects": {
+                "honey": -2400,
+                "satisfaction": 3,
+                "reputation": 0
+              }
+            },
+            {
+              "id": "C",
+              "text": "維持店內購買",
+              "feedback": "下雨天時顧客遲疑站在門外，嘟囔著不方便，有些人甚至轉去別家。便利不足讓你的銷售受到影響。",
+              "coefficient": 0.7,
+              "effects": {
+                "honey": 0,
+                "satisfaction": -2,
+                "reputation": 0
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 4,
+        "title": "增加曝光度",
+        "economicSignal": {
+          "level": "紅燈",
+          "message": "今日景氣：🔴 紅燈（市場熱絡）",
+          "coefficientMessage": "「早啊小熊～今天的市場氣味不錯，該出貨賺一波了！」"
+        },
+        "story": {
+          "image": "assets/images/住宅區/[場景四：增加曝光度].jpg",
+          "text": "你看到社群上有人曬小熊麵包照片，心想：「如果能在社群上做活動，吸引更多顧客，那就太棒了！」\n店內員工提議：「可以舉辦拍照打卡送小點心活動，增加曝光。」"
+        },
+        "event": {
+          "title": "增加曝光度",
+          "description": "如何為本店增加曝光度",
+          "marketingLesson": "● 社群行銷: 能夠快速提高曝光度,但需要投入時間與心力持續經營和互動。\n● 廣告投放: 能精準鎖定目標客群,有效吸引新顧客,但必須仔細評估投資報酬率。\n● 口碑宣傳: 屬於比較保守的行銷方式,雖然能維持現有客群,但容易錯失讓店鋪快速成長的機會。",
+          "options": [
+            {
+              "id": "A",
+              "text": "舉辦社群打卡活動",
+              "feedback": "顧客拿著麵包在店門口開心拍照上傳，標註「#熊熊烘焙所」，短時間內照片刷滿社群，更多人慕名而來，店內氣氛熱絡。",
+              "coefficient": 1.2,
+              "effects": {
+                "honey": -2600,
+                "satisfaction": 6,
+                "reputation": 5
+              }
+            },
+            {
+              "id": "B",
+              "text": "投放小額線上廣告",
+              "feedback": "廣告彈窗出現在附近居民的手機上，不少新面孔走進來嘗鮮，營收短期上升，但支出也讓你皺了皺眉，效果還需時間驗證。",
+              "coefficient": 1.0,
+              "effects": {
+                "honey": -2000,
+                "satisfaction": 3,
+                "reputation": 0
+              }
+            },
+            {
+              "id": "C",
+              "text": "維持口碑宣傳",
+              "feedback": "老顧客依舊照常上門，店內溫馨熟悉，但少了新鮮話題，人氣成長停滯不前。",
+              "coefficient": 0.7,
+              "effects": {
+                "honey": 0,
+                "satisfaction": 1,
+                "reputation": 0
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 5,
+        "title": "謠言危機",
+        "economicSignal": {
+          "level": "藍燈",
+          "message": "今日景氣：🔵 藍燈（市場低迷）",
+          "coefficientMessage": "「景氣藍燈代表機會藏得更深～我們得挖一挖才行！」"
+        },
+        "story": {
+          "image": "assets/images/住宅區/[場景五：謠言危機].jpg",
+          "text": "上午，有居民在社群傳言：「聽說小熊的核桃麵包可能用過期材料！」\n小熊愣住，心想：「一定要澄清，否則店鋪聲譽受損！」\n員工小聲提醒：「小熊，顧客會很在意食安問題，拖久了聲望可能掉很快。」\n你深吸一口氣，決定採取行動。"
+        },
+        "event": {
+          "title": "謠言危機",
+          "description": "如何解決麵包店謠言?",
+          "marketingLesson": "● 危機管理:遇到負面消息,應快速且透明回應,才能維護品牌聲譽。\n● 聲譽影響:食安謠言會直接影響顧客信任與銷售,拖延只會加大損失。",
+          "options": [
+            {
+              "id": "A",
+              "text": "公開食材來源與檢驗證明",
+              "feedback": "小熊在店內張貼食材來源與檢驗證明，並在社群上同步發布照片與說明。顧客看到後紛紛留言表示放心，甚至有人特地來店裡打卡拍照，支持小熊的誠信。謠言迅速被澄清，店內氣氛逐漸活絡，顧客互動熱烈。",
+              "coefficient": 1.3,
+              "effects": {
+                "honey": -1000,
+                "satisfaction": 4,
+                "reputation": 5
+              }
+            },
+            {
+              "id": "B",
+              "text": "在社群平台回覆澄清",
+              "feedback": "小熊在社群平台留言回應謠言，表明所有食材均符合規範並附上部分檢驗資料。部分顧客表示相信，但仍有人保持觀望。社群上出現少量正面互動，店內人潮略有回升，但聲譽改善有限。",
+              "coefficient": 1.0,
+              "effects": {
+                "honey": -1000,
+                "satisfaction": 2,
+                "reputation": 2
+              }
+            },
+            {
+              "id": "C",
+              "text": "暫時忽略謠言",
+              "feedback": "謠言未被處理，顧客在社群上議論紛紛，部分人取消預訂，店內氣氛變得緊張。小熊感到壓力山大，員工也擔心長期聲譽受損。營收下滑，聲望與顧客滿意度大幅下降。",
+              "coefficient": 0.2,
+              "effects": {
+                "honey": 0,
+                "satisfaction": -3,
+                "reputation": -4
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 6,
+        "title": "產品改良",
+        "economicSignal": {
+          "level": "綠燈",
+          "message": "今日景氣：🟢 綠燈（市場平穩）",
+          "coefficientMessage": "平穩的市場環境適合進行產品改良，提升顧客滿意度。"
+        },
+        "story": {
+          "image": "assets/images/住宅區/[場景六：產品改良].jpg",
+          "text": "清晨，你打開店門，擺好從供應商進貨的新一批奶油麵包。麵包表面微焦、香氣撲鼻，一時間吸引不少顧客駐足。\n不過有細心的家長反映：「甜度有點高，小朋友吃到後來會覺得膩。」\n隔壁的兔子媽媽輕聲說：「如果甜度能再調整一下就更完美了！」\n你心想：「也許可以跟供應商溝通，調整配方。不僅能讓現有顧客更滿意，也可能吸引新顧客嘗鮮。」"
+        },
+        "event": {
+          "title": "產品改良",
+          "description": "產品改良方案",
+          "marketingLesson": "● 產品改良策略:小幅改良可降低風險、提升滿意度;大幅改良能吸引新顧客,但成本較高且短期利潤可能受影響。\n● 顧客回饋管理:及時收集並回應顧客反饋,有助於持續改善產品滿意度與品牌聲譽。",
+          "options": [
+            {
+              "id": "A",
+              "text": "微調甜度，保持原配方",
+              "feedback": "小熊微調奶油麵包的甜度後，顧客發現口味更順口，尤其孩子和老人家都笑著點頭。回頭客開始主動分享好評，有人甚至特地來店裡品嚐新口味，店內氣氛溫馨而活絡。",
+              "coefficient": 1.0,
+              "effects": {
+                "honey": -1300,
+                "satisfaction": 4,
+                "reputation": 3
+              }
+            },
+            {
+              "id": "B",
+              "text": "大幅改良，與供應商合作開發新口味，加入高品質奶油或天然香草等高級食材。",
+              "feedback": "小熊嘗試加入高級食材，烘焙出全新口味的奶油麵包。顧客第一次品嚐時露出驚喜表情，社群上開始有人打卡分享新口味。然而高成本讓短期利潤受到壓力，店內計算機上的數字讓小熊眉頭微皺，但人氣與聲望明顯提升。",
+              "coefficient": 1.2,
+              "effects": {
+                "honey": -3800,
+                "satisfaction": 6,
+                "reputation": 4
+              }
+            },
+            {
+              "id": "C",
+              "text": "保持現狀，不改良",
+              "feedback": "小熊決定維持原有配方繼續進行進貨，顧客依舊享用熟悉的奶油麵包，回頭率穩定。雖然大家沒有抱怨，但少了新鮮感，社群上鮮少新的分享與打卡，店內人氣保持平穩但缺乏活力。",
+              "coefficient": 0.7,
+              "effects": {
+                "honey": 0,
+                "satisfaction": 0,
+                "reputation": -1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 7,
+        "title": "天氣應對",
+        "economicSignal": {
+          "level": "藍燈",
+          "message": "今日景氣：🔵 藍燈（市場低迷）",
+          "coefficientMessage": "天氣變化影響客流量，靈活的應對策略能減少損失並創造機會。"
+        },
+        "story": {
+          "image": "assets/images/住宅區/[場景七：天氣對應].jpg",
+          "text": "天氣預報顯示下午可能下大雨，你站在店門口，看著空曠的街道與陰沉的天空，心裡擔心原本的顧客會減少。\n店內員工建議：「小熊，也許可以推出雨天優惠或外送服務，吸引顧客。」\n小熊心裡盤算：如果能利用天氣做促銷，說不定可以減少損失，甚至吸引一些回頭客。"
+        },
+        "event": {
+          "title": "天氣應對",
+          "description": "如何應對天氣造成的損失",
+          "marketingLesson": "● 危機應對策略:天氣或外部因素會影響銷售,提前設計應對方案能有效降低損失。\n● 靈活行銷:小型促銷或臨時服務能提升顧客滿意度,維持營收並增加顧客互動。",
+          "options": [
+            {
+              "id": "A",
+              "text": "推出雨天優惠",
+              "feedback": "小熊推出「雨天購買優惠」，店門口張貼醒目的宣傳牌。顧客看到後，即使下著小雨，也有人冒雨來店購買，店內氣氛比預期好。部分顧客在社群上分享活動，增加了曝光，讓小熊感到安心。",
+              "coefficient": 1.0,
+              "effects": {
+                "honey": -1400,
+                "satisfaction": 5,
+                "reputation": 2
+              }
+            },
+            {
+              "id": "B",
+              "text": "臨時開通外送服務",
+              "feedback": "小熊快速開通外送服務，部分顧客選擇在家訂購。雨天阻礙了人潮，但外送訂單幫助減少了營收損失，店內員工忙碌但效率高，顧客反饋稱讚方便，品牌形象略有提升。",
+              "coefficient": 1.1,
+              "effects": {
+                "honey": -2600,
+                "satisfaction": 4,
+                "reputation": 3
+              }
+            },
+            {
+              "id": "C",
+              "text": "維持原狀，等待天氣改善",
+              "feedback": "小熊選擇不做調整，結果人潮稀少，店內顧客寥寥無幾，短期營收下降。部分老顧客抱怨無優惠或外送服務，店內氣氛沉悶，員工也感到沮喪。",
+              "coefficient": 0.4,
+              "effects": {
+                "honey": 0,
+                "satisfaction": -3,
+                "reputation": -2
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "商業區": [
+      {
+        "id": 1,
+        "title": "競爭對手折扣戰",
+        "economicSignal": {
+          "level": "紅燈",
+          "message": "今日景氣：🔴紅燈（熱絡）",
+          "coefficientMessage": "每個選項會有相對應的係數會影響銷售量以及需要付出的銷貨成本，請玩家做好選擇。"
+        },
+        "story": {
+          "image": "assets/images/商業區/商業區 場景ㄧ（競爭對手折扣戰）.jpg",
+          "text": "清晨的陽光灑進「熊熊烘焙所」，小熊正把一籃籃新進貨的麵包擺上架子。\n忽然，街角的連鎖麵包店傳來熱鬧的聲音：「買三送一！限時優惠！」\n人潮一瞬間蜂擁而至，讓小熊的店門口顯得冷清。\n小熊低頭看著空蕩蕩的櫃檯，心裡酸酸的：「爺爺的時代，這裡可是全鎮最熱鬧的地方……難道我真的不行嗎？」\n他握緊小爪子，決定必須立刻想辦法。"
+        },
+        "event": {
+          "title": "競爭對手折扣戰",
+          "description": "面對競爭對手的折扣戰，小熊該怎麼應對？",
+          "marketingLesson": "價格戰的本質不只是「便宜」,而是「價值」。\n● 激烈折扣會帶來短期人潮,但消耗利潤。\n● 堅持品質能建立長期信任。\n● 熱情互動則能營造「體驗價值」。",
+          "options": [
+            {
+              "id": "A",
+              "text": "推出「買二送一」，比對手更激進。",
+              "feedback": "顧客立刻湧入，店裡人聲鼎沸，但結算時利潤卻被壓縮得很厲害。",
+              "coefficient": 1.2,
+              "effects": {
+                "honey": -5000,
+                "satisfaction": 2,
+                "reputation": -5
+              }
+            },
+            {
+              "id": "B",
+              "text": "不參加價格戰，貼上「手工製作，用料扎實」的告示。",
+              "feedback": "雖然人少了，但留下的顧客對小熊笑著說：「這就是我每天都想來的原因！」",
+              "coefficient": 1.0,
+              "effects": {
+                "honey": -500,
+                "satisfaction": 3,
+                "reputation": 4
+              }
+            },
+            {
+              "id": "C",
+              "text": "維持原價，站在店外熱情喊：「新鮮出爐，數量有限，先到先得！」",
+              "feedback": "幾位路過的顧客被小熊的活力吸引，笑著走進店裡。氣氛重新熱鬧起來。",
+              "coefficient": 1.2,
+              "effects": {
+                "honey": 0,
+                "satisfaction": 4,
+                "reputation": 3
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "title": "避免剩貨",
+        "economicSignal": {
+          "level": "藍燈",
+          "message": "今日景氣：🔵藍燈（低迷）",
+          "coefficientMessage": "市場低迷時需要更精準的庫存管理策略，避免不必要的損失。"
+        },
+        "story": {
+          "image": "assets/images/商業區/商業區 場景二（避免剩貨）.jpg",
+          "text": "午後的陽光有點慵懶，街上人潮稀少。小熊看著櫃檯上還有一堆麵包，心裡一陣發慌。\n「如果這些都賣不掉，今晚就只能丟掉了……」\n這時，一位媽媽帶著孩子進來。孩子盯著甜麵包撒嬌：「媽媽，我想要！」\n媽媽卻猶豫地說：「今天要省點錢，下次再買吧。」\n小熊聽到後更緊張了，他必須想辦法讓顧客願意多買一些。"
+        },
+        "event": {
+          "title": "避免剩貨",
+          "description": "小熊要如何避免剩貨？",
+          "marketingLesson": "促銷是吸引顧客的工具。\n● 折扣帶來人潮,但犧牲利潤。\n● 贈品能創造驚喜與情感連結。\n● 維持原價能守住價值,但要承擔庫存風險。",
+          "options": [
+            {
+              "id": "A",
+              "text": "推出「下午全面八折」。",
+              "feedback": "折扣消息傳開，顧客湧入店裡，麵包一袋袋被帶走。小熊雖然累壞了，但終於鬆了一口氣。",
+              "coefficient": 1.15,
+              "effects": {
+                "honey": -3000,
+                "satisfaction": 4,
+                "reputation": 2
+              }
+            },
+            {
+              "id": "B",
+              "text": "推出「滿額贈送環保袋」。",
+              "feedback": "顧客買了更多麵包來湊金額，孩子還抱著環保袋喊：「這是熊熊送的！」 店裡充滿笑聲。",
+              "coefficient": 1.1,
+              "effects": {
+                "honey": -1500,
+                "satisfaction": 5,
+                "reputation": 3
+              }
+            },
+            {
+              "id": "C",
+              "text": "維持原價，接受可能的剩貨。",
+              "feedback": "少數老顧客照常支持，但最後剩下的麵包只好被丟棄，小熊收店時有些心痛。",
+              "coefficient": 0.6,
+              "effects": {
+                "honey": 0,
+                "satisfaction": 1,
+                "reputation": -2
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 3,
+        "title": "滿足辦公族",
+        "economicSignal": {
+          "level": "綠燈",
+          "message": "今日景氣：🟢綠燈（平穩）",
+          "coefficientMessage": "平穩的市場環境適合開發新的客群，擴大經營範圍。"
+        },
+        "story": {
+          "image": "assets/images/商業區/商業區 場景三.jpg",
+          "text": "中午，一群西裝筆挺的上班族走進店裡。\n「今天下午部門開會，買些麵包當點心吧！」\n「一次多帶幾個好了！」\n小熊聽到後，靈光一閃：或許可以改變一下賣法，讓顧客買得更方便。"
+        },
+        "event": {
+          "title": "滿足辦公族",
+          "description": "小熊該怎麼滿足這些辦公族的需求？",
+          "marketingLesson": "產品不僅是「賣什麼」,還包括「怎麼賣」。銷售方式能影響顧客的便利感與購買量。",
+          "options": [
+            {
+              "id": "A",
+              "text": "推出「整袋販售」（例如一次 5 個裝）。",
+              "feedback": "顧客很高興能省事，結帳速度加快，銷售效率大增。",
+              "coefficient": 1.2,
+              "effects": {
+                "honey": -2000,
+                "satisfaction": 4,
+                "reputation": 2
+              }
+            },
+            {
+              "id": "B",
+              "text": "維持單個販售。",
+              "feedback": "雖然買的數量少一點，但銷售依然穩定。",
+              "coefficient": 0.8,
+              "effects": {
+                "honey": -1500,
+                "satisfaction": 2,
+                "reputation": 1
+              }
+            },
+            {
+              "id": "C",
+              "text": "提供「預訂隔日整袋取貨」。",
+              "feedback": "有些顧客樂意接受，今天銷售不算特別多，但未來庫存更好控管。",
+              "coefficient": 1.0,
+              "effects": {
+                "honey": -2000,
+                "satisfaction": 3,
+                "reputation": 2
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 4,
+        "title": "外送平台合作",
+        "economicSignal": {
+          "level": "紅燈",
+          "message": "今日景氣：🔴紅燈（熱絡）",
+          "coefficientMessage": "市場熱絡期是拓展新業務的好時機，外送服務能帶來更多商機。"
+        },
+        "story": {
+          "image": "assets/images/商業區/商業區 場景四.jpg",
+          "text": "正午，外送平台的業務走進來，笑著遞上一張名片：「小熊先生，如果合作，我們能把您的麵包送到每個家庭和辦公室！」\n小熊拿著名片，看著店裡忙碌的人潮，心裡掙扎：「如果加入外送，會有更多顧客吃到我的麵包，但……會不會失去那份親手交到顧客手上的溫暖呢？」"
+        },
+        "event": {
+          "title": "外送平台合作",
+          "description": "小熊要不要和外送平台合作？",
+          "marketingLesson": "通路策略是產品接觸顧客的橋樑。擴大通路能增加銷量，但也可能提高營運成本。找到線上與線下的平衡，是「多通路行銷（Omni-Channel Marketing）」的核心。",
+          "options": [
+            {
+              "id": "A",
+              "text": "全數商品加入平台。",
+              "feedback": "訂單量暴增，但平台抽成不少，小熊皺了皺眉。",
+              "coefficient": 1.0,
+              "effects": {
+                "honey": -3500,
+                "satisfaction": 4,
+                "reputation": 1
+              }
+            },
+            {
+              "id": "B",
+              "text": "拒絕，專注店面經營。",
+              "feedback": "顧客說：「我還是喜歡來店裡和小熊打招呼！」但銷量有限。",
+              "coefficient": 0.7,
+              "effects": {
+                "honey": 0,
+                "satisfaction": 2,
+                "reputation": 3
+              }
+            },
+            {
+              "id": "C",
+              "text": "挑幾款商品上架平台。",
+              "feedback": "外送帶來一些新顧客，同時保留現場的溫度感。",
+              "coefficient": 1.1,
+              "effects": {
+                "honey": -3000,
+                "satisfaction": 4,
+                "reputation": 4
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 5,
+        "title": "設備故障危機",
+        "economicSignal": {
+          "level": "藍燈",
+          "message": "今日景氣：🔵藍燈（低迷）",
+          "coefficientMessage": "市場低迷時遇到設備故障，需要快速且有效的解決方案。"
+        },
+        "story": {
+          "image": "assets/images/商業區/商業區 場景五.jpg",
+          "text": "午後，一位常客媽媽氣喘吁吁地走進店裡，手上拿著一袋核桃麵包。\n「小熊，這麵包今天吃起來怪怪的，是不是批發商送錯貨了？」\n小熊連忙查看，發現有幾袋麵包的外觀與氣味確實不太對。\n他皺著眉，心想：「要是這消息傳出去，爺爺留下的招牌可就完了……」\n但眼前的顧客正等著他的回應，他必須立刻做出決定。"
+        },
+        "event": {
+          "title": "設備故障危機",
+          "description": "面對疑似品質異常的產品，小熊該如何處理？",
+          "marketingLesson": "產品問題是品牌經營的關鍵考驗。透明公開與主動補救，不僅能挽回顧客信任，也能強化品牌形象。",
+          "options": [
+            {
+              "id": "A",
+              "text": "立即下架所有同批麵包並重新進貨。",
+              "feedback": "顧客對小熊主動負責的態度感到安心，紛紛表示願意再來購買。",
+              "coefficient": 1.0,
+              "effects": {
+                "honey": -4500,
+                "satisfaction": 5,
+                "reputation": 4
+              }
+            },
+            {
+              "id": "B",
+              "text": "與批發商聯繫確認後，再決定是否回收。",
+              "feedback": "你謹慎地暫緩處理，但有顧客在社群留言「小熊的麵包最近怪怪的」，造成短暫信任危機。",
+              "coefficient": 0.8,
+              "effects": {
+                "honey": -4000,
+                "satisfaction": -2,
+                "reputation": -1
+              }
+            },
+            {
+              "id": "C",
+              "text": "發公告說明狀況並提供退換。",
+              "feedback": "你在社群上發公告說明問題並道歉，提供退換服務。顧客稱讚你誠實負責，留言區充滿鼓勵。",
+              "coefficient": 1.3,
+              "effects": {
+                "honey": -6000,
+                "satisfaction": 6,
+                "reputation": 5
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 6,
+        "title": "社區活動贊助",
+        "economicSignal": {
+          "level": "綠燈",
+          "message": "今日景氣：🟢綠燈（平穩）",
+          "coefficientMessage": "平穩的市場環境適合進行社區活動，建立良好的品牌形象。"
+        },
+        "story": {
+          "image": "assets/images/商業區/商業區 場景六.jpg",
+          "text": "清晨，小熊收到一封社區活動邀請信。\n「誠摯邀請熊熊烘焙所贊助活動麵包，和大家一起分享幸福的味道！」\n小熊看著信封，心裡暖暖的：「如果爺爺還在，他一定會很樂意分享吧……」\n但想到今天的收益，他又有些猶豫。"
+        },
+        "event": {
+          "title": "社區活動贊助",
+          "description": "小熊要不要參與活動贊助？",
+          "marketingLesson": "推廣的價值在於「曝光」。短期未必賺錢,但能讓更多人認識品牌。",
+          "options": [
+            {
+              "id": "A",
+              "text": "贊助大量麵包。",
+              "feedback": "活動現場人手一份麵包，大家拍照上傳社群，小熊成了話題人物。",
+              "coefficient": 1.1,
+              "effects": {
+                "honey": -3500,
+                "satisfaction": 6,
+                "reputation": 5
+              }
+            },
+            {
+              "id": "B",
+              "text": "贊助少量試吃。",
+              "feedback": "孩子們吃得開心，家長說：「下次要帶孩子來買！」",
+              "coefficient": 1.0,
+              "effects": {
+                "honey": -3000,
+                "satisfaction": 4,
+                "reputation": 3
+              }
+            },
+            {
+              "id": "C",
+              "text": "婉拒邀請。",
+              "feedback": "店裡照常營業，但錯過了曝光機會。",
+              "coefficient": 0.8,
+              "effects": {
+                "honey": 0,
+                "satisfaction": 1,
+                "reputation": -2
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 7,
+        "title": "改善結帳動線",
+        "economicSignal": {
+          "level": "紅燈",
+          "message": "今日景氣：🔴紅燈（熱絡)",
+          "coefficientMessage": "市場熱絡期需要提升服務效率，改善顧客體驗能帶來更多回頭客。"
+        },
+        "story": {
+          "image": "assets/images/商業區/商業區 場景七.jpg",
+          "text": "週末的住宅區人潮洶湧，熊熊烘焙所門口排起長隊。\n小熊看著顧客有的耐心等待，有的卻焦躁不安，心裡七上八下：「要是他們等太久跑掉了怎麼辦？」\n他回想起爺爺的叮嚀：「顧客的時間，也是麵包店的一部分。」"
+        },
+        "event": {
+          "title": "改善結帳動線",
+          "description": "小熊要如何改善結帳動線？",
+          "marketingLesson": "產品不只是「商品本身」，還包括購買體驗。改善流程能提升顧客滿意度，這是「顧客體驗管理（Customer Experience Management）」的重要實踐。",
+          "options": [
+            {
+              "id": "A",
+              "text": "增聘臨時工。",
+              "feedback": "排隊速度加快，顧客笑著滿意離開。",
+              "coefficient": 1.1,
+              "effects": {
+                "honey": -4000,
+                "satisfaction": 5,
+                "reputation": 3
+              }
+            },
+            {
+              "id": "B",
+              "text": "維持原有員工。",
+              "feedback": "部分顧客耐心等候，也有人轉身離開。",
+              "coefficient": 0.7,
+              "effects": {
+                "honey": 0,
+                "satisfaction": 1,
+                "reputation": -1
+              }
+            },
+            {
+              "id": "C",
+              "text": "設立「現金快速結帳櫃台」。",
+              "feedback": "結帳效率提升，顧客開心說：「這樣好多了！」",
+              "coefficient": 1.0,
+              "effects": {
+                "honey": -3000,
+                "satisfaction": 4,
+                "reputation": 2
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "學區": [
+      {
+        "id": 1,
+        "title": "運動會",
+        "economicSignal": {
+          "level": "綠燈",
+          "message": "今日景氣：🟢 綠燈（市場平穩）",
+          "coefficientMessage": "每個選項會有相對應的係數會影響銷售量以及需要付出的銷貨成本，請玩家做好選擇。"
+        },
+        "story": {
+          "image": "assets/images/學區/[場景一：運動會].jpg",
+          "text": "上午，你經過學校附近，看到學生們正忙著搭帳棚準備運動會。\n幾位老師談笑著說：「要是能在場邊買到小熊的麵包就好了，孩子比完賽能補充能量。」\n你心裡一動，這或許是個推廣的好時機，但也得考慮成本與人手..."
+        },
+        "event": {
+          "title": "運動會",
+          "description": "小熊要不要參與校園活動？",
+          "marketingLesson": "這就是 接觸點管理（Touchpoint Management） 的應用。消費者會在哪裡出現，品牌就要在哪裡提供價值。校園活動就是一個臨時但重要的接觸點。",
+          "options": [
+            {
+              "id": "A",
+              "text": "設置臨時攤位（校園外）",
+              "feedback": "小熊帶著攤車在學校門口擺攤，學生們一場比賽後蜂擁而至，家長也順手購買，場面熱鬧。老師們稱讚：「小熊很懂學生的需求！」",
+              "coefficient": 1.2,
+              "effects": {
+                "honey": -3500,
+                "satisfaction": 6,
+                "reputation": 3
+              }
+            },
+            {
+              "id": "B",
+              "text": "提供「運動能量包」給參賽者",
+              "feedback": "學生們賽後拿到麵包能量補給，覺得窩心，校方在廣播上還特別感謝小熊，聲譽提升。",
+              "coefficient": 1.0,
+              "effects": {
+                "honey": -2500,
+                "satisfaction": 4,
+                "reputation": 4
+              }
+            },
+            {
+              "id": "C",
+              "text": "維持店內販售",
+              "feedback": "活動現場人潮集中在校園，小熊的店面反而冷清，只有少數常客光顧。",
+              "coefficient": 0.6,
+              "effects": {
+                "honey": 0,
+                "satisfaction": -1,
+                "reputation": 0
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "title": "考前衝刺",
+        "economicSignal": {
+          "level": "紅燈",
+          "message": "今日景氣：🔴 紅燈（市場熱絡）",
+          "coefficientMessage": "市場熱絡期是推出新產品的好時機，針對特定客群設計產品能帶來商機。"
+        },
+        "story": {
+          "image": "assets/images/學區/[場景二：考前衝刺].jpg",
+          "text": "期中考前夕，補習班外燈火通明，學生人手一杯咖啡與零食。\n家長感嘆：「唉，要是有健康的點心就好了，不然孩子熬夜都靠糖分硬撐。」\n小熊想到：「如果能推出專門的『考生麵包』，或許能打動家長。」"
+        },
+        "event": {
+          "title": "考前衝刺",
+          "description": "小熊該如何設計產品？",
+          "marketingLesson": "這就是 差異化策略（Differentiation Strategy）。針對特定族群（考生）推出專屬產品，可以讓顧客感受到獨特價值。",
+          "options": [
+            {
+              "id": "A",
+              "text": "推出「考生能量麵包」",
+              "feedback": "學生們覺得很貼心，家長也紛紛購買，覺得小熊懂需求。考前一週銷量大增。",
+              "coefficient": 1.2,
+              "effects": {
+                "honey": -3000,
+                "satisfaction": 6,
+                "reputation": 3
+              }
+            },
+            {
+              "id": "B",
+              "text": "搭配「夜讀套餐」飲品組合",
+              "feedback": "補習班學生一邊啃麵包一邊溫習，覺得超方便。小熊的店成為考生夜讀的補給站。",
+              "coefficient": 1.0,
+              "effects": {
+                "honey": -3500,
+                "satisfaction": 5,
+                "reputation": 2
+              }
+            },
+            {
+              "id": "C",
+              "text": "維持原有品項",
+              "feedback": "學生依舊去便利商店買零食，家長覺得小熊缺乏創意，需求被別人搶走。",
+              "coefficient": 0.5,
+              "effects": {
+                "honey": 0,
+                "satisfaction": -2,
+                "reputation": 0
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 3,
+        "title": "雨天生意",
+        "economicSignal": {
+          "level": "藍燈",
+          "message": "今日景氣：🔵 藍燈（市場低迷）",
+          "coefficientMessage": "市場低迷時需要創新服務模式，外送服務能開拓新的客源。"
+        },
+        "story": {
+          "image": "assets/images/學區/[場景三：雨天生意].jpg",
+          "text": "下午天空烏雲密布，突然下起大雨。\n放學學生匆匆跑回家，路過店門口卻沒停下。\n小熊心想：「要是能讓學生在雨天也方便買到麵包就好了…」"
+        },
+        "event": {
+          "title": "雨天生意",
+          "description": "小熊是否該提供外送？",
+          "marketingLesson": "這是 最後一哩配送（Last Mile Delivery） 的典型問題。產品能否方便送達顧客，直接影響購買意願。",
+          "options": [
+            {
+              "id": "A",
+              "text": "與外送平台合作",
+              "feedback": "雨天仍有訂單送出，顧客大讚便利，小熊的品牌在社群被討論。",
+              "coefficient": 1.2,
+              "effects": {
+                "honey": -4000,
+                "satisfaction": 5,
+                "reputation": 3
+              }
+            },
+            {
+              "id": "B",
+              "text": "自行安排學區限定小範圍外送",
+              "feedback": "僅部分顧客能享受到便利，但已有人稱讚小熊「貼心」，口碑慢慢傳開。",
+              "coefficient": 1.0,
+              "effects": {
+                "honey": -3500 ,
+                "satisfaction": 3,
+                "reputation": 0
+              }
+            },
+            {
+              "id": "C",
+              "text": "不提供外送",
+              "feedback": "雨天人潮銳減，庫存麵包滯銷，小熊心裡暗暗嘆氣。",
+              "coefficient": 0.4,
+              "effects": {
+                "honey": 0,
+                "satisfaction": -2,
+                "reputation": 0
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 4,
+        "title": "社團活動",
+        "economicSignal": {
+          "level": "綠燈",
+          "message": "今日景氣：🟢 綠燈（市場平穩）",
+          "coefficientMessage": "平穩的市場環境適合進行校園合作，建立長期品牌關係。"
+        },
+        "story": {
+          "image": "assets/images/學區/[場景四：社團活動].jpg",
+          "text": "學校一年一度的社團週熱鬧展開，操場上搭滿了各種攤位...\n一位社團老師看著孩子們大汗淋漓地練習，笑著對小熊說：「如果能和你合作，孩子們在排練之餘就能吃到新鮮麵包，活動也會更有氣氛呢！」"
+        },
+        "event": {
+          "title": "社團活動",
+          "description": "小熊要不要贊助社團活動？",
+          "marketingLesson": "這是 口碑行銷（Word of Mouth Marketing, WOM） 的最佳場景。學生的分享比任何廣告更有力量。",
+          "options": [
+            {
+              "id": "A",
+              "text": "提供免費試吃攤位",
+              "feedback": "學生們邊試吃邊拍照打卡，貼滿社群，品牌迅速擴散。",
+              "coefficient": 1.2,
+              "effects": {
+                "honey": -3500,
+                "satisfaction": 5,
+                "reputation": 5
+              }
+            },
+            {
+              "id": "B",
+              "text": "贊助比賽冠軍麵包禮盒",
+              "feedback": "優勝隊伍開心領獎，新聞稿還特別提到小熊麵包，聲譽提升。",
+              "coefficient": 1.0,
+              "effects": {
+                "honey": -2800,
+                "satisfaction": 3,
+                "reputation": 4
+              }
+            },
+            {
+              "id": "C",
+              "text": "不參與",
+              "feedback": "其他廠商搶下贊助機會，學生們只記得競爭對手的品牌。",
+              "coefficient": 0.6,
+              "effects": {
+                "honey": 0,
+                "satisfaction": -1,
+                "reputation": -1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 5,
+        "title": "家長日",
+        "economicSignal": {
+          "level": "紅燈",
+          "message": "今日景氣：🔴 紅燈（市場熱絡）",
+          "coefficientMessage": "市場熱絡期是接觸家長客群的好時機，適當的定價策略能帶來長期收益。"
+        },
+        "story": {
+          "image": "assets/images/學區/[場景五：家長日].jpg",
+          "text": "今天是一年一度的學校家長日...小熊心裡一動：「這可是個好機會，如果推出優惠活動，不僅能吸引家長們當場購買，還能提升品牌好感度。\n可……優惠太多的話，會不會壓縮利潤呢？」"
+        },
+        "event": {
+          "title": "家長日",
+          "description": "小熊該如何定價？",
+          "marketingLesson": "這是心理定價（Psychological Pricing）的應用。顧客往往不只看價格，更在意是否「感覺划算」。",
+          "options": [
+            {
+              "id": "A",
+              "text": "推出「親子套餐」組合價",
+              "feedback": "家長覺得實惠又有心意，孩子開心分享，小熊的品牌加分不少。",
+              "coefficient": 1.2,
+              "effects": {
+                "honey": -4000,
+                "satisfaction": 6,
+                "reputation": 2
+              }
+            },
+            {
+              "id": "B",
+              "text": "限時折扣 10%",
+              "feedback": "人潮湧入，但不少人開始期待「小熊是不是會常打折」。",
+              "coefficient": 1.0,
+              "effects": {
+                "honey": -3800,
+                "satisfaction": 4,
+                "reputation": -1
+              }
+            },
+            {
+              "id": "C",
+              "text": "維持原價",
+              "feedback": "銷售平穩，但缺少吸引力，錯過了家長消費力的高峰。",
+              "coefficient": 0.8,
+              "effects": {
+                "honey": 0,
+                "satisfaction": -2,
+                "reputation": -2
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 6,
+        "title": "天氣衝擊",
+        "economicSignal": {
+          "level": "紅燈",
+          "message": "今日景氣：🔴紅燈（市場熱絡）",
+          "coefficientMessage": "市場熱絡期遇到天氣變化，需要靈活應變策略來減少損失。"
+        },
+        "story": {
+          "image": "assets/images/學區/[場景六：天氣衝擊].jpg",
+          "text": "午後，學校運動會正要舉行，卻突然烏雲密布，傾盆大雨打亂了活動安排...\n小熊望著準備好的麵包，焦急思索：要怎麼應變，才能避免大量滯銷？"
+        },
+        "event": {
+          "title": "天氣衝擊",
+          "description": "小熊該如何處理這場突如其來的天氣危機？",
+          "marketingLesson": "這就是 產品生命週期（Product Life Cycle, PLC） 的提醒。消費者需求在變，產品也必須不斷更新。",
+          "options": [
+            {
+              "id": "A",
+              "text": "立刻轉向禮堂內擺攤",
+              "feedback": "學生和家長立刻排隊，氣氛反而更熱絡。",
+              "coefficient": 1.2,
+              "effects": {
+                "honey": -3500,
+                "satisfaction": 5,
+                "reputation": 4
+              }
+            },
+            {
+              "id": "B",
+              "text": "宣布「買二送一」雨天優惠",
+              "feedback": "學生爭相購買，雖然單價下降，但大量出清存貨。",
+              "coefficient": 1.0,
+              "effects": {
+                "honey": -3000,
+                "satisfaction": 4,
+                "reputation": 3
+              }
+            },
+            {
+              "id": "C",
+              "text": "暫停販售，等雨停再出攤",
+              "feedback": "學生錯過點心時間，很多人乾脆去買零食，麵包滯銷。",
+              "coefficient": 0.3,
+              "effects": {
+                "honey": 0,
+                "satisfaction": -2,
+                "reputation": -3
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 7,
+        "title": "疫情影響",
+        "economicSignal": {
+          "level": "藍燈",
+          "message": "今日景氣：🔵藍燈（市場低迷）",
+          "coefficientMessage": "市場低迷期遇到突發事件，需要快速調整策略來應對危機。"
+        },
+        "story": {
+          "image": "assets/images/學區/[場景七：疫情影響].jpg",
+          "text": "下午，學校突然廣播：「因為校內傳出流感疫情，從明天開始暫停課程一週。」\n家長群組立刻傳開消息...小熊站在店門口，看著剛剛才送來的大批麵包，心裡一沉。"
+        },
+        "event": {
+          "title": "疫情影響",
+          "description": "小熊該如何因應疫情帶來的銷售衝擊？",
+          "marketingLesson": "這是 競爭定位（Competitive Positioning） 的挑戰。當市場出現強勢競爭者，品牌必須快速找到自己的差異化價值。",
+          "options": [
+            {
+              "id": "A",
+              "text": "與外送平台合作，把麵包送到學生家裡",
+              "feedback": "家長們很高興不用出門也能買到新鮮麵包，孩子們在家也能繼續享受。",
+              "coefficient": 1.2,
+              "effects": {
+                "honey": -4800,
+                "satisfaction": 5,
+                "reputation": 4
+              }
+            },
+            {
+              "id": "B",
+              "text": "推出「家庭分享組合」優惠",
+              "feedback": "不少家長趁孩子在家訂購大份量套餐，雖然利潤降低，但銷量暫時穩住。",
+              "coefficient": 1.0,
+              "effects": {
+                "honey": -3600,
+                "satisfaction": 3,
+                "reputation": 0
+              }
+            },
+            {
+              "id": "C",
+              "text": "暫時縮減營業，少量出爐",
+              "feedback": "雖然浪費減少，但品牌存在感下降，學生與家長開始轉向便利商店購買。",
+              "coefficient": 0.5,
+              "effects": {
+                "honey": 0,
+                "satisfaction": -2,
+                "reputation": -3
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

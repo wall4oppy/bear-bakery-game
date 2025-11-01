@@ -1,0 +1,238 @@
+/* 底部導航 */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 414px;
+    background: white;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 0;
+    z-index: 1000;
+    overflow-x: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+.bottom-nav::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.nav-item {
+    flex: 1;
+    min-width: 50px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 6px 4px;
+    border-radius: 8px;
+}
+
+.nav-item.active {
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.nav-item:hover {
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.nav-icon {
+    font-size: 18px;
+    margin-bottom: 3px;
+}
+
+.nav-label {
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+    .container {
+        max-width: 100%;
+    }
+    
+    .header {
+        border-radius: 0 0 20px 20px;
+    }
+    
+    .card {
+        margin: 10px;
+        border-radius: 15px;
+    }
+    
+    .comparison-container {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .achievements-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .recipe-nutrients {
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    
+    .user-info {
+        gap: 8px;
+    }
+    
+    .welcome-text {
+        font-size: 20px;
+    }
+    
+    /* 小螢幕導覽列優化 */
+    .nav-item {
+        min-width: 45px;
+        padding: 4px 2px;
+    }
+    
+    .nav-icon {
+        font-size: 16px;
+        margin-bottom: 2px;
+    }
+    
+    .nav-label {
+        font-size: 9px;
+    }
+}
+
+@media (max-width: 360px) {
+    .main-content {
+        padding: 15px;
+    }
+    
+    .card {
+        padding: 15px;
+        margin: 8px;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        font-size: 13px;
+    }
+    
+    .checkin-days {
+        font-size: 28px;
+    }
+    
+    .flow-percentage {
+        font-size: 20px;
+    }
+    
+    /* 超小螢幕導覽列優化 */
+    .nav-item {
+        min-width: 40px;
+        padding: 3px 1px;
+    }
+    
+    .nav-icon {
+        font-size: 14px;
+        margin-bottom: 1px;
+    }
+    
+    .nav-label {
+        font-size: 8px;
+    }
+}
+
+/* 平板響應式 */
+@media (min-width: 768px) {
+    .container {
+        max-width: 768px;
+    }
+    
+    .main-content {
+        padding: 30px;
+    }
+    
+    .achievements-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .comparison-container {
+        gap: 30px;
+    }
+    
+    .card {
+        padding: 30px;
+    }
+    
+    /* 平板導覽列優化 */
+    .nav-item {
+        min-width: 60px;
+        padding: 8px 6px;
+    }
+    
+    .nav-icon {
+        font-size: 20px;
+        margin-bottom: 4px;
+    }
+    
+    .nav-label {
+        font-size: 11px;
+    }
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    }
+    
+    .container {
+        background: #1a1a1a;
+        color: #fff;
+    }
+    
+    .card {
+        background: #2d2d2d;
+        border-color: rgba(255,255,255,0.1);
+        color: #fff;
+    }
+    
+    .task-checkbox {
+        border-color: #555;
+    }
+    
+    .achievement-badge {
+        background: #2d2d2d;
+        border-color: #555;
+        color: #fff;
+    }
+    
+    .btn-secondary {
+        background: #444;
+        color: #fff;
+    }
+    
+    .btn-secondary:hover {
+        background: #555;
+    }
+    
+    .bottom-nav {
+        background: #2d2d2d;
+        border-top-color: #555;
+    }
+    
+    .nav-item:hover {
+        background: #3d3d3d;
+    }
+    
+    .nav-item.active {
+        background: rgba(102, 126, 234, 0.2);
+    }
+    
+    .offline-banner {
+        background: #e74c3c;
+    }
+} 

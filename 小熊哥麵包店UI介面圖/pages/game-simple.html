@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小熊哥麵包店 - 像素風行銷教育遊戲</title>
+    <link rel="stylesheet" href="../styles/styles.css">
+</head>
+<body>
+    <!-- 頂部導航欄 -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <div class="logo">🍞 小熊哥麵包店</div>
+            <div class="nav-menu" id="nav-menu">
+                <button class="nav-btn active" data-section="profile">玩家資料</button>
+                <button class="nav-btn" data-section="inventory">進貨系統</button>
+                <button class="nav-btn" data-section="game">遊戲模式</button>
+                <button class="nav-btn" data-section="reports">銷售報表</button>
+                <button class="nav-btn" data-section="settings">設定</button>
+                <button class="nav-btn logout-btn" id="logout-btn">🏠 返回首頁</button>
+            </div>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要內容區域 -->
+    <main id="main-content">
+        <!-- 1. 玩家資料 -->
+        <section id="profile" class="section active">
+            <div class="container">
+                <div class="profile-box">
+                    <h2>玩家資料</h2>
+                    <div class="profile-content">
+                        <div class="avatar-section">
+                            <div class="avatar" id="playerAvatar">🧑‍🍳</div>
+                            <button class="pixel-btn small" onclick="changeAvatar()">更換頭像</button>
+                        </div>
+                        <div class="player-info">
+                            <div class="info-item">
+                                <label>玩家名稱：</label>
+                                <span id="playerName">小熊哥</span>
+                                <button class="pixel-btn small" onclick="changeName()">變更名稱</button>
+                            </div>
+                            <div class="info-item">
+                                <label>等級：</label>
+                                <span id="playerLevel">1</span>
+                            </div>
+                            <div class="info-item">
+                                <label>遊戲幣：</label>
+                                <span id="playerCoins">1000</span> 💰
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 進貨/庫存系統 -->
+        <section id="inventory" class="section">
+            <div class="container">
+                <h2>進貨／庫存系統</h2>
+                <div class="inventory-grid">
+                    <div class="bread-item">
+                        <div class="bread-icon">🍞</div>
+                        <h3>白吐司</h3>
+                        <p>庫存：<span id="bread1-stock">10</span></p>
+                        <div class="purchase-controls">
+                            <input type="number" id="bread1-qty" value="1" min="1">
+                            <button class="pixel-btn small" onclick="purchaseBread('bread1', 50)">進貨 ($50)</button>
+                        </div>
+                    </div>
+                    <div class="bread-item">
+                        <div class="bread-icon">🥖</div>
+                        <h3>法式麵包</h3>
+                        <p>庫存：<span id="bread2-stock">5</span></p>
+                        <div class="purchase-controls">
+                            <input type="number" id="bread2-qty" value="1" min="1">
+                            <button class="pixel-btn small" onclick="purchaseBread('bread2', 80)">進貨 ($80)</button>
+                        </div>
+                    </div>
+                    <div class="bread-item">
+                        <div class="bread-icon">🥐</div>
+                        <h3>可頌</h3>
+                        <p>庫存：<span id="bread3-stock">8</span></p>
+                        <div class="purchase-controls">
+                            <input type="number" id="bread3-qty" value="1" min="1">
+                            <button class="pixel-btn small" onclick="purchaseBread('bread3', 120)">進貨 ($120)</button>
+                        </div>
+                    </div>
+                    <div class="bread-item">
+                        <div class="bread-icon">🧁</div>
+                        <h3>杯子蛋糕</h3>
+                        <p>庫存：<span id="bread4-stock">15</span></p>
+                        <div class="purchase-controls">
+                            <input type="number" id="bread4-qty" value="1" min="1">
+                            <button class="pixel-btn small" onclick="purchaseBread('bread4', 30)">進貨 ($30)</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. 主要遊戲介面 -->
+        <section id="game" class="section">
+            <div class="container">
+                <div class="game-box">
+                    <div id="story-section" class="game-content active">
+                        <h2>行銷教育劇情</h2>
+                        <div class="story-content">
+                            <div class="story-page active" id="story-1">
+                                <h3>第一章：開店準備</h3>
+                                <p>小熊哥決定開一家麵包店，但他發現光會做麵包還不夠，還需要學會如何行銷...</p>
+                            </div>
+                            <div class="story-page" id="story-2" style="display: none;">
+                                <h3>第二章：認識客群</h3>
+                                <p>不同的客人有不同的需求，了解目標客群是成功行銷的第一步...</p>
+                            </div>
+                            <div class="story-page" id="story-3" style="display: none;">
+                                <h3>第三章：定價策略</h3>
+                                <p>如何為麵包定價？太高會沒人買，太低又賺不到錢...</p>
+                            </div>
+                            <div class="story-page" id="story-4" style="display: none;">
+                                <h3>第四章：宣傳推廣</h3>
+                                <p>好的產品也需要好的宣傳，讓更多人知道小熊哥的麵包店...</p>
+                            </div>
+                        </div>
+                        <div class="story-controls">
+                            <button class="pixel-btn" onclick="previousStory()" id="prev-story">上一頁</button>
+                            <span id="story-progress">1 / 4</span>
+                            <button class="pixel-btn" onclick="nextStory()" id="next-story">下一頁</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. 銷售報表 -->
+        <section id="reports" class="section">
+            <div class="container">
+                <h2>銷售報表</h2>
+                <div class="report-content">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>總收入</h3>
+                            <div class="stat-value" id="total-income">$2,500</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>總支出</h3>
+                            <div class="stat-value" id="total-expense">$1,200</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>淨利潤</h3>
+                            <div class="stat-value profit" id="net-profit">$1,300</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. 設定頁面 -->
+        <section id="settings" class="section">
+            <div class="container">
+                <h2>遊戲設定</h2>
+                <div class="settings-content">
+                    <div class="setting-group">
+                        <h3>音訊設定</h3>
+                        <div class="setting-item">
+                            <label for="music-volume">音樂音量</label>
+                            <input type="range" id="music-volume" min="0" max="100" value="50">
+                            <span id="music-value">50%</span>
+                        </div>
+                        <div class="setting-item">
+                            <label for="sound-effects">點擊音效</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="sound-effects" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <h3>顯示設定</h3>
+                        <div class="setting-item">
+                            <label for="brightness">畫面明亮度</label>
+                            <input type="range" id="brightness" min="30" max="150" value="100">
+                            <span id="brightness-value">100%</span>
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <h3>遊戲設定</h3>
+                        <button class="pixel-btn secondary" onclick="resetProgress()">重置遊戲進度</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // 簡化的遊戲狀態管理
+        let gameState = {
+            currentSection: 'profile',
+            isLoggedIn: false,
+            isGuestMode: false,
+            playerData: {
+                name: '小熊哥',
+                avatar: '🧑‍🍳',
+                level: 1,
+                coins: 1000
+            },
+            inventory: {
+                bread1: 10,
+                bread2: 5,
+                bread3: 8,
+                bread4: 15
+            },
+            currentStory: 1
+        };
+
+        // 載入遊戲狀態
+        function loadGameState() {
+            try {
+                const savedData = localStorage.getItem('bearBakeryGameState');
+                if (savedData) {
+                    const parsedData = JSON.parse(savedData);
+                    gameState = { ...gameState, ...parsedData };
+                }
+            } catch (error) {
+                console.error('載入遊戲狀態失敗:', error);
+            }
+        }
+
+        // 保存遊戲狀態
+        function saveGameState() {
+            try {
+                localStorage.setItem('bearBakeryGameState', JSON.stringify(gameState));
+            } catch (error) {
+                console.error('保存遊戲狀態失敗:', error);
+            }
+        }
+
+        // 顯示指定區段
+        function showSection(sectionId) {
+            // 隱藏所有區段
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // 顯示目標區段
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+                gameState.currentSection = sectionId;
+                saveGameState();
+            }
+
+            // 更新導航按鈕狀態
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.section === sectionId) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        // 更新玩家資訊顯示
+        function updatePlayerInfo() {
+            document.getElementById('playerName').textContent = gameState.playerData.name || '小熊哥';
+            document.getElementById('playerAvatar').textContent = gameState.playerData.avatar || '🧑‍🍳';
+            document.getElementById('playerLevel').textContent = gameState.playerData.level || 1;
+            document.getElementById('playerCoins').textContent = gameState.playerData.coins || 1000;
+        }
+
+        // 更新庫存顯示
+        function updateInventoryDisplay() {
+            Object.keys(gameState.inventory).forEach(breadType => {
+                const stockElement = document.getElementById(`${breadType}-stock`);
+                if (stockElement) {
+                    stockElement.textContent = gameState.inventory[breadType];
+                }
+            });
+        }
+
+        // 玩家功能
+        function changeName() {
+            const newName = prompt('請輸入新的玩家名稱：', gameState.playerData.name);
+            if (newName && newName.trim()) {
+                gameState.playerData.name = newName.trim();
+                updatePlayerInfo();
+                saveGameState();
+                alert('名稱已更新！');
+            }
+        }
+
+        function changeAvatar() {
+            const avatars = ['🧑‍🍳', '👨‍🍳', '👩‍🍳', '🧑‍💼', '👨‍💼', '👩‍💼', '🧑', '👨', '👩', '👤'];
+            const currentIndex = avatars.indexOf(gameState.playerData.avatar);
+            const nextIndex = (currentIndex + 1) % avatars.length;
+            
+            gameState.playerData.avatar = avatars[nextIndex];
+            updatePlayerInfo();
+            saveGameState();
+        }
+
+        // 進貨功能
+        function purchaseBread(breadType, cost) {
+            const qtyInput = document.getElementById(`${breadType}-qty`);
+            const quantity = parseInt(qtyInput.value) || 1;
+            const totalCost = cost * quantity;
+
+            if (gameState.playerData.coins >= totalCost) {
+                gameState.playerData.coins -= totalCost;
+                gameState.inventory[breadType] += quantity;
+                
+                updatePlayerInfo();
+                updateInventoryDisplay();
+                saveGameState();
+                
+                alert(`成功進貨 ${quantity} 個！花費 $${totalCost}`);
+            } else {
+                alert('遊戲幣不足！');
+            }
+        }
+
+        // 劇情功能
+        function previousStory() {
+            if (gameState.currentStory > 1) {
+                gameState.currentStory--;
+                updateStoryDisplay();
+                saveGameState();
+            }
+        }
+
+        function nextStory() {
+            if (gameState.currentStory < 4) {
+                gameState.currentStory++;
+                updateStoryDisplay();
+                saveGameState();
+            }
+        }
+
+        function updateStoryDisplay() {
+            // 隱藏所有故事頁面
+            document.querySelectorAll('.story-page').forEach(page => {
+                page.style.display = 'none';
+                page.classList.remove('active');
+            });
+
+            // 顯示當前故事
+            const currentPage = document.getElementById(`story-${gameState.currentStory}`);
+            if (currentPage) {
+                currentPage.style.display = 'block';
+                currentPage.classList.add('active');
+            }
+
+            // 更新進度顯示
+            document.getElementById('story-progress').textContent = `${gameState.currentStory} / 4`;
+        }
+
+        // 設定功能
+        function resetProgress() {
+            if (confirm('確定要重置所有遊戲進度嗎？此操作無法復原！')) {
+                localStorage.removeItem('bearBakeryGameState');
+                location.reload();
+            }
+        }
+
+        // 返回首頁
+        function goHome() {
+            if (gameState.isGuestMode) {
+                window.location.href = './index.html';
+            } else {
+                if (confirm('確定要返回首頁嗎？')) {
+                    window.location.href = './index.html';
+                }
+            }
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🍞 精簡版遊戲載入中...');
+            
+            // 載入遊戲狀態
+            loadGameState();
+            
+            // 檢查登入狀態
+            if (!gameState.isLoggedIn) {
+                gameState.isGuestMode = true;
+                gameState.playerData.name = '訪客玩家';
+                gameState.playerData.avatar = '👤';
+            }
+
+            // 更新UI
+            updatePlayerInfo();
+            updateInventoryDisplay();
+            updateStoryDisplay();
+
+            // 設定事件監聽器
+            document.querySelectorAll('.nav-btn:not(.logout-btn)').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const section = this.dataset.section;
+                    if (section) {
+                        showSection(section);
+                    }
+                });
+            });
+
+            // 返回按鈕
+            document.getElementById('logout-btn').addEventListener('click', goHome);
+
+            // 漢堡選單
+            document.getElementById('hamburger').addEventListener('click', function() {
+                document.getElementById('nav-menu').classList.toggle('active');
+                this.classList.toggle('active');
+            });
+
+            // 設定滑桿事件
+            const brightnessSlider = document.getElementById('brightness');
+            const brightnessValue = document.getElementById('brightness-value');
+            brightnessSlider.addEventListener('input', function() {
+                const value = this.value;
+                brightnessValue.textContent = value + '%';
+                document.body.style.filter = `brightness(${value/100})`;
+            });
+
+            const musicSlider = document.getElementById('music-volume');
+            const musicValue = document.getElementById('music-value');
+            musicSlider.addEventListener('input', function() {
+                musicValue.textContent = this.value + '%';
+            });
+
+            console.log('✅ 精簡版遊戲載入完成！');
+            console.log('登入狀態:', gameState.isLoggedIn);
+            console.log('訪客模式:', gameState.isGuestMode);
+            console.log('玩家名稱:', gameState.playerData.name);
+        });
+    </script>
+</body>
+</html> 

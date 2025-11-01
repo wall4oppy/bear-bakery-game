@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小熊哥麵包店 - 像素風行銷教育遊戲（測試版）</title>
+
+    <link rel="stylesheet" href="../styles/styles.css">
+</head>
+<body>
+    <!-- 頂部導航欄 -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <div class="logo">🍞 小熊哥麵包店</div>
+            <div class="nav-menu" id="nav-menu">
+                <button class="nav-btn" data-section="profile">玩家資料</button>
+                <button class="nav-btn" data-section="inventory">進貨系統</button>
+                <button class="nav-btn" data-section="game">遊戲模式</button>
+                <button class="nav-btn" data-section="reports">銷售報表</button>
+                <button class="nav-btn" data-section="settings">設定</button>
+                <button class="nav-btn logout-btn" id="logout-btn">🚪 登出</button>
+            </div>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要內容區域 -->
+    <main id="main-content">
+        <!-- 主要遊戲介面 -->
+        <section id="game" class="section active">
+            <div class="container">
+                <div class="game-box">
+                    <h2 style="text-align: center; color: #a0522d; margin-bottom: 30px;">🎮 遊戲介面測試</h2>
+                    
+                    <!-- 劇情段落 -->
+                    <div id="story-section" class="game-content active">
+                        <h2>行銷教育劇情</h2>
+                        <div class="story-content">
+                            <div class="story-page active" id="story-1">
+                                <h3>第一章：開店準備</h3>
+                                <p>小熊哥決定開一家麵包店，但他發現光會做麵包還不夠，還需要學會如何行銷...</p>
+                            </div>
+                        </div>
+                        <div class="story-controls">
+                            <button class="pixel-btn">上一頁</button>
+                            <span id="story-progress">1 / 4</span>
+                            <button class="pixel-btn">下一頁</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        console.log('🍞 測試版本載入！無主JavaScript干擾');
+        console.log('如果能看到這個頁面，表示HTML+CSS都正常');
+    </script>
+</body>
+</html> 

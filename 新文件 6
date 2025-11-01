@@ -1,0 +1,41 @@
+import java.util.Scanner;
+public class Main {
+
+    public static void main(String[] args) {
+        // 星期陣列 (0 = Monday)
+        String[] dayNames = {
+            "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+        };
+
+        // 2011年 (非閏年) 每個月的「末日」參照日期 (索引 1 對應 1 月)
+        int[] doomsdayAnchors = {
+            0, 10, 21, 7, 4, 9, 6, 11, 8, 5, 10, 7, 12
+        };
+
+        Scanner scanner = new Scanner(System.in);
+
+        // 讀取測試案例的數量
+        int numTestCases = scanner.nextInt();
+
+        for (int i = 0; i < numTestCases; i++) {
+            
+            // 修正 2: UVa 的輸入格式是標準的, 直接用 nextInt() 讀取 M 和 D
+            int M = scanner.nextInt();
+            int D = scanner.nextInt();
+
+            // 取得該月的參照日期 (星期一)
+            int anchorDay = doomsdayAnchors[M];
+
+            // 計算天數差
+            int dayDiff = D - anchorDay;
+            
+            // 計算星期的索引 (確保結果恆為正數)
+            int dayIndex = ((dayDiff % 7) + 7) % 7;
+
+            // 輸出結果
+            System.out.println(dayNames[dayIndex]);
+        }
+
+        scanner.close();
+    }
+}

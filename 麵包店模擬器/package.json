@@ -1,0 +1,51 @@
+{
+  "name": "bakery-simulator",
+  "displayName": "麵包店模擬器",
+  "version": "1.0.0",
+  "unity": "2022.3",
+  "description": "一款寫實的麵包店經營模擬遊戲",
+  "keywords": [
+    "simulation",
+    "bakery",
+    "business",
+    "management"
+  ],
+  "category": "Simulation Games",
+  "dependencies": {
+    "com.unity.ugui": "1.0.0",
+    "com.unity.textmeshpro": "3.0.6",
+    "com.unity.timeline": "1.7.4",
+    "com.unity.cinemachine": "2.9.7",
+    "com.unity.ai.navigation": "1.1.4",
+    "com.unity.render-pipelines.universal": "14.0.8",
+    "com.unity.postprocessing": "3.2.2",
+    "com.unity.inputsystem": "1.6.3",
+    "com.unity.addressables": "1.21.14",
+    "com.unity.analytics": "3.8.1",
+    "com.unity.cloud.build": "1.0.2"
+  },
+  "optionalDependencies": {
+    "com.rlabrecque.steamworks.net": "20.2.0"
+  },
+  "author": {
+    "name": "BakerySimulatorStudio",
+    "email": "contact@bakerysimulator.com",
+    "url": "https://www.bakerysimulator.com"
+  },
+  "engines": {
+    "unity": ">=2022.3.0f1"
+  },
+  "scripts": {
+    "test": "echo \"Unity 測試腳本\"",
+    "build": "echo \"Unity 構建腳本\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BakerySimulatorStudio/BakerySimulator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/BakerySimulatorStudio/BakerySimulator/issues"
+  },
+  "homepage": "https://www.bakerysimulator.com",
+  "license": "Proprietary"
+} 

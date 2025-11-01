@@ -1,0 +1,4297 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小熊哥麵包坊・bear&bread</title>
+    <link rel="stylesheet" href="../styles/styles.css">
+</head>
+<body>
+
+    <div class="profile-container" id="open-profile-button">
+        <div class="profile-avatar-box">
+            <span id="playerAvatar">👤</span>
+        </div>
+        <div class="profile-details-box">
+            <div class="profile-name" id="playerName">訪客玩家</div>
+            <div class="profile-xp-bar">
+                <div class="profile-level-box">
+                    <span id="playerLevel">1</span>
+                </div>
+                <div class="xp-bar-background">
+                    <div class="xp-bar-fill" style="width: 30%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 狀態列（右上角） -->
+    <div class="status-container" style="position: fixed; top: 16px; right: 32px; z-index: 20; text-align: right;">
+        <div class="status-item">☀️ 天數  <span id="playerDay">1</span></div>
+        <div class="status-item">🌟 聲譽  <span id="playerReputation">50</span></div>
+        <div class="status-item">👣 客流量  <span id="playerTraffic">30</span></div>
+        <div class="status-item">🍯 蜂蜜幣  <span id="playerCoins">1000</span></div>
+    </div>
+
+    <!-- 左下角：景氣燈號、好友系統、排行榜 -->
+    <div class="bottom-left-menu" style="position: fixed; left: 32px; bottom: 32px; display: flex; flex-direction: column; gap: 16px; z-index: 20;">
+        <button class="pixel-btn primary" id="open-indicator-button">💡 景氣燈號</button>
+        <button class="pixel-btn primary" id="open-friends-button">👥 好友</button>
+        <button class="pixel-btn primary" id="open-leaderboard-button">📊 排行榜</button>
+    </div>
+    <!-- 右下角：進貨 -->
+    <div class="bottom-right-action" style="position: fixed; right: 32px; bottom: 32px; z-index: 20;">
+        <button id="open-stocking-button">
+            <span class="btn-icon">📦</span>進貨
+        </button>
+    </div>
+
+    <div class="main-area">
+        <div class="story-box">
+            <div class="story-title">第一章：開店準備</div>
+            <div class="story-content">小熊哥決定開一家麵包店，但他發現光會做麵包還不夠，還需要學會如何行銷...</div>
+            <div class="event-options"></div>
+            <div class="event-feedback"></div>
+            <div class="story-controls">
+                <button class="pixel-btn primary story-control-btn" id="prev-btn">上一頁</button>
+                <span class="story-page-indicator" id="page-indicator">1 / 4</span>
+                <button class="pixel-btn primary story-control-btn" id="next-btn">下一頁</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 彈出視窗 HTML 樣板 -->
+    <div class="modal-backdrop" id="game-modal">
+        <div class="pixel-art-panel">
+            <div class="main-tabs-container">
+                <button class="main-tab active" data-tab="profile">玩家資料</button>
+                <button class="main-tab" data-tab="settings">遊戲設定</button>
+            </div>
+
+            <div class="main-panel-content">
+                <button class="modal-close" id="modal-close-btn">X</button>
+
+                <div class="tab-content active" data-content="profile">
+                    <div class="profile-layout">
+                        <div class="profile-left-panel">
+                            <div class="profile-avatar-display" id="profile-avatar-display">👤</div>
+                            <div class="profile-text-info">
+                                <p>用戶編號：<span id="info-user-id">15820</span></p>
+                                <p>玩家名稱：<span id="info-player-name">訪客玩家</span></p>
+                                <p>遊玩天數：<span id="info-play-days">1</span></p>
+                            </div>
+                            <div class="profile-actions">
+                                <button class="pixel-art-btn small">更換地區</button>
+                                <button class="pixel-art-btn small" id="logout-btn">登出</button>
+                            </div>
+                        </div>
+                        <div class="profile-right-panel">
+                            <div class="sub-tabs-container">
+                                <button class="sub-tab active" data-subtab="avatar">頭像</button>
+                                <button class="sub-tab" data-subtab="achievements">成就</button>
+                                <button class="sub-tab" data-subtab="stats">統計</button>
+                            </div>
+                            <div class="sub-content-display">
+                                <div class="sub-content active" data-subcontent="avatar">
+                                    <h3>選擇頭像</h3>
+                                    <div class="avatar-gallery">
+                                        <div class="avatar-option" data-avatar="👤">
+                                            <div class="avatar-preview">👤</div>
+                                            <span class="avatar-name">預設頭像</span>
+                                        </div>
+                                        <div class="avatar-option" data-avatar="../assets/images/頭像1.gif">
+                                            <div class="avatar-preview">
+                                                <img src="../assets/images/頭像1.gif" alt="頭像1" />
+                                            </div>
+                                            <span class="avatar-name">頭像1</span>
+                                        </div>
+                                        <div class="avatar-option" data-avatar="../assets/images/頭像4.gif">
+                                            <div class="avatar-preview">
+                                                <img src="../assets/images/頭像4.gif" alt="頭像4" />
+                                            </div>
+                                            <span class="avatar-name">頭像4</span>
+                                        </div>
+                                        <div class="avatar-option" data-avatar="../assets/images/頭像2.gif">
+                                            <div class="avatar-preview">
+                                                <img src="../assets/images/頭像2.gif" alt="頭像2" />
+                                            </div>
+                                            <span class="avatar-name">頭像2</span>
+                                        </div>
+                                        <div class="avatar-option" data-avatar="../assets/images/頭像3.gif">
+                                            <div class="avatar-preview">
+                                                <img src="../assets/images/頭像3.gif" alt="頭像3" />
+                                            </div>
+                                            <span class="avatar-name">頭像3</span>
+                                        </div>
+                                        <div class="avatar-option" data-avatar="../assets/images/頭像5.jpg">
+                                            <div class="avatar-preview">
+                                                <img src="../assets/images/頭像5.jpg" alt="頭像5" />
+                                            </div>
+                                            <span class="avatar-name">頭像5</span>
+                                        </div>
+                                        <div class="avatar-option" data-avatar="../assets/images/頭像6.jpg">
+                                            <div class="avatar-preview">
+                                                <img src="../assets/images/頭像6.jpg" alt="頭像6" />
+                                            </div>
+                                            <span class="avatar-name">頭像6</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="sub-content" data-subcontent="achievements">
+                                    <p>這裡是成就列表...</p>
+                                </div>
+                                <div class="sub-content" data-subcontent="stats">
+                                    <p>這裡是統計數據...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" data-content="settings">
+                    <h2>遊戲設定</h2>
+                    <div class="setting-item">
+                        <label for="music-volume">背景音樂音量</label>
+                        <input type="range" id="music-volume" min="0" max="100" value="50">
+                        <span id="music-value">50%</span>
+                    </div>
+                    <div class="setting-item">
+                        <label for="sfx-volume">音效音量</label>
+                        <input type="range" id="sfx-volume" min="0" max="100" value="70">
+                        <span id="sfx-value">70%</span>
+                    </div>
+                    <div class="setting-item">
+                        <label>音效：</label>
+                        <div class="setting-value-row">
+                            <label class="pixel-toggle">
+                                <input type="checkbox" id="sound-effects" checked>
+                                <span class="pixel-toggle-track"></span>
+                                <span class="pixel-toggle-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label>背景音樂：</label>
+                        <div class="setting-value-row">
+                            <label class="pixel-toggle">
+                                <input type="checkbox" id="background-music" checked>
+                                <span class="pixel-toggle-track"></span>
+                                <span class="pixel-toggle-handle"></span>
+                            </label>
+                            <span id="music-status">🎵 播放中</span>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label>亮度：</label>
+                        <input type="range" id="brightness" min="30" max="150" value="100" step="10">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 獨立進貨系統彈窗 -->
+    <div class="modal-backdrop" id="stocking-modal">
+        <div class="stocking-panel">
+            <button class="modal-close" id="stocking-close-btn">X</button>
+            <div class="stocking-header">
+                <h2>📦 進貨系統</h2>
+                <div class="current-coins">🍯 蜂蜜幣：<span id="stocking-coins">1000</span></div>
+            </div>
+            
+            <div class="bread-grid">
+                <!-- 法式長棍麵包 -->
+                <div class="bread-card" data-bread="baguette">
+                    <div class="bread-icon">🥖</div>
+                    <div class="bread-info">
+                        <h3>法式長棍</h3>
+                        <div class="bread-price">進貨價格: $15</div>
+                        <div class="bread-stock">庫存: <span id="baguette-stock">0</span></div>
+                    </div>
+                    <div class="quantity-controls">
+                        <button class="qty-btn minus" data-action="minus" data-bread="baguette">-</button>
+                        <input type="number" class="qty-input" id="baguette-qty" value="0" min="0" max="99">
+                        <button class="qty-btn plus" data-action="plus" data-bread="baguette">+</button>
+                    </div>
+                    <div class="subtotal">小計: $<span id="baguette-subtotal">0</span></div>
+                </div>
+
+                <!-- 牛角麵包 -->
+                <div class="bread-card" data-bread="croissant">
+                    <div class="bread-icon">🥐</div>
+                    <div class="bread-info">
+                        <h3>牛角麵包</h3>
+                        <div class="bread-price">進貨價格: $20</div>
+                        <div class="bread-stock">庫存: <span id="croissant-stock">0</span></div>
+                    </div>
+                    <div class="quantity-controls">
+                        <button class="qty-btn minus" data-action="minus" data-bread="croissant">-</button>
+                        <input type="number" class="qty-input" id="croissant-qty" value="0" min="0" max="99">
+                        <button class="qty-btn plus" data-action="plus" data-bread="croissant">+</button>
+                    </div>
+                    <div class="subtotal">小計: $<span id="croissant-subtotal">0</span></div>
+                </div>
+
+                <!-- 吐司麵包 -->
+                <div class="bread-card" data-bread="toast">
+                    <div class="bread-icon">🍞</div>
+                    <div class="bread-info">
+                        <h3>吐司麵包</h3>
+                        <div class="bread-price">進貨價格: $12</div>
+                        <div class="bread-stock">庫存: <span id="toast-stock">0</span></div>
+                    </div>
+                    <div class="quantity-controls">
+                        <button class="qty-btn minus" data-action="minus" data-bread="toast">-</button>
+                        <input type="number" class="qty-input" id="toast-qty" value="0" min="0" max="99">
+                        <button class="qty-btn plus" data-action="plus" data-bread="toast">+</button>
+                    </div>
+                    <div class="subtotal">小計: $<span id="toast-subtotal">0</span></div>
+                </div>
+
+                <!-- 杯子蛋糕 -->
+                <div class="bread-card" data-bread="cupcake">
+                    <div class="bread-icon">🧁</div>
+                    <div class="bread-info">
+                        <h3>杯子蛋糕</h3>
+                        <div class="bread-price">進貨價格: $25</div>
+                        <div class="bread-stock">庫存: <span id="cupcake-stock">0</span></div>
+                    </div>
+                    <div class="quantity-controls">
+                        <button class="qty-btn minus" data-action="minus" data-bread="cupcake">-</button>
+                        <input type="number" class="qty-input" id="cupcake-qty" value="0" min="0" max="99">
+                        <button class="qty-btn plus" data-action="plus" data-bread="cupcake">+</button>
+                    </div>
+                    <div class="subtotal">小計: $<span id="cupcake-subtotal">0</span></div>
+                </div>
+            </div>
+
+            <div class="stocking-footer">
+                <div class="total-section">
+                    <div class="total-amount">
+                        總金額: $<span id="total-amount">0</span>
+                    </div>
+                    <div class="remaining-coins">
+                        剩餘金額: $<span id="remaining-coins">1000</span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="pixel-btn secondary" id="clear-all-btn">清空</button>
+                    <button class="pixel-btn primary" id="confirm-purchase-btn">確認進貨</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 獨立排行榜彈窗 -->
+    <div class="modal-backdrop" id="leaderboard-modal">
+        <div class="leaderboard-panel">
+            <button class="modal-close" id="leaderboard-close-btn">X</button>
+                            <div class="leaderboard-header">
+                    <h2>🏆 蜂蜜幣排行榜</h2>
+                    <div class="leaderboard-tabs">
+                        <button class="leaderboard-tab active" id="all-players-tab">🌍 全服排行榜</button>
+                        <button class="leaderboard-tab" id="friends-tab">👥 好友排行榜</button>
+                    </div>
+                </div>
+
+                <div class="leaderboard-content">
+                <!-- 前三名特殊展示 -->
+                <div class="top-three">
+                    <div class="podium-item second-place">
+                        <div class="podium-rank">🥈</div>
+                        <div class="podium-avatar">👨‍🍳</div>
+                        <div class="podium-name">麵包師傅</div>
+                        <div class="podium-coins">🍯 2,500</div>
+                    </div>
+                    <div class="podium-item first-place">
+                        <div class="podium-rank">👑</div>
+                        <div class="podium-avatar">🧑‍💼</div>
+                        <div class="podium-name">蜂蜜大亨</div>
+                        <div class="podium-coins">🍯 5,000</div>
+                    </div>
+                    <div class="podium-item third-place">
+                        <div class="podium-rank">🥉</div>
+                        <div class="podium-avatar">👩‍🍳</div>
+                        <div class="podium-name">烘焙達人</div>
+                        <div class="podium-coins">🍯 1,800</div>
+                    </div>
+                </div>
+
+                <!-- 排行榜列表 -->
+                <div class="leaderboard-list">
+                    <div class="leaderboard-list-header">
+                        <span class="rank-col">排名</span>
+                        <span class="player-col">玩家</span>
+                        <span class="coins-col">蜂蜜幣</span>
+                    </div>
+                    <div class="leaderboard-items" id="leaderboard-items">
+                        <!-- 排行榜項目將由 JavaScript 動態生成 -->
+                    </div>
+                </div>
+
+                <!-- 當前玩家排名 -->
+                <div class="current-player-rank">
+                    <div class="current-player-label">你的排名</div>
+                    <div class="current-player-info">
+                        <span class="current-rank">#42</span>
+                        <span class="current-avatar">👤</span>
+                        <span class="current-name">訪客玩家</span>
+                        <span class="current-coins">🍯 1,000</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="leaderboard-footer">
+                <div class="refresh-info">💡 排行榜每小時更新一次</div>
+                <button class="pixel-btn primary" id="refresh-leaderboard-btn">🔄 刷新排行榜</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 好友系統彈窗 -->
+    <div class="modal-backdrop" id="friends-modal">
+        <div class="friends-panel">
+            <button class="modal-close" id="friends-close-btn">X</button>
+            
+            <!-- 好友系統標題區 -->
+            <div class="friends-header">
+                <h2>👥 好友系統</h2>
+                <div class="online-status">🟢 線上</div>
+            </div>
+
+            <!-- 好友系統主要內容 -->
+            <div class="friends-content">
+                <!-- 左側：功能選單 -->
+                <div class="friends-sidebar">
+                    <div class="friends-tabs">
+                        <button class="friends-tab active" data-tab="friends-list">
+                            <span class="tab-icon">👥</span>
+                            <span class="tab-text">好友列表</span>
+                            <span class="tab-badge" id="friends-count">3</span>
+                        </button>
+                        <button class="friends-tab" data-tab="friend-requests">
+                            <span class="tab-icon">📬</span>
+                            <span class="tab-text">好友邀請</span>
+                            <span class="tab-badge" id="requests-count">2</span>
+                        </button>
+                        <button class="friends-tab" data-tab="add-friend">
+                            <span class="tab-icon">➕</span>
+                            <span class="tab-text">新增好友</span>
+                        </button>
+                        <button class="friends-tab" data-tab="chat-rooms">
+                            <span class="tab-icon">💬</span>
+                            <span class="tab-text">聊天室</span>
+                            <span class="tab-badge" id="unread-count">5</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 右側：主要內容區 -->
+                <div class="friends-main">
+                    <!-- 好友列表 -->
+                    <div class="friends-tab-content active" data-content="friends-list">
+                        <div class="friends-list-header">
+                            <h3>好友列表 (3/50)</h3>
+                            <div class="list-controls">
+                                <input type="text" class="pixel-input" placeholder="🔍 搜尋好友..." id="search-friends">
+                                <select class="pixel-select" id="friends-filter">
+                                    <option value="all">全部</option>
+                                    <option value="online">線上</option>
+                                    <option value="offline">離線</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="friends-list" id="friends-list">
+                            <!-- 好友項目由 JavaScript 動態生成 -->
+                        </div>
+                    </div>
+
+                    <!-- 好友邀請 -->
+                    <div class="friends-tab-content" data-content="friend-requests">
+                        <div class="requests-header">
+                            <h3>好友邀請</h3>
+                            <button class="pixel-btn small" id="clear-all-requests">清除全部</button>
+                        </div>
+                        
+                        <!-- 收到的邀請 -->
+                        <div class="requests-section">
+                            <h4>📩 收到的邀請 (2)</h4>
+                            <div class="requests-list" id="received-requests">
+                                <!-- 邀請項目由 JavaScript 動態生成 -->
+                            </div>
+                        </div>
+
+                        <!-- 發送的邀請 -->
+                        <div class="requests-section">
+                            <h4>📤 發送的邀請 (1)</h4>
+                            <div class="requests-list" id="sent-requests">
+                                <!-- 邀請項目由 JavaScript 動態生成 -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 新增好友 -->
+                    <div class="friends-tab-content" data-content="add-friend">
+                        <div class="add-friend-header">
+                            <h3>新增好友</h3>
+                        </div>
+                        
+                        <div class="add-friend-form">
+                            <div class="input-group">
+                                <label>🔍 搜尋方式</label>
+                                <div class="search-tabs">
+                                    <button class="search-tab active" data-search="nickname">暱稱</button>
+                                    <button class="search-tab" data-search="id">玩家ID</button>
+                                    <button class="search-tab" data-search="nearby">附近玩家</button>
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <input type="text" class="pixel-input large" id="friend-search-input" placeholder="輸入好友暱稱或ID...">
+                                <button class="pixel-btn primary" id="search-friend-btn">🔍 搜尋</button>
+                            </div>
+
+                            <div class="search-results" id="search-results">
+                                <div class="no-results">🔍 輸入關鍵字開始搜尋好友</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 聊天室 -->
+                    <div class="friends-tab-content" data-content="chat-rooms">
+                        <div class="chat-header">
+                            <h3>聊天室</h3>
+                            <div class="chat-controls">
+                                <button class="pixel-btn small" id="create-group-chat">➕ 群組</button>
+                                <button class="pixel-btn small" id="chat-settings">⚙️ 設定</button>
+                            </div>
+                        </div>
+
+                        <div class="chat-layout">
+                            <!-- 聊天室列表 -->
+                            <div class="chat-rooms-list">
+                                <div class="chat-rooms-header">
+                                    <span>最近聊天</span>
+                                </div>
+                                <div class="chat-rooms" id="chat-rooms">
+                                    <!-- 聊天室項目由 JavaScript 動態生成 -->
+                                </div>
+                            </div>
+
+                            <!-- 聊天視窗 -->
+                            <div class="chat-window" id="chat-window">
+                                <div class="chat-window-header">
+                                    <span class="chat-title">選擇一個聊天室開始對話</span>
+                                </div>
+                                <div class="chat-messages" id="chat-messages">
+                                    <div class="no-chat-selected">
+                                        💬 點擊左側聊天室開始對話
+                                    </div>
+                                </div>
+                                <div class="chat-input-area" id="chat-input-area" style="display: none;">
+                                    <div class="chat-input-group">
+                                        <input type="text" class="chat-input" id="chat-message-input" placeholder="輸入訊息...">
+                                        <button class="chat-send-btn" id="send-message-btn">📤</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 好友個人資料彈窗 -->
+    <div class="modal-backdrop" id="friend-profile-modal">
+        <div class="friend-profile-panel">
+            <button class="modal-close" id="friend-profile-close-btn">X</button>
+            
+            <!-- 個人資料標題區 -->
+            <div class="friend-profile-header">
+                <div class="profile-avatar-large" id="profile-friend-avatar">👤</div>
+                <div class="profile-basic-info">
+                    <h2 id="profile-friend-name">好友姓名</h2>
+                    <div class="profile-status-line">
+                        <span class="status-indicator" id="profile-friend-status"></span>
+                        <span id="profile-friend-status-text">線上</span>
+                        <span class="profile-level">Lv.<span id="profile-friend-level">1</span></span>
+                    </div>
+                    <div class="profile-join-date">加入時間：<span id="profile-friend-join-date">2024年1月</span></div>
+                </div>
+                <div class="profile-quick-actions">
+                    <button class="action-btn primary" id="profile-send-message">💬 發訊息</button>
+                    <button class="action-btn secondary" id="profile-send-gift">🎁 送禮物</button>
+                </div>
+            </div>
+
+            <!-- 個人資料內容區 -->
+            <div class="friend-profile-content">
+                <!-- 左側：遊戲數據 -->
+                <div class="profile-left-section">
+                    <div class="profile-section">
+                        <h3>🏪 店舖資訊</h3>
+                        <div class="shop-info-grid">
+                            <div class="info-item">
+                                <div class="info-label">店舖名稱</div>
+                                <div class="info-value" id="profile-shop-name">小熊麵包屋</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">店舖等級</div>
+                                <div class="info-value" id="profile-shop-level">Lv.5</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">蜂蜜幣</div>
+                                <div class="info-value" id="profile-coins">🍯 2,500</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">總營業額</div>
+                                <div class="info-value" id="profile-total-revenue">$15,000</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h3>📊 遊戲統計</h3>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-icon">🍞</div>
+                                <div class="stat-info">
+                                    <div class="stat-value" id="profile-bread-made">245</div>
+                                    <div class="stat-label">製作麵包</div>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon">🛒</div>
+                                <div class="stat-info">
+                                    <div class="stat-value" id="profile-orders-completed">89</div>
+                                    <div class="stat-label">完成訂單</div>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon">⭐</div>
+                                <div class="stat-info">
+                                    <div class="stat-value" id="profile-customer-rating">4.8</div>
+                                    <div class="stat-label">顧客評分</div>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon">🎯</div>
+                                <div class="stat-info">
+                                    <div class="stat-value" id="profile-days-played">15</div>
+                                    <div class="stat-label">遊玩天數</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右側：成就與活動 -->
+                <div class="profile-right-section">
+                    <div class="profile-section">
+                        <h3>🏆 最新成就</h3>
+                        <div class="achievements-list" id="profile-achievements">
+                            <!-- 成就項目由 JavaScript 動態生成 -->
+                        </div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h3>📅 最近活動</h3>
+                        <div class="activity-list" id="profile-activities">
+                            <!-- 活動記錄由 JavaScript 動態生成 -->
+                        </div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h3>🍞 招牌商品</h3>
+                        <div class="signature-products" id="profile-products">
+                            <!-- 招牌商品由 JavaScript 動態生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 遊戲內通知系統 -->
+    <div class="notification-container" id="notification-container"></div>
+
+    <!-- 景氣燈號彈窗 -->
+    <div class="modal-backdrop" id="indicator-modal">
+      <div class="pixel-art-panel indicator-panel">
+        <div class="modal-header" style="display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:18px;position:relative;">
+          <h2 class="modal-title" style="color:#7c4a18;font-family:'Zpix',monospace;font-size:1.4rem;letter-spacing:2px;margin:0;text-align:center;width:100%;">景氣燈號</h2>
+          <div style="width:100%;text-align:center;margin:8px 0 0 0;font-size:1.08rem;color:#a0522d;font-family:'Zpix',monospace;letter-spacing:1px;">今日燈號：（燈號會隨著未來的題目變動）</div>
+          <button class="modal-close" id="indicator-close-btn" style="position:absolute;top:0;right:0;">X</button>
+        </div>
+        <div class="modal-content" style="color:#5c4033;font-family:'Zpix',monospace;font-size:1.1rem;line-height:1.7;text-align:left;">
+          <ul style="margin:0 0 0 1.2em;max-width:260px;">
+            <li>🟢 綠燈：表示當前景氣穩定</li>
+            <li>🔴 紅燈：表示景氣熱絡</li>
+            <li>🔵 藍燈：表示景氣低迷</li>
+          </ul>
+          <p style="margin-top:16px;">（未來可串接真實經濟數據或遊戲內事件）</p>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="../scripts/game-lite.js"></script>
+    <script type="module" src="../scripts/eventGame.js"></script>
+
+    <script type="module">
+        import { logout } from '../scripts/game-lite.js';
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('[系統] 頁面載入完成，開始綁定功能...');
+
+            // --- 劇情翻頁邏輯 ---
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const storyTitle = document.querySelector('.story-title');
+            const storyContent = document.querySelector('.story-content');
+            const pageIndicator = document.getElementById('page-indicator');
+
+            function updateStoryPage() {
+                const currentPage = window._gameState.storyPages[window._gameState.currentStoryPage];
+                if (storyTitle) storyTitle.textContent = currentPage.title;
+                if (storyContent) storyContent.textContent = currentPage.content;
+                if (pageIndicator) pageIndicator.textContent = `${window._gameState.currentStoryPage + 1} / ${window._gameState.storyPages.length}`;
+                if (prevBtn) prevBtn.disabled = window._gameState.currentStoryPage === 0;
+                if (nextBtn) nextBtn.disabled = window._gameState.currentStoryPage === window._gameState.storyPages.length - 1;
+            }
+
+            if(prevBtn) prevBtn.addEventListener('click', () => {
+                if (window._gameState.currentStoryPage > 0) {
+                    window._gameState.currentStoryPage--;
+                    updateStoryPage();
+                }
+            });
+
+            if(nextBtn) nextBtn.addEventListener('click', () => {
+                if (window._gameState.currentStoryPage < window._gameState.storyPages.length - 1) {
+                    window._gameState.currentStoryPage++;
+                    updateStoryPage();
+                }
+            });
+
+            // --- 全新像素風格「玩家中心」彈出視窗邏輯 ---
+            const gameModal = document.getElementById('game-modal');
+            if (gameModal) {
+                const openProfileBtn = document.getElementById('open-profile-button');
+                const closeBtn = gameModal.querySelector('#modal-close-btn');
+                
+                const mainTabs = gameModal.querySelectorAll('.main-tab');
+                const mainTabContents = gameModal.querySelectorAll('.tab-content');
+                
+                const subTabs = gameModal.querySelectorAll('.sub-tab');
+                const subTabContents = gameModal.querySelectorAll('.sub-content');
+
+                // 開啟視窗 (範例：只讓左上角按鈕觸發)
+                if(openProfileBtn) {
+                    openProfileBtn.addEventListener('click', () => {
+                        gameModal.classList.add('active');
+                    });
+                }
+
+                // 關閉視窗
+                if(closeBtn) closeBtn.addEventListener('click', () => gameModal.classList.remove('active'));
+                gameModal.addEventListener('click', (e) => {
+                    if(e.target === gameModal) gameModal.classList.remove('active');
+                });
+
+                // 主頁籤切換邏輯
+                mainTabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        mainTabs.forEach(t => t.classList.remove('active'));
+                        mainTabContents.forEach(c => c.classList.remove('active'));
+                        
+                        tab.classList.add('active');
+                        const contentId = tab.dataset.tab;
+                        const activeContent = gameModal.querySelector(`.tab-content[data-content="${contentId}"]`);
+                        if(activeContent) activeContent.classList.add('active');
+                    });
+                });
+
+                // 副頁籤切換邏輯
+                subTabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        subTabs.forEach(t => t.classList.remove('active'));
+                        subTabContents.forEach(c => c.classList.remove('active'));
+
+                        tab.classList.add('active');
+                        const contentId = tab.dataset.subtab;
+                        const activeContent = gameModal.querySelector(`.sub-content[data-subcontent="${contentId}"]`);
+                        if(activeContent) activeContent.classList.add('active');
+                    });
+                });
+                console.log('✅ 全新像素風格視窗功能已綁定！');
+            }
+
+            // 頭像選擇功能
+            const avatarOptions = document.querySelectorAll('.avatar-option');
+            const profileAvatarDisplay = document.getElementById('profile-avatar-display');
+            const playerAvatar = document.getElementById('playerAvatar');
+
+            avatarOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    // 移除所有選中狀態
+                    avatarOptions.forEach(opt => opt.classList.remove('selected'));
+                    // 添加選中狀態
+                    option.classList.add('selected');
+                    
+                    const avatarData = option.dataset.avatar;
+                    
+                    // 更新左側頭像顯示區塊
+                    if (avatarData.includes('.gif') || avatarData.includes('.png') || avatarData.includes('.jpg')) {
+                        // 圖片頭像
+                        profileAvatarDisplay.innerHTML = `<img src="${avatarData}" alt="玩家頭像" />`;
+                        playerAvatar.innerHTML = `<img src="${avatarData}" alt="玩家頭像" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />`;
+                    } else {
+                        // 文字頭像（emoji）
+                        profileAvatarDisplay.textContent = avatarData;
+                        playerAvatar.textContent = avatarData;
+                    }
+                    
+                    console.log('頭像已更換為：', avatarData);
+                });
+            });
+
+            // 串接玩家中心彈窗內的登出按鈕
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', logout);
+            }
+
+            // === 進貨系統功能 ===
+            setupStockingSystem();
+
+            // === 排行榜系統功能 ===
+            setupLeaderboardSystem();
+
+            // === 好友系統功能 ===
+            setupFriendsSystem();
+
+            // 音樂音量
+            const musicVolumeSlider = document.getElementById('music-volume');
+            const musicValueDisplay = document.getElementById('music-value');
+            if (musicVolumeSlider && musicValueDisplay) {
+                musicVolumeSlider.addEventListener('input', function() {
+                    const value = this.value;
+                    musicValueDisplay.textContent = `${value}%`;
+                    if (window.soundManager) {
+                        window.soundManager.setVolume(value / 100);
+                    }
+                    if (window._gameState) {
+                        window._gameState.settings.musicVolume = parseInt(value);
+                    }
+                });
+            }
+            // 音效音量
+            const sfxVolumeSlider = document.getElementById('sfx-volume');
+            const sfxValueDisplay = document.getElementById('sfx-value');
+            if (sfxVolumeSlider && sfxValueDisplay) {
+                sfxVolumeSlider.addEventListener('input', function() {
+                    const value = this.value;
+                    sfxValueDisplay.textContent = `${value}%`;
+                    if (window.soundManager) {
+                        window.soundManager.setSfxVolume(value / 100);
+                    }
+                    if (window._gameState) {
+                        window._gameState.settings.sfxVolume = parseInt(value);
+                    }
+                });
+            }
+            // 音效開關
+            const soundEffectsToggle = document.getElementById('sound-effects');
+            if (soundEffectsToggle) {
+                soundEffectsToggle.addEventListener('change', function() {
+                    if (window._gameState) {
+                        window._gameState.settings.soundEffects = this.checked;
+                    }
+                    if (window.soundManager) {
+                        window.soundManager.musicEnabled = this.checked;
+                    }
+                });
+            }
+            // 背景音樂開關
+            const backgroundMusicToggle = document.getElementById('background-music');
+            if (backgroundMusicToggle) {
+                backgroundMusicToggle.addEventListener('change', function() {
+                    if (window._gameState) {
+                        window._gameState.settings.backgroundMusic = this.checked;
+                    }
+                    if (window.soundManager) {
+                        if (this.checked) {
+                            window.soundManager.play();
+                        } else {
+                            window.soundManager.stop();
+                        }
+                    }
+                });
+            }
+            // 亮度
+            const brightnessSlider = document.getElementById('brightness');
+            if (brightnessSlider) {
+                brightnessSlider.addEventListener('input', function() {
+                    const value = this.value;
+                    document.body.style.filter = `brightness(${value}%)`;
+                    if (window._gameState) {
+                        window._gameState.settings.brightness = value;
+                    }
+                });
+            }
+
+            // 景氣燈號彈窗開關
+            const indicatorBtn = document.getElementById('open-indicator-button');
+            const indicatorModal = document.getElementById('indicator-modal');
+            const indicatorClose = document.getElementById('indicator-close-btn');
+            if (indicatorBtn && indicatorModal && indicatorClose) {
+              indicatorBtn.addEventListener('click', () => {
+                indicatorModal.classList.add('active');
+              });
+              indicatorClose.addEventListener('click', () => {
+                indicatorModal.classList.remove('active');
+              });
+              indicatorModal.addEventListener('click', (e) => {
+                if (e.target === indicatorModal) {
+                  indicatorModal.classList.remove('active');
+                }
+              });
+            }
+        });
+
+        // 進貨系統功能設定
+        function setupStockingSystem() {
+            const stockingModal = document.getElementById('stocking-modal');
+            const openStockingBtn = document.getElementById('open-stocking-button');
+            const closeStockingBtn = document.getElementById('stocking-close-btn');
+            
+            // 麵包資料
+            const breadData = {
+                baguette: { name: '法式長棍', price: 15, stock: 0 },
+                croissant: { name: '牛角麵包', price: 20, stock: 0 },
+                toast: { name: '吐司麵包', price: 12, stock: 0 },
+                cupcake: { name: '杯子蛋糕', price: 25, stock: 0 }
+            };
+
+            let currentCoins = 1000; // 從遊戲狀態讀取
+
+            // 開啟進貨彈窗
+            if (openStockingBtn) {
+                openStockingBtn.addEventListener('click', () => {
+                    stockingModal.classList.add('active');
+                    updateStockingDisplay();
+                });
+            }
+
+            // 關閉進貨彈窗
+            if (closeStockingBtn) {
+                closeStockingBtn.addEventListener('click', () => {
+                    stockingModal.classList.remove('active');
+                });
+            }
+
+            // 點擊背景關閉彈窗
+            stockingModal.addEventListener('click', (e) => {
+                if (e.target === stockingModal) {
+                    stockingModal.classList.remove('active');
+                }
+            });
+
+            // 數量控制按鈕
+            document.querySelectorAll('.qty-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const action = e.target.dataset.action;
+                    const breadType = e.target.dataset.bread;
+                    const qtyInput = document.getElementById(`${breadType}-qty`);
+                    let currentQty = parseInt(qtyInput.value) || 0;
+
+                    if (action === 'plus' && currentQty < 99) {
+                        currentQty++;
+                    } else if (action === 'minus' && currentQty > 0) {
+                        currentQty--;
+                    }
+
+                    qtyInput.value = currentQty;
+                    updateSubtotal(breadType);
+                    updateTotals();
+                });
+            });
+
+            // 數量輸入框變更
+            document.querySelectorAll('.qty-input').forEach(input => {
+                input.addEventListener('input', (e) => {
+                    const breadType = e.target.id.replace('-qty', '');
+                    let qty = parseInt(e.target.value) || 0;
+                    
+                    if (qty < 0) qty = 0;
+                    if (qty > 99) qty = 99;
+                    
+                    e.target.value = qty;
+                    updateSubtotal(breadType);
+                    updateTotals();
+                });
+            });
+
+            // 清空按鈕
+            document.getElementById('clear-all-btn').addEventListener('click', () => {
+                document.querySelectorAll('.qty-input').forEach(input => {
+                    input.value = 0;
+                });
+                Object.keys(breadData).forEach(breadType => {
+                    updateSubtotal(breadType);
+                });
+                updateTotals();
+            });
+
+            // 確認購買按鈕
+            document.getElementById('confirm-purchase-btn').addEventListener('click', () => {
+                const totalAmount = calculateTotal();
+                
+                // 檢查是否有實際進貨（總金額不能為0）
+                if (totalAmount === 0) {
+                    showNotification('⚠️ 請選擇要進貨的商品！', 'warning');
+                    return;
+                }
+
+                if (totalAmount > currentCoins) {
+                    showNotification(`💰 蜂蜜幣不足！需要 $${totalAmount}，但您只有 $${currentCoins}`, 'error');
+                    return;
+                }
+
+                // 執行購買
+                let purchaseList = [];
+                let totalItemsPurchased = 0;
+                
+                Object.keys(breadData).forEach(breadType => {
+                    const qty = parseInt(document.getElementById(`${breadType}-qty`).value) || 0;
+                    if (qty > 0) {
+                        breadData[breadType].stock += qty;
+                        purchaseList.push(`${breadData[breadType].name} x${qty}`);
+                        totalItemsPurchased += qty;
+                    }
+                });
+
+                currentCoins -= totalAmount;
+                
+                // 重置數量為0
+                document.querySelectorAll('.qty-input').forEach(input => {
+                    input.value = 0;
+                });
+
+                updateStockingDisplay();
+                updateTotals();
+
+                showNotification(`✅ 進貨成功！\n\n購買清單：\n${purchaseList.join('\n')}\n\n共進貨 ${totalItemsPurchased} 項商品\n總花費：$${totalAmount}\n剩餘蜂蜜幣：$${currentCoins}`, 'success');
+            });
+
+            // 更新小計
+            function updateSubtotal(breadType) {
+                const qty = parseInt(document.getElementById(`${breadType}-qty`).value) || 0;
+                const subtotal = breadData[breadType].price * qty;
+                document.getElementById(`${breadType}-subtotal`).textContent = subtotal;
+            }
+
+            // 計算總金額
+            function calculateTotal() {
+                let total = 0;
+                Object.keys(breadData).forEach(breadType => {
+                    const qty = parseInt(document.getElementById(`${breadType}-qty`).value) || 0;
+                    total += breadData[breadType].price * qty;
+                });
+                return total;
+            }
+
+            // 更新總計顯示
+            function updateTotals() {
+                const total = calculateTotal();
+                const remaining = currentCoins - total;
+                
+                document.getElementById('total-amount').textContent = total;
+                document.getElementById('remaining-coins').textContent = remaining;
+                
+                // 檢查餘額是否足夠
+                const confirmBtn = document.getElementById('confirm-purchase-btn');
+                if (remaining < 0) {
+                    confirmBtn.style.opacity = '0.5';
+                    confirmBtn.style.cursor = 'not-allowed';
+                    document.getElementById('remaining-coins').style.color = '#ff4444';
+                } else {
+                    confirmBtn.style.opacity = '1';
+                    confirmBtn.style.cursor = 'pointer';
+                    document.getElementById('remaining-coins').style.color = '#2E8B57';
+                }
+            }
+
+            // 更新進貨彈窗顯示
+            function updateStockingDisplay() {
+                document.getElementById('stocking-coins').textContent = currentCoins;
+                
+                Object.keys(breadData).forEach(breadType => {
+                    document.getElementById(`${breadType}-stock`).textContent = breadData[breadType].stock;
+                    updateSubtotal(breadType);
+                });
+                
+                updateTotals();
+            }
+
+            // 初始化顯示
+            updateStockingDisplay();
+        }
+
+                 // === 排行榜系統功能 ===
+         function setupLeaderboardSystem() {
+             const leaderboardModal = document.getElementById('leaderboard-modal');
+             const leaderboardBtn = document.getElementById('open-leaderboard-button');
+             const closeLeaderboardBtn = document.getElementById('leaderboard-close-btn');
+             const refreshLeaderboardBtn = document.getElementById('refresh-leaderboard-btn');
+             const allPlayersTab = document.getElementById('all-players-tab');
+             const friendsTab = document.getElementById('friends-tab');
+
+             // 當前顯示的排行榜類型
+             let currentLeaderboardType = 'all'; // 'all' 或 'friends'
+             
+             // 模擬的全服排行榜數據（未來會由 Firebase 提供）
+             let allPlayersData = [
+                 { rank: 1, name: '🏆 蜂蜜大王', avatar: '👑', coins: 25000, level: 15, isFriend: false },
+                 { rank: 2, name: '🥈 甜蜜天使', avatar: '👼', coins: 18500, level: 12, isFriend: false },
+                 { rank: 3, name: '🥉 糖霜精靈', avatar: '🧚', coins: 15200, level: 10, isFriend: false },
+                 { rank: 4, name: '烘焙王子', avatar: '🤴', coins: 12800, level: 20, isFriend: true },
+                 { rank: 5, name: '蛋糕女神', avatar: '🍰', coins: 11000, level: 9, isFriend: false },
+                 { rank: 6, name: '鮮奶達人', avatar: '🥛', coins: 9500, level: 7, isFriend: false },
+                 { rank: 7, name: '司康高手', avatar: '👩‍💼', coins: 8200, level: 6, isFriend: false },
+                 { rank: 8, name: '奶昔專家', avatar: '🥤', coins: 7800, level: 6, isFriend: false },
+                 { rank: 9, name: '布丁魔法師', avatar: '🍮', coins: 6900, level: 5, isFriend: false },
+                 { rank: 10, name: '馬卡龍藝術家', avatar: '🎨', coins: 6500, level: 5, isFriend: false },
+                 { rank: 11, name: '巧克力工匠', avatar: '🍫', coins: 5800, level: 4, isFriend: false },
+                 { rank: 12, name: '冰淇淋大師', avatar: '🍦', coins: 5200, level: 4, isFriend: false },
+                 { rank: 13, name: '麵包達人', avatar: '👨‍🍳', coins: 4500, level: 15, isFriend: true },
+                 { rank: 14, name: '甜點公主', avatar: '👸', coins: 3200, level: 12, isFriend: true },
+                 { rank: 15, name: '餅乾老師', avatar: '👩‍🏫', coins: 2800, level: 5, isFriend: false },
+                 { rank: 16, name: '果醬魔法師', avatar: '🧙‍♀️', coins: 2200, level: 4, isFriend: false }
+             ];
+
+             // 從好友數據和全服數據中獲取好友排行榜
+             function getFriendsLeaderboard() {
+                 const friendNames = friendsData.friends.map(f => f.name);
+                 let friendsInLeaderboard = [];
+                 
+                 // 從全服排行榜中找好友
+                 friendsInLeaderboard = allPlayersData.filter(player => 
+                     friendNames.includes(player.name) || player.isFriend
+                 );
+                 
+                 // 重新計算好友排行榜的排名
+                 friendsInLeaderboard.sort((a, b) => b.coins - a.coins);
+                 friendsInLeaderboard.forEach((player, index) => {
+                     player.friendRank = index + 1;
+                 });
+
+                 return friendsInLeaderboard;
+             }
+
+                         // 排行榜分頁切換事件
+             if (allPlayersTab) {
+                 allPlayersTab.addEventListener('click', function() {
+                     switchLeaderboardTab('all');
+                 });
+             }
+
+             if (friendsTab) {
+                 friendsTab.addEventListener('click', function() {
+                     switchLeaderboardTab('friends');
+                 });
+             }
+
+             // 排行榜按鈕點擊事件
+             if (leaderboardBtn) {
+                 leaderboardBtn.addEventListener('click', function() {
+                     openLeaderboard();
+                 });
+             }
+
+             // 排行榜關閉按鈕點擊事件
+             if (closeLeaderboardBtn) {
+                 closeLeaderboardBtn.addEventListener('click', function() {
+                     closeLeaderboard();
+                 });
+             }
+
+             // 排行榜背景點擊關閉
+             if (leaderboardModal) {
+                 leaderboardModal.addEventListener('click', function(e) {
+                     if (e.target === leaderboardModal) {
+                         closeLeaderboard();
+                     }
+                 });
+             }
+
+             // 刷新排行榜按鈕
+             if (refreshLeaderboardBtn) {
+                 refreshLeaderboardBtn.addEventListener('click', function() {
+                     refreshLeaderboard();
+                 });
+             }
+
+             // 切換排行榜分頁
+             function switchLeaderboardTab(type) {
+                 currentLeaderboardType = type;
+                 
+                 // 更新分頁按鈕狀態
+                 if (allPlayersTab && friendsTab) {
+                     allPlayersTab.classList.toggle('active', type === 'all');
+                     friendsTab.classList.toggle('active', type === 'friends');
+                 }
+                 
+                 // 重新渲染排行榜
+                 renderLeaderboard();
+             }
+
+            // 打開排行榜彈窗
+            function openLeaderboard() {
+                leaderboardModal.classList.add('active');
+                renderLeaderboard();
+            }
+
+            // 關閉排行榜彈窗
+            function closeLeaderboard() {
+                leaderboardModal.classList.remove('active');
+            }
+
+                         // 渲染排行榜內容
+             function renderLeaderboard() {
+                 const itemsContainer = document.getElementById('leaderboard-items');
+                 if (!itemsContainer) return;
+                 
+                 // 根據當前分頁選擇數據
+                 let currentData;
+                 if (currentLeaderboardType === 'friends') {
+                     currentData = getFriendsLeaderboard();
+                 } else {
+                     currentData = allPlayersData;
+                 }
+                 
+                 // 更新前三名領獎台
+                 updateTopThree(currentData);
+                 
+                 // 清空列表
+                 itemsContainer.innerHTML = '';
+
+                 // 顯示第4名以後的排行榜項目
+                 const listItems = currentData.slice(3, Math.min(currentData.length, 15));
+                 
+                 listItems.forEach(player => {
+                     const item = document.createElement('div');
+                     item.className = 'leaderboard-item';
+                     
+                     // 根據排行榜類型使用不同的排名
+                     const displayRank = currentLeaderboardType === 'friends' ? player.friendRank : player.rank;
+                     
+                     item.innerHTML = `
+                         <div class="item-rank">#${displayRank}</div>
+                         <div class="item-player">
+                             <span class="item-avatar">${player.avatar}</span>
+                             <span class="item-name">${player.name}</span>
+                         </div>
+                         <div class="item-coins">🍯 ${player.coins.toLocaleString()}</div>
+                     `;
+                     
+                     itemsContainer.appendChild(item);
+                 });
+
+                 // 更新當前玩家排名
+                 updateCurrentPlayerRank(currentData);
+             }
+
+             // 更新前三名領獎台
+             function updateTopThree(data) {
+                 const topThree = data.slice(0, 3);
+                 
+                 // 找到所有領獎台元素
+                 const podiumItems = document.querySelectorAll('.podium-item');
+                 
+                 topThree.forEach((player, index) => {
+                     if (podiumItems[index]) {
+                         const rankElement = podiumItems[index].querySelector('.podium-rank');
+                         const avatarElement = podiumItems[index].querySelector('.podium-avatar');
+                         const nameElement = podiumItems[index].querySelector('.podium-name');
+                         const coinsElement = podiumItems[index].querySelector('.podium-coins');
+                         
+                         const displayRank = currentLeaderboardType === 'friends' ? player.friendRank : player.rank;
+                         
+                         if (rankElement) rankElement.textContent = ['🥇', '🥈', '🥉'][index];
+                         if (avatarElement) avatarElement.textContent = player.avatar;
+                         if (nameElement) nameElement.textContent = player.name;
+                         if (coinsElement) coinsElement.textContent = `🍯 ${player.coins.toLocaleString()}`;
+                     }
+                 });
+             }
+
+                         // 更新當前玩家排名
+             function updateCurrentPlayerRank(currentData) {
+                 const coinCountElement = document.getElementById('coin-count');
+                 const currentPlayerCoins = coinCountElement ? parseInt(coinCountElement.textContent) || 1000 : 1000;
+                 let playerRank = 1;
+                 
+                 // 計算玩家排名
+                 for (let i = 0; i < currentData.length; i++) {
+                     if (currentData[i].coins > currentPlayerCoins) {
+                         playerRank = i + 2;
+                     } else {
+                         break;
+                     }
+                 }
+                 
+                 // 如果玩家幣數比所有排行榜玩家都少
+                 if (playerRank > currentData.length) {
+                     playerRank = currentData.length + 1;
+                 }
+
+                 // 更新顯示
+                 const currentRankElement = document.querySelector('.current-rank');
+                 const currentCoinsElement = document.querySelector('.current-coins');
+                 const currentPlayerLabel = document.querySelector('.current-player-label');
+                 
+                 if (currentRankElement) {
+                     currentRankElement.textContent = `#${playerRank}`;
+                 }
+                 if (currentCoinsElement) {
+                     currentCoinsElement.textContent = `🍯 ${currentPlayerCoins.toLocaleString()}`;
+                 }
+                 if (currentPlayerLabel) {
+                     const labelText = currentLeaderboardType === 'friends' ? '你在好友中的排名' : '你的排名';
+                     currentPlayerLabel.textContent = labelText;
+                 }
+             }
+
+                         // 刷新排行榜數據
+             function refreshLeaderboard() {
+                 const refreshText = currentLeaderboardType === 'friends' ? '正在刷新好友排行榜...' : '正在刷新全服排行榜...';
+                 const successText = currentLeaderboardType === 'friends' ? '✅ 好友排行榜已更新！' : '✅ 全服排行榜已更新！';
+                 
+                 showNotification(`🔄 ${refreshText}`, 'info');
+                 
+                 // 模擬 API 請求延遲
+                 setTimeout(() => {
+                     // 這裡未來會替換為 Firebase 數據獲取
+                     // 目前只是更新顯示
+                     renderLeaderboard();
+                     showNotification(successText, 'success');
+                 }, 1000);
+             }
+
+             // Firebase 整合準備（未來使用）
+             function fetchLeaderboardFromFirebase() {
+                 // 這裡未來會實現 Firebase 數據獲取
+                 // 現在先返回模擬數據
+                 return Promise.resolve(allPlayersData);
+             }
+
+             function updateLeaderboardToFirebase(playerData) {
+                 // 這裡未來會實現 Firebase 數據更新
+                 // 現在先返回成功狀態
+                 return Promise.resolve(true);
+             }
+         }
+
+         // === 好友系統功能 ===
+         function setupFriendsSystem() {
+             const friendsModal = document.getElementById('friends-modal');
+             const friendsBtn = document.getElementById('open-friends-button');
+             const closeFriendsBtn = document.getElementById('friends-close-btn');
+             
+             // 模擬好友數據（未來會由 Firebase 提供）
+             let friendsData = {
+                 friends: [
+                     { 
+                         id: 'friend1', 
+                         name: '麵包達人', 
+                         avatar: '👨‍🍳', 
+                         status: 'online', 
+                         lastSeen: '線上',
+                         level: 15,
+                         coins: 2500
+                     },
+                     { 
+                         id: 'friend2', 
+                         name: '甜點公主', 
+                         avatar: '👸', 
+                         status: 'offline', 
+                         lastSeen: '2小時前',
+                         level: 12,
+                         coins: 1800
+                     },
+                     { 
+                         id: 'friend3', 
+                         name: '烘焙王子', 
+                         avatar: '🤴', 
+                         status: 'online', 
+                         lastSeen: '線上',
+                         level: 20,
+                         coins: 3200
+                     }
+                 ],
+                 receivedRequests: [
+                     { 
+                         id: 'req1', 
+                         name: '餅乾怪獸', 
+                         avatar: '🍪', 
+                         time: '5分鐘前',
+                         level: 8
+                     },
+                     { 
+                         id: 'req2', 
+                         name: '蛋糕魔法師', 
+                         avatar: '🎂', 
+                         time: '1小時前',
+                         level: 14
+                     }
+                 ],
+                 sentRequests: [
+                     { 
+                         id: 'sent1', 
+                         name: '布丁大師', 
+                         avatar: '🍮', 
+                         time: '3小時前',
+                         level: 16
+                     }
+                 ],
+                 chatRooms: [
+                     {
+                         id: 'chat1',
+                         name: '麵包達人',
+                         avatar: '👨‍🍳',
+                         lastMessage: '今天又學會新配方了！',
+                         unreadCount: 2,
+                         messages: [
+                             { sender: 'friend', avatar: '👨‍🍳', text: '嗨！最近怎麼樣？', time: '10:30' },
+                             { sender: 'me', avatar: '👤', text: '很好啊！剛完成一個訂單', time: '10:32' },
+                             { sender: 'friend', avatar: '👨‍🍳', text: '太棒了！今天又學會新配方了！', time: '10:35' }
+                         ]
+                     },
+                     {
+                         id: 'chat2',
+                         name: '烘焙王子',
+                         avatar: '🤴',
+                         lastMessage: '要不要一起組隊？',
+                         unreadCount: 0,
+                         messages: [
+                             { sender: 'friend', avatar: '🤴', text: '要不要一起組隊？', time: '昨天' }
+                         ]
+                     },
+                     {
+                         id: 'chat3',
+                         name: '麵包店群組',
+                         avatar: '🏪',
+                         lastMessage: '大家今天的營業額如何？',
+                         unreadCount: 3,
+                         messages: [
+                             { sender: 'friend', avatar: '👸', text: '我今天賣了50個蛋糕！', time: '14:20' },
+                             { sender: 'friend', avatar: '🤴', text: '厲害！我也有45個麵包', time: '14:22' },
+                             { sender: 'friend', avatar: '👨‍🍳', text: '大家今天的營業額如何？', time: '14:25' }
+                         ]
+                     }
+                 ]
+             };
+
+             let currentChatRoom = null;
+
+             // 好友按鈕點擊事件
+             if (friendsBtn) {
+                 friendsBtn.addEventListener('click', function() {
+                     openFriendsModal();
+                 });
+             }
+
+             // 關閉按鈕事件
+             if (closeFriendsBtn) {
+                 closeFriendsBtn.addEventListener('click', function() {
+                     closeFriendsModal();
+                 });
+             }
+
+             // 背景點擊關閉
+             if (friendsModal) {
+                 friendsModal.addEventListener('click', function(e) {
+                     if (e.target === friendsModal) {
+                         closeFriendsModal();
+                     }
+                 });
+             }
+
+             // 頁籤切換事件
+             setupFriendsTabNavigation();
+
+             // 打開好友彈窗
+             function openFriendsModal() {
+                 friendsModal.classList.add('active');
+                 renderFriendsList();
+                 renderFriendRequests();
+                 renderChatRooms();
+                 updateFriendsCounts();
+             }
+
+             // 關閉好友彈窗
+             function closeFriendsModal() {
+                 friendsModal.classList.remove('active');
+             }
+
+             // 設置頁籤導航
+             function setupFriendsTabNavigation() {
+                 const tabs = document.querySelectorAll('.friends-tab');
+                 const contents = document.querySelectorAll('.friends-tab-content');
+
+                 tabs.forEach(tab => {
+                     tab.addEventListener('click', () => {
+                         // 移除所有 active 狀態
+                         tabs.forEach(t => t.classList.remove('active'));
+                         contents.forEach(c => c.classList.remove('active'));
+
+                         // 添加當前 active 狀態
+                         tab.classList.add('active');
+                         const targetContent = document.querySelector(`[data-content="${tab.dataset.tab}"]`);
+                         if (targetContent) {
+                             targetContent.classList.add('active');
+                         }
+
+                         // 根據頁籤加載對應內容
+                         switch(tab.dataset.tab) {
+                             case 'friends-list':
+                                 renderFriendsList();
+                                 break;
+                             case 'friend-requests':
+                                 renderFriendRequests();
+                                 break;
+                             case 'add-friend':
+                                 setupAddFriendPage();
+                                 break;
+                             case 'chat-rooms':
+                                 renderChatRooms();
+                                 break;
+                         }
+                     });
+                 });
+             }
+
+             // 渲染好友列表
+             function renderFriendsList() {
+                 const friendsList = document.getElementById('friends-list');
+                 if (!friendsList) return;
+
+                 friendsList.innerHTML = '';
+
+                 friendsData.friends.forEach(friend => {
+                     const friendItem = document.createElement('div');
+                     friendItem.className = 'friend-item';
+                     
+                     friendItem.innerHTML = `
+                         <div class="friend-avatar">${friend.avatar}</div>
+                         <div class="friend-info">
+                             <div class="friend-name">${friend.name}</div>
+                             <div class="friend-status">
+                                 <span class="status-indicator status-${friend.status}"></span>
+                                 ${friend.lastSeen} • Lv.${friend.level} • 🍯${friend.coins.toLocaleString()}
+                             </div>
+                         </div>
+                         <div class="friend-actions">
+                             <button class="action-btn" onclick="openChatWith('${friend.id}')">💬</button>
+                             <button class="action-btn" onclick="viewFriendProfile('${friend.id}')">👤</button>
+                             <button class="action-btn danger" onclick="removeFriend('${friend.id}')">🗑️</button>
+                         </div>
+                     `;
+                     
+                     friendsList.appendChild(friendItem);
+                 });
+
+                 // 設置搜尋和篩選功能
+                 setupFriendsSearch();
+             }
+
+             // 渲染好友邀請
+             function renderFriendRequests() {
+                 // 渲染收到的邀請
+                 const receivedList = document.getElementById('received-requests');
+                 if (receivedList) {
+                     receivedList.innerHTML = '';
+                     
+                     friendsData.receivedRequests.forEach(request => {
+                         const requestItem = document.createElement('div');
+                         requestItem.className = 'request-item';
+                         
+                         requestItem.innerHTML = `
+                             <div class="friend-avatar">${request.avatar}</div>
+                             <div class="request-info">
+                                 <div class="request-name">${request.name}</div>
+                                 <div class="request-time">${request.time} • Lv.${request.level}</div>
+                             </div>
+                             <div class="request-actions">
+                                 <button class="action-btn accept-btn" onclick="acceptFriendRequest('${request.id}')">✅</button>
+                                 <button class="action-btn reject-btn" onclick="rejectFriendRequest('${request.id}')">❌</button>
+                             </div>
+                         `;
+                         
+                         receivedList.appendChild(requestItem);
+                     });
+                 }
+
+                 // 渲染發送的邀請
+                 const sentList = document.getElementById('sent-requests');
+                 if (sentList) {
+                     sentList.innerHTML = '';
+                     
+                     friendsData.sentRequests.forEach(request => {
+                         const requestItem = document.createElement('div');
+                         requestItem.className = 'request-item';
+                         
+                         requestItem.innerHTML = `
+                             <div class="friend-avatar">${request.avatar}</div>
+                             <div class="request-info">
+                                 <div class="request-name">${request.name}</div>
+                                 <div class="request-time">${request.time} • Lv.${request.level}</div>
+                             </div>
+                             <div class="request-actions">
+                                 <button class="action-btn" onclick="cancelFriendRequest('${request.id}')">取消</button>
+                             </div>
+                         `;
+                         
+                         sentList.appendChild(requestItem);
+                     });
+                 }
+             }
+
+             // 設置新增好友頁面
+             function setupAddFriendPage() {
+                 const searchBtn = document.getElementById('search-friend-btn');
+                 const searchInput = document.getElementById('friend-search-input');
+                 const searchTabs = document.querySelectorAll('.search-tab');
+
+                 // 搜尋方式切換
+                 searchTabs.forEach(tab => {
+                     tab.addEventListener('click', () => {
+                         searchTabs.forEach(t => t.classList.remove('active'));
+                         tab.classList.add('active');
+                         
+                         const searchType = tab.dataset.search;
+                         switch(searchType) {
+                             case 'nickname':
+                                 searchInput.placeholder = '輸入好友暱稱...';
+                                 break;
+                             case 'id':
+                                 searchInput.placeholder = '輸入玩家ID...';
+                                 break;
+                             case 'nearby':
+                                 searchInput.placeholder = '搜尋附近玩家...';
+                                 break;
+                         }
+                     });
+                 });
+
+                 // 搜尋按鈕事件
+                 if (searchBtn) {
+                     searchBtn.addEventListener('click', () => {
+                         searchFriends();
+                     });
+                 }
+
+                 // Enter 鍵搜尋
+                 if (searchInput) {
+                     searchInput.addEventListener('keypress', (e) => {
+                         if (e.key === 'Enter') {
+                             searchFriends();
+                         }
+                     });
+                 }
+             }
+
+             // 搜尋好友功能
+             function searchFriends() {
+                 const searchInput = document.getElementById('friend-search-input');
+                 const searchResults = document.getElementById('search-results');
+                 const keyword = searchInput.value.trim();
+
+                 if (!keyword) {
+                     showNotification('⚠️ 請輸入搜尋關鍵字！', 'warning');
+                     return;
+                 }
+
+                 showNotification('🔍 正在搜尋...', 'info');
+
+                 // 模擬搜尋結果
+                 setTimeout(() => {
+                     const mockResults = [
+                         { id: 'search1', name: '蛋糕大師', avatar: '🎂', level: 18, coins: 2800, status: 'online' },
+                         { id: 'search2', name: '司康專家', avatar: '🧁', level: 10, coins: 1200, status: 'offline' },
+                         { id: 'search3', name: '麵包新手', avatar: '🥖', level: 3, coins: 500, status: 'online' }
+                     ];
+
+                     searchResults.innerHTML = '';
+
+                     if (mockResults.length === 0) {
+                         searchResults.innerHTML = '<div class="no-results">😔 找不到符合的玩家</div>';
+                     } else {
+                         mockResults.forEach(player => {
+                             const resultItem = document.createElement('div');
+                             resultItem.className = 'search-result-item';
+                             
+                             resultItem.innerHTML = `
+                                 <div class="friend-avatar">${player.avatar}</div>
+                                 <div class="friend-info">
+                                     <div class="friend-name">${player.name}</div>
+                                     <div class="friend-status">
+                                         <span class="status-indicator status-${player.status}"></span>
+                                         Lv.${player.level} • 🍯${player.coins.toLocaleString()}
+                                     </div>
+                                 </div>
+                                 <div class="friend-actions">
+                                     <button class="action-btn" onclick="sendFriendRequest('${player.id}')">➕ 加好友</button>
+                                 </div>
+                             `;
+                             
+                             searchResults.appendChild(resultItem);
+                         });
+                     }
+
+                     showNotification('✅ 搜尋完成！', 'success');
+                 }, 1000);
+             }
+
+             // 渲染聊天室
+             function renderChatRooms() {
+                 const chatRooms = document.getElementById('chat-rooms');
+                 if (!chatRooms) return;
+
+                 chatRooms.innerHTML = '';
+
+                 friendsData.chatRooms.forEach(room => {
+                     const roomItem = document.createElement('div');
+                     roomItem.className = 'chat-room-item';
+                     roomItem.onclick = () => openChatRoom(room.id);
+                     
+                     roomItem.innerHTML = `
+                         <div class="room-name">
+                             ${room.avatar} ${room.name}
+                             ${room.unreadCount > 0 ? `<span class="room-unread">${room.unreadCount}</span>` : ''}
+                         </div>
+                         <div class="room-last-message">${room.lastMessage}</div>
+                     `;
+                     
+                     chatRooms.appendChild(roomItem);
+                 });
+
+                 // 設置聊天輸入功能
+                 setupChatInput();
+             }
+
+             // 打開聊天室
+             function openChatRoom(roomId) {
+                 currentChatRoom = friendsData.chatRooms.find(room => room.id === roomId);
+                 if (!currentChatRoom) return;
+
+                 // 更新聊天室選中狀態
+                 document.querySelectorAll('.chat-room-item').forEach(item => {
+                     item.classList.remove('active');
+                 });
+                 event.target.closest('.chat-room-item').classList.add('active');
+
+                 // 更新聊天視窗標題
+                 document.querySelector('.chat-title').textContent = `${currentChatRoom.avatar} ${currentChatRoom.name}`;
+
+                 // 渲染聊天訊息
+                 renderChatMessages();
+
+                 // 顯示輸入區域
+                 document.getElementById('chat-input-area').style.display = 'block';
+
+                 // 清除未讀計數
+                 currentChatRoom.unreadCount = 0;
+                 renderChatRooms();
+                 updateFriendsCounts();
+             }
+
+             // 渲染聊天訊息
+             function renderChatMessages() {
+                 const chatMessages = document.getElementById('chat-messages');
+                 if (!chatMessages || !currentChatRoom) return;
+
+                 chatMessages.innerHTML = '';
+
+                 currentChatRoom.messages.forEach(message => {
+                     const messageDiv = document.createElement('div');
+                     messageDiv.className = `message ${message.sender === 'me' ? 'own' : ''}`;
+                     
+                     messageDiv.innerHTML = `
+                         <div class="message-avatar">${message.avatar}</div>
+                         <div class="message-content">
+                             <div class="message-text">${message.text}</div>
+                             <div class="message-time">${message.time}</div>
+                         </div>
+                     `;
+                     
+                     chatMessages.appendChild(messageDiv);
+                 });
+
+                 // 滾動到底部
+                 chatMessages.scrollTop = chatMessages.scrollHeight;
+             }
+
+             // 設置聊天輸入功能
+             function setupChatInput() {
+                 const sendBtn = document.getElementById('send-message-btn');
+                 const messageInput = document.getElementById('chat-message-input');
+
+                 if (sendBtn) {
+                     sendBtn.addEventListener('click', () => {
+                         sendMessage();
+                     });
+                 }
+
+                 if (messageInput) {
+                     messageInput.addEventListener('keypress', (e) => {
+                         if (e.key === 'Enter') {
+                             sendMessage();
+                         }
+                     });
+                 }
+             }
+
+             // 發送訊息
+             function sendMessage() {
+                 const messageInput = document.getElementById('chat-message-input');
+                 const messageText = messageInput.value.trim();
+
+                 if (!messageText || !currentChatRoom) return;
+
+                 // 添加訊息到聊天室
+                 const newMessage = {
+                     sender: 'me',
+                     avatar: '👤',
+                     text: messageText,
+                     time: new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })
+                 };
+
+                 currentChatRoom.messages.push(newMessage);
+                 currentChatRoom.lastMessage = messageText;
+
+                 // 重新渲染
+                 renderChatMessages();
+                 renderChatRooms();
+
+                 // 清空輸入框
+                 messageInput.value = '';
+
+                 showNotification('📤 訊息已發送！', 'success');
+             }
+
+             // 好友列表搜尋功能
+             function setupFriendsSearch() {
+                 const searchInput = document.getElementById('search-friends');
+                 const filterSelect = document.getElementById('friends-filter');
+
+                 if (searchInput) {
+                     searchInput.addEventListener('input', filterFriends);
+                 }
+
+                 if (filterSelect) {
+                     filterSelect.addEventListener('change', filterFriends);
+                 }
+             }
+
+             // 篩選好友
+             function filterFriends() {
+                 const searchKeyword = document.getElementById('search-friends').value.toLowerCase();
+                 const statusFilter = document.getElementById('friends-filter').value;
+                 const friendItems = document.querySelectorAll('.friend-item');
+
+                 friendItems.forEach(item => {
+                     const friendName = item.querySelector('.friend-name').textContent.toLowerCase();
+                     const friendStatus = item.querySelector('.status-indicator').className.includes('online') ? 'online' : 'offline';
+
+                     const matchesSearch = friendName.includes(searchKeyword);
+                     const matchesFilter = statusFilter === 'all' || statusFilter === friendStatus;
+
+                     item.style.display = (matchesSearch && matchesFilter) ? 'flex' : 'none';
+                 });
+             }
+
+             // 更新好友相關計數
+             function updateFriendsCounts() {
+                 document.getElementById('friends-count').textContent = friendsData.friends.length;
+                 document.getElementById('requests-count').textContent = friendsData.receivedRequests.length;
+                 
+                 const totalUnread = friendsData.chatRooms.reduce((sum, room) => sum + room.unreadCount, 0);
+                 document.getElementById('unread-count').textContent = totalUnread;
+             }
+
+             // 全域函數（供 HTML onclick 使用）
+             window.openChatWith = function(friendId) {
+                 const friend = friendsData.friends.find(f => f.id === friendId);
+                 if (friend) {
+                     // 切換到聊天室頁籤
+                     document.querySelector('[data-tab="chat-rooms"]').click();
+                     
+                     // 找到或創建聊天室
+                     let chatRoom = friendsData.chatRooms.find(room => room.name === friend.name);
+                     if (!chatRoom) {
+                         chatRoom = {
+                             id: 'chat_' + Date.now(),
+                             name: friend.name,
+                             avatar: friend.avatar,
+                             lastMessage: '開始對話...',
+                             unreadCount: 0,
+                             messages: []
+                         };
+                         friendsData.chatRooms.unshift(chatRoom);
+                         renderChatRooms();
+                     }
+                     
+                     setTimeout(() => openChatRoom(chatRoom.id), 100);
+                 }
+             };
+
+             window.viewFriendProfile = function(friendId) {
+                 const friend = friendsData.friends.find(f => f.id === friendId);
+                 if (friend) {
+                     openFriendProfileModal(friend);
+                 }
+             };
+
+             // 好友個人資料彈窗功能
+             function openFriendProfileModal(friend) {
+                 const profileModal = document.getElementById('friend-profile-modal');
+                 const closeProfileBtn = document.getElementById('friend-profile-close-btn');
+                 
+                 // 設置關閉事件
+                 if (closeProfileBtn) {
+                     closeProfileBtn.onclick = () => {
+                         profileModal.classList.remove('active');
+                     };
+                 }
+
+                 // 背景點擊關閉
+                 profileModal.onclick = (e) => {
+                     if (e.target === profileModal) {
+                         profileModal.classList.remove('active');
+                     }
+                 };
+
+                 // 填充好友基本資料
+                 fillFriendProfileData(friend);
+
+                 // 設置快速操作按鈕
+                 setupProfileQuickActions(friend);
+
+                 // 顯示彈窗
+                 profileModal.classList.add('active');
+             }
+
+             function fillFriendProfileData(friend) {
+                 // 基本資訊
+                 document.getElementById('profile-friend-avatar').textContent = friend.avatar;
+                 document.getElementById('profile-friend-name').textContent = friend.name;
+                 document.getElementById('profile-friend-status').className = `status-indicator status-${friend.status}`;
+                 document.getElementById('profile-friend-status-text').textContent = friend.lastSeen;
+                 document.getElementById('profile-friend-level').textContent = friend.level;
+
+                 // 模擬詳細資料（未來會從 Firebase 獲取）
+                 const detailedProfile = generateDetailedProfile(friend);
+
+                 // 店舖資訊
+                 document.getElementById('profile-shop-name').textContent = detailedProfile.shopName;
+                 document.getElementById('profile-shop-level').textContent = `Lv.${detailedProfile.shopLevel}`;
+                 document.getElementById('profile-coins').textContent = `🍯 ${friend.coins.toLocaleString()}`;
+                 document.getElementById('profile-total-revenue').textContent = `$${detailedProfile.totalRevenue.toLocaleString()}`;
+                 document.getElementById('profile-friend-join-date').textContent = detailedProfile.joinDate;
+
+                 // 遊戲統計
+                 document.getElementById('profile-bread-made').textContent = detailedProfile.breadMade;
+                 document.getElementById('profile-orders-completed').textContent = detailedProfile.ordersCompleted;
+                 document.getElementById('profile-customer-rating').textContent = detailedProfile.customerRating;
+                 document.getElementById('profile-days-played').textContent = detailedProfile.daysPlayed;
+
+                 // 成就列表
+                 renderProfileAchievements(detailedProfile.achievements);
+
+                 // 最近活動
+                 renderProfileActivities(detailedProfile.activities);
+
+                 // 招牌商品
+                 renderProfileProducts(detailedProfile.products);
+             }
+
+             function generateDetailedProfile(friend) {
+                 // 根據好友等級和名稱生成對應的詳細資料
+                 const profiles = {
+                     '麵包達人': {
+                         shopName: '達人烘焙屋',
+                         shopLevel: 8,
+                         totalRevenue: 25000,
+                         joinDate: '2023年11月',
+                         breadMade: 445,
+                         ordersCompleted: 156,
+                         customerRating: 4.9,
+                         daysPlayed: 28,
+                         achievements: [
+                             { icon: '🏆', name: '麵包大師', desc: '製作500個麵包' },
+                             { icon: '⭐', name: '五星好評', desc: '獲得100個五星評價' },
+                             { icon: '💰', name: '富豪商人', desc: '累積賺取20,000蜂蜜幣' }
+                         ],
+                         activities: [
+                             { time: '2小時前', desc: '製作了10個法式長棍麵包' },
+                             { time: '5小時前', desc: '完成了VIP訂單，獲得500蜂蜜幣' },
+                             { time: '昨天', desc: '店舖升級到Lv.8' }
+                         ],
+                         products: [
+                             { icon: '🥖', name: '招牌法棍', sales: '熱賣142個' },
+                             { icon: '🥐', name: '奶油牛角', sales: '熱賣98個' }
+                         ]
+                     },
+                     '甜點公主': {
+                         shopName: '公主甜品屋',
+                         shopLevel: 6,
+                         totalRevenue: 18000,
+                         joinDate: '2023年12月',
+                         breadMade: 320,
+                         ordersCompleted: 89,
+                         customerRating: 4.7,
+                         daysPlayed: 22,
+                         achievements: [
+                             { icon: '🍰', name: '甜點專家', desc: '製作200個甜點' },
+                             { icon: '👑', name: '人氣店主', desc: '獲得1000個讚' },
+                             { icon: '🎨', name: '創意大師', desc: '開發5種新配方' }
+                         ],
+                         activities: [
+                             { time: '離線中', desc: '最後活動：6小時前完成蛋糕訂單' },
+                             { time: '昨天', desc: '推出新產品：彩虹杯子蛋糕' },
+                             { time: '2天前', desc: '參加了烘焙大賽，獲得第二名' }
+                         ],
+                         products: [
+                             { icon: '🧁', name: '彩虹杯糕', sales: '熱賣76個' },
+                             { icon: '🍰', name: '草莓蛋糕', sales: '熱賣54個' }
+                         ]
+                     },
+                     '烘焙王子': {
+                         shopName: '王子烘焙工坊',
+                         shopLevel: 10,
+                         totalRevenue: 32000,
+                         joinDate: '2023年10月',
+                         breadMade: 650,
+                         ordersCompleted: 234,
+                         customerRating: 4.8,
+                         daysPlayed: 35,
+                         achievements: [
+                             { icon: '👑', name: '烘焙之王', desc: '達到最高等級' },
+                             { icon: '🔥', name: '效率專家', desc: '單日完成50個訂單' },
+                             { icon: '🌟', name: '完美主義', desc: '連續30天獲得五星評價' }
+                         ],
+                         activities: [
+                             { time: '1小時前', desc: '剛剛完成了大型婚禮蛋糕訂單' },
+                             { time: '3小時前', desc: '獲得了"本週銷量王"稱號' },
+                             { time: '今天', desc: '店舖收入突破1000蜂蜜幣' }
+                         ],
+                         products: [
+                             { icon: '🎂', name: '婚禮蛋糕', sales: '訂製23個' },
+                             { icon: '🍞', name: '吐司麵包', sales: '熱賣201個' }
+                         ]
+                     }
+                 };
+
+                 return profiles[friend.name] || {
+                     shopName: '小熊麵包店',
+                     shopLevel: friend.level,
+                     totalRevenue: friend.coins * 6,
+                     joinDate: '2024年1月',
+                     breadMade: friend.level * 30,
+                     ordersCompleted: friend.level * 10,
+                     customerRating: (4.0 + (friend.level * 0.05)).toFixed(1),
+                     daysPlayed: Math.max(1, friend.level * 2),
+                     achievements: [
+                         { icon: '🏅', name: '新手上路', desc: '完成第一個訂單' },
+                         { icon: '📈', name: '成長中', desc: '店舖等級達到' + friend.level }
+                     ],
+                     activities: [
+                         { time: friend.lastSeen, desc: '最近在努力經營店舖' }
+                     ],
+                     products: [
+                         { icon: '🍞', name: '基礎麵包', sales: '銷售中' }
+                     ]
+                 };
+             }
+
+             function renderProfileAchievements(achievements) {
+                 const container = document.getElementById('profile-achievements');
+                 container.innerHTML = '';
+
+                 achievements.forEach(achievement => {
+                     const achievementDiv = document.createElement('div');
+                     achievementDiv.className = 'achievement-item';
+                     achievementDiv.innerHTML = `
+                         <div class="achievement-icon">${achievement.icon}</div>
+                         <div class="achievement-info">
+                             <div class="achievement-name">${achievement.name}</div>
+                             <div class="achievement-desc">${achievement.desc}</div>
+                         </div>
+                     `;
+                     container.appendChild(achievementDiv);
+                 });
+             }
+
+             function renderProfileActivities(activities) {
+                 const container = document.getElementById('profile-activities');
+                 container.innerHTML = '';
+
+                 activities.forEach(activity => {
+                     const activityDiv = document.createElement('div');
+                     activityDiv.className = 'activity-item';
+                     activityDiv.innerHTML = `
+                         <div class="activity-time">${activity.time}</div>
+                         <div class="activity-desc">${activity.desc}</div>
+                     `;
+                     container.appendChild(activityDiv);
+                 });
+             }
+
+             function renderProfileProducts(products) {
+                 const container = document.getElementById('profile-products');
+                 container.innerHTML = '';
+
+                 products.forEach(product => {
+                     const productDiv = document.createElement('div');
+                     productDiv.className = 'product-item';
+                     productDiv.innerHTML = `
+                         <div class="product-icon">${product.icon}</div>
+                         <div class="product-info">
+                             <div class="product-name">${product.name}</div>
+                             <div class="product-sales">${product.sales}</div>
+                         </div>
+                     `;
+                     container.appendChild(productDiv);
+                 });
+             }
+
+             function setupProfileQuickActions(friend) {
+                 const sendMessageBtn = document.getElementById('profile-send-message');
+                 const sendGiftBtn = document.getElementById('profile-send-gift');
+
+                 if (sendMessageBtn) {
+                     sendMessageBtn.onclick = () => {
+                         document.getElementById('friend-profile-modal').classList.remove('active');
+                         openChatWith(friend.id);
+                     };
+                 }
+
+                 if (sendGiftBtn) {
+                     sendGiftBtn.onclick = () => {
+                         showNotification(`🎁 已向 ${friend.name} 發送禮物！`, 'success');
+                     };
+                 }
+             }
+
+             window.removeFriend = function(friendId) {
+                 const friend = friendsData.friends.find(f => f.id === friendId);
+                 if (friend && confirm(`確定要刪除好友 ${friend.name} 嗎？`)) {
+                     friendsData.friends = friendsData.friends.filter(f => f.id !== friendId);
+                     renderFriendsList();
+                     updateFriendsCounts();
+                     showNotification(`😢 已刪除好友 ${friend.name}`, 'info');
+                 }
+             };
+
+             window.acceptFriendRequest = function(requestId) {
+                 const request = friendsData.receivedRequests.find(r => r.id === requestId);
+                 if (request) {
+                     // 移動到好友列表
+                     friendsData.friends.push({
+                         id: 'friend_' + Date.now(),
+                         name: request.name,
+                         avatar: request.avatar,
+                         status: 'online',
+                         lastSeen: '線上',
+                         level: request.level,
+                         coins: 1000
+                     });
+                     
+                     // 從邀請列表移除
+                     friendsData.receivedRequests = friendsData.receivedRequests.filter(r => r.id !== requestId);
+                     
+                     renderFriendRequests();
+                     updateFriendsCounts();
+                     showNotification(`✅ 已接受 ${request.name} 的好友邀請！`, 'success');
+                 }
+             };
+
+             window.rejectFriendRequest = function(requestId) {
+                 const request = friendsData.receivedRequests.find(r => r.id === requestId);
+                 if (request) {
+                     friendsData.receivedRequests = friendsData.receivedRequests.filter(r => r.id !== requestId);
+                     renderFriendRequests();
+                     updateFriendsCounts();
+                     showNotification(`❌ 已拒絕 ${request.name} 的好友邀請`, 'info');
+                 }
+             };
+
+             window.cancelFriendRequest = function(requestId) {
+                 const request = friendsData.sentRequests.find(r => r.id === requestId);
+                 if (request) {
+                     friendsData.sentRequests = friendsData.sentRequests.filter(r => r.id !== requestId);
+                     renderFriendRequests();
+                     showNotification(`🚫 已取消對 ${request.name} 的好友邀請`, 'info');
+                 }
+             };
+
+             window.sendFriendRequest = function(playerId) {
+                 showNotification('📤 好友邀請已發送！', 'success');
+                 
+                 // 模擬添加到發送列表
+                 setTimeout(() => {
+                     document.getElementById('friend-search-input').value = '';
+                     document.getElementById('search-results').innerHTML = '<div class="no-results">🔍 輸入關鍵字開始搜尋好友</div>';
+                 }, 1000);
+             };
+
+             // Firebase 整合準備（未來使用）
+             window.fetchFriendsFromFirebase = function() {
+                 // 這裡未來會實現 Firebase 好友數據獲取
+                 return Promise.resolve(friendsData);
+             };
+
+             window.updateFriendsToFirebase = function(data) {
+                 // 這裡未來會實現 Firebase 好友數據更新
+                 return Promise.resolve(true);
+             };
+         }
+
+        // 遊戲內通知系統
+        function showNotification(message, type = 'info', duration = 4000) {
+            const container = document.getElementById('notification-container');
+            
+            // 創建通知元素
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            // 創建關閉按鈕
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'notification-close';
+            closeBtn.textContent = '×';
+            
+            // 創建內容區域
+            const content = document.createElement('div');
+            content.className = 'notification-content';
+            content.textContent = message;
+            
+            // 組裝通知
+            notification.appendChild(closeBtn);
+            notification.appendChild(content);
+
+            // 添加到容器
+            container.appendChild(notification);
+
+            // 觸發顯示動畫
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+
+            // 設置自動關閉
+            const autoCloseTimer = setTimeout(() => {
+                closeNotification(notification);
+            }, duration);
+
+            // 手動關閉按鈕
+            closeBtn.addEventListener('click', () => {
+                clearTimeout(autoCloseTimer);
+                closeNotification(notification);
+            });
+
+            // 關閉通知函數
+            function closeNotification(notif) {
+                notif.classList.remove('show');
+                setTimeout(() => {
+                    if (notif.parentNode) {
+                        notif.parentNode.removeChild(notif);
+                    }
+                }, 300);
+            }
+        }
+    </script>
+
+    <style>
+        /* === 全新的左上角玩家資料區塊樣式 (精緻版) === */
+        .profile-container {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: -10px; /* 讓頭像和資訊框稍微重疊 */
+            cursor: pointer;
+            background: #e2c49a; /* 深色底 */
+            border-radius: 22px;
+            padding: 8px;
+            border-top: 2px solid #fffbe6;
+            border-left: 2px solid #fffbe6;
+            border-bottom: 2px solid #b98c5c;
+            border-right: 2px solid #b98c5c;
+            box-shadow: 3px 3px 0 #a17d5c;
+            transition: all 0.2s ease-out;
+        }
+        .profile-container:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0 #a17d5c;
+        }
+        .profile-container:active {
+            transform: translate(1px, 1px);
+            box-shadow: 2px 2px 0 #a17d5c;
+        }
+
+        .profile-avatar-box {
+            width: 64px;
+            height: 64px;
+            background: #f5e1c6;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            z-index: 2;
+            border: 3px solid #b98c5c;
+        }
+
+        .profile-details-box {
+            background: #f5e1c6;
+            border-radius: 18px;
+            padding: 8px 16px 8px 24px; /* 左邊 padding 大一點，因為有重疊 */
+            margin-left: -18px; /* 讓它向左移動，與頭像重疊 */
+            z-index: 1;
+            border: 3px solid #b98c5c;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 180px;
+        }
+
+        .profile-name {
+            font-size: 1.2rem;
+            color: #5c4033;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .profile-xp-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .profile-level-box {
+            background: #DAA520; /* 等級背景色 */
+            color: white;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border-radius: 8px;
+            padding: 2px 8px;
+            border: 2px solid #fff;
+            box-shadow: 1px 1px 0 #a17d5c;
+        }
+
+        .xp-bar-background {
+            flex-grow: 1;
+            height: 14px;
+            background: #a17d5c; /* 經驗條底色 */
+            border-radius: 7px;
+            border: 1px solid #5c4033;
+            padding: 2px;
+        }
+
+        .xp-bar-fill {
+            height: 100%;
+            background: linear-gradient(to right, #6abf4b, #a3d96c); /* 經驗條顏色 */
+            border-radius: 5px;
+            width: 30%; /* 預設寬度，可以由 JS 控制 */
+        }
+
+        /* === 進貨系統彈窗樣式 === */
+        #stocking-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #stocking-modal.active {
+            display: flex;
+        }
+
+        .stocking-panel {
+            background: #f5e1c6;
+            border: 4px solid #b98c5c;
+            border-radius: 16px;
+            box-shadow: 8px 8px 0 #a17d5c;
+            width: 90%;
+            max-width: 800px;
+            height: auto;
+            max-height: 85vh;
+            overflow: hidden;
+            position: relative;
+            padding: 24px;
+            font-family: 'Zpix', monospace;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stocking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 3px solid #b98c5c;
+        }
+
+        .stocking-header h2 {
+            color: #5c4033;
+            font-size: 1.8rem;
+            text-shadow: 2px 2px 0 #fffbe6;
+        }
+
+        .current-coins {
+            background: #DAA520;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 2px solid #fff;
+            box-shadow: 2px 2px 0 #a17d5c;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .bread-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+            flex: 1;
+            align-content: start;
+        }
+
+        @media (max-width: 600px) {
+            .bread-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .bread-card {
+            background: #ffe7b2;
+            border: 3px solid #d1914e;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            box-shadow: 4px 4px 0 #a17d5c;
+            transition: transform 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 200px;
+        }
+
+        .bread-card:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 #a17d5c;
+        }
+
+        .bread-icon {
+            font-size: 2.5rem;
+            margin-bottom: 6px;
+            filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.3));
+        }
+
+        .bread-info h3 {
+            color: #5c4033;
+            font-size: 1.1rem;
+            margin: 8px 0;
+            text-shadow: 1px 1px 0 #fffbe6;
+        }
+
+        .bread-price {
+            color: #8B4513;
+            font-weight: bold;
+            margin: 4px 0;
+        }
+
+        .bread-stock {
+            color: #2E8B57;
+            font-weight: bold;
+            margin: 4px 0;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 12px 0;
+        }
+
+        .qty-btn {
+            width: 32px;
+            height: 32px;
+            background: #DAA520;
+            color: white;
+            border: 2px solid #fff;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 2px 2px 0 #a17d5c;
+            transition: all 0.1s ease;
+        }
+
+        .qty-btn:hover {
+            background: #FFD700;
+            transform: translate(-1px, -1px);
+            box-shadow: 3px 3px 0 #a17d5c;
+        }
+
+        .qty-btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0 #a17d5c;
+        }
+
+        .qty-input {
+            width: 60px;
+            height: 32px;
+            text-align: center;
+            background: #fff;
+            border: 2px solid #d1914e;
+            border-radius: 6px;
+            font-family: 'Zpix', monospace;
+            font-size: 1rem;
+            color: #5c4033;
+        }
+
+        .qty-input:focus {
+            outline: none;
+            border-color: #DAA520;
+            box-shadow: 0 0 0 2px rgba(218, 165, 32, 0.3);
+        }
+
+        .subtotal {
+            color: #8B4513;
+            font-weight: bold;
+            font-size: 1.1rem;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid #d1914e;
+        }
+
+        .stocking-footer {
+            border-top: 3px solid #b98c5c;
+            padding-top: 16px;
+            margin-top: auto;
+            flex-shrink: 0;
+        }
+
+        .total-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 2px solid #d1914e;
+        }
+
+        .total-amount {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #8B4513;
+            text-shadow: 1px 1px 0 #fffbe6;
+        }
+
+        .remaining-coins {
+            font-size: 1.1rem;
+            color: #2E8B57;
+            font-weight: bold;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .pixel-btn {
+            font-family: 'Zpix', monospace;
+            font-size: 1rem;
+            font-weight: bold;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid;
+        }
+
+        .pixel-btn.primary {
+            background: linear-gradient(180deg, #f5e9d3 70%, #e2c49a 100%) !important;
+            color: #5c4033 !important;
+            border: 4px solid #7c4a18 !important;
+            box-shadow:
+                0 0 0 4px #fff inset,
+                4px 4px 0 #a0522d,
+                0 0 0 4px #b98c5c !important;
+            border-radius: 18px !important;
+            font-family: 'Zpix', monospace !important;
+            font-size: 1.25rem !important;
+            font-weight: bold !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            padding: 14px 32px !important;
+            letter-spacing: 2px !important;
+            cursor: pointer !important;
+            transition: box-shadow 0.1s, background 0.1s, transform 0.08s !important;
+            position: relative !important;
+        }
+        .pixel-btn.primary .btn-icon {
+            font-size: 1.2rem !important;
+            color: #7c4a18 !important;
+            margin-right: 6px !important;
+            background: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+        }
+        .pixel-btn.primary:hover {
+            background: linear-gradient(180deg, #f9f4ea 70%, #e2c49a 100%) !important;
+            box-shadow:
+                0 0 0 4px #fff inset,
+                0 0 8px #e2c49a,
+                4px 4px 0 #a0522d,
+                0 0 0 4px #b98c5c !important;
+            transform: translate(-1px, -1px) !important;
+        }
+        .pixel-btn.primary:active {
+            background: #e2c49a !important;
+            box-shadow:
+                0 0 0 4px #fff inset,
+                2px 2px 0 #a0522d,
+                0 0 0 4px #b98c5c !important;
+            transform: translate(1px, 1px) !important;
+        }
+        .pixel-btn.secondary {
+            background: linear-gradient(180deg, #ddd 80%, #bbb 100%);
+            color: #5c4033;
+            border-color: #fff;
+            box-shadow: 3px 3px 0 #999;
+        }
+
+        .pixel-btn.secondary:hover {
+            background: linear-gradient(180deg, #eee 80%, #ccc 100%);
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0 #999;
+        }
+
+        .pixel-btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0 #a17d5c;
+        }
+
+        /* 右下角進貨按鈕特殊樣式 */
+        #open-stocking-button {
+            all: unset;
+            font-family: 'Zpix', monospace;
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #5c4033;
+            background: linear-gradient(180deg, #f5e9d3 70%, #b98c5c 100%);
+            border: 4px solid #7c4a18;
+            box-shadow:
+                0 0 0 4px #fff inset,
+                4px 4px 0 #a0522d,
+                0 0 0 8px #b98c5c;
+            border-radius: 18px;
+            padding: 18px 44px 16px 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            letter-spacing: 4px;
+            min-width: 180px;
+            min-height: 64px;
+            justify-content: center;
+            transition: box-shadow 0.1s, background 0.1s, transform 0.08s;
+            position: relative;
+        }
+        #open-stocking-button:hover {
+            background: linear-gradient(180deg, #f9f4ea 70%, #b98c5c 100%);
+            box-shadow:
+                0 0 0 4px #fff inset,
+                0 0 8px #e2c49a,
+                4px 4px 0 #a0522d,
+                0 0 0 8px #b98c5c;
+            border-radius: 18px;
+            transform: translate(-1px, -1px);
+        }
+        #open-stocking-button:active {
+            background: #e2c49a;
+            box-shadow:
+                0 0 0 4px #fff inset,
+                2px 2px 0 #a0522d,
+                0 0 0 8px #b98c5c;
+            border-radius: 18px;
+            transform: translate(1px, 1px);
+        }
+        #open-stocking-button .btn-icon {
+            font-size: 1.3rem;
+            margin-right: 6px;
+            background: none;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+            filter: drop-shadow(1px 1px 0 #fffbe6);
+        }
+
+        /* === 遊戲內通知系統樣式 === */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .notification {
+            background: #f5e1c6;
+            border: 3px solid #b98c5c;
+            border-radius: 12px;
+            padding: 16px 20px;
+            font-family: 'Zpix', monospace;
+            font-size: 1rem;
+            color: #5c4033;
+            box-shadow: 4px 4px 0 #a17d5c;
+            transform: translateY(-100px);
+            opacity: 0;
+            transition: all 0.3s ease-out;
+            white-space: pre-line;
+            text-align: center;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 60px;
+            line-height: 1.4;
+        }
+
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .notification.success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+            box-shadow: 4px 4px 0 #1e7e34;
+        }
+
+        .notification.warning {
+            background: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+            box-shadow: 4px 4px 0 #d39e00;
+        }
+
+        .notification.error {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+            box-shadow: 4px 4px 0 #a71e2a;
+        }
+
+        .notification-close {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: inherit;
+            cursor: pointer;
+            font-family: 'Zpix', monospace;
+            opacity: 0.6;
+            transition: opacity 0.2s ease;
+            z-index: 10;
+        }
+
+        .notification-close:hover {
+            opacity: 1;
+        }
+
+        .notification-content {
+            flex: 1;
+            padding-right: 30px;
+            white-space: pre-line;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes notificationSlideIn {
+            from {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+                 @keyframes notificationSlideOut {
+             from {
+                 transform: translateY(0);
+                 opacity: 1;
+             }
+             to {
+                 transform: translateY(-100px);
+                 opacity: 0;
+             }
+         }
+
+         /* === 排行榜彈窗樣式 === */
+         #leaderboard-modal {
+             position: fixed;
+             top: 0;
+             left: 0;
+             width: 100%;
+             height: 100%;
+             background: rgba(0, 0, 0, 0.7);
+             z-index: 1500;
+             display: none;
+             align-items: center;
+             justify-content: center;
+         }
+
+         #leaderboard-modal.active {
+             display: flex;
+         }
+
+         .leaderboard-panel {
+             background: #f5e1c6;
+             border: 4px solid #b98c5c;
+             border-radius: 16px;
+             box-shadow: 8px 8px 0 #a17d5c;
+             width: 90%;
+             max-width: 600px;
+             height: auto;
+             max-height: 85vh;
+             overflow: hidden;
+             position: relative;
+             padding: 24px;
+             font-family: 'Zpix', monospace;
+             display: flex;
+             flex-direction: column;
+         }
+
+         .leaderboard-header {
+             text-align: center;
+             margin-bottom: 20px;
+             padding-bottom: 16px;
+             border-bottom: 3px solid #b98c5c;
+         }
+
+         .leaderboard-header h2 {
+             color: #5c4033;
+             font-size: 1.8rem;
+             text-shadow: 2px 2px 0 #fffbe6;
+             margin-bottom: 16px;
+         }
+
+         .leaderboard-tabs {
+             display: flex;
+             gap: 8px;
+             justify-content: center;
+             margin-bottom: 0;
+         }
+
+         .leaderboard-tab {
+             font-family: 'Zpix', monospace;
+             background: rgba(255, 255, 255, 0.7);
+             border: 2px solid #d1914e;
+             border-radius: 8px;
+             padding: 8px 16px;
+             color: #8B4513;
+             cursor: pointer;
+             transition: all 0.2s ease;
+             font-size: 0.9rem;
+         }
+
+         .leaderboard-tab:hover {
+             background: rgba(255, 215, 0, 0.3);
+             transform: translateY(-1px);
+         }
+
+         .leaderboard-tab.active {
+             background: #FFD700;
+             color: #5c4033;
+             font-weight: bold;
+             box-shadow: 2px 2px 0 #DAA520;
+         }
+
+         .leaderboard-content {
+             flex: 1;
+             overflow-y: auto;
+         }
+
+         /* 前三名領獎台 */
+         .top-three {
+             display: flex;
+             justify-content: center;
+             align-items: end;
+             margin-bottom: 24px;
+             gap: 12px;
+         }
+
+         .podium-item {
+             background: #ffe7b2;
+             border: 3px solid #d1914e;
+             border-radius: 12px;
+             padding: 12px 8px;
+             text-align: center;
+             box-shadow: 4px 4px 0 #a17d5c;
+             min-width: 120px;
+             position: relative;
+         }
+
+         .podium-item.first-place {
+             background: linear-gradient(180deg, #FFD700 80%, #DAA520 100%);
+             border-color: #FFD700;
+             transform: translateY(-10px);
+             z-index: 3;
+         }
+
+         .podium-item.second-place {
+             background: linear-gradient(180deg, #C0C0C0 80%, #A9A9A9 100%);
+             border-color: #C0C0C0;
+             transform: translateY(-5px);
+             z-index: 2;
+         }
+
+         .podium-item.third-place {
+             background: linear-gradient(180deg, #CD7F32 80%, #B8860B 100%);
+             border-color: #CD7F32;
+             z-index: 1;
+         }
+
+         .podium-rank {
+             font-size: 1.5rem;
+             margin-bottom: 6px;
+         }
+
+         .podium-avatar {
+             font-size: 2rem;
+             margin-bottom: 6px;
+         }
+
+         .podium-name {
+             font-size: 0.9rem;
+             color: #5c4033;
+             font-weight: bold;
+             margin-bottom: 4px;
+         }
+
+         .podium-coins {
+             font-size: 0.8rem;
+             color: #2E8B57;
+             font-weight: bold;
+         }
+
+         /* 排行榜列表 */
+         .leaderboard-list {
+             background: rgba(255, 255, 255, 0.7);
+             border: 2px solid #d1914e;
+             border-radius: 12px;
+             overflow: hidden;
+             margin-bottom: 16px;
+         }
+
+         .leaderboard-list-header {
+             background: #d1914e;
+             color: white;
+             padding: 12px;
+             display: grid;
+             grid-template-columns: 60px 1fr 100px;
+             gap: 12px;
+             font-weight: bold;
+             text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+         }
+
+         .leaderboard-items {
+             max-height: 240px;
+             overflow-y: auto;
+             padding-right: 8px;
+         }
+
+         /* 隱藏滾輪 */
+         .leaderboard-items::-webkit-scrollbar {
+             width: 0;
+             height: 0;
+         }
+
+         .leaderboard-items::-webkit-scrollbar-track {
+             background: transparent;
+         }
+
+         .leaderboard-items::-webkit-scrollbar-thumb {
+             background: transparent;
+         }
+
+         .leaderboard-items {
+             scrollbar-width: none; /* Firefox */
+             -ms-overflow-style: none; /* IE and Edge */
+         }
+
+         .leaderboard-item {
+             padding: 10px 12px;
+             display: grid;
+             grid-template-columns: 60px 1fr 100px;
+             gap: 12px;
+             align-items: center;
+             border-bottom: 1px solid #e5d5c0;
+             transition: background 0.2s ease;
+         }
+
+         .leaderboard-item:hover {
+             background: rgba(255, 231, 178, 0.5);
+         }
+
+         .leaderboard-item:last-child {
+             border-bottom: none;
+         }
+
+         .item-rank {
+             font-weight: bold;
+             color: #8B4513;
+             text-align: center;
+         }
+
+         .item-player {
+             display: flex;
+             align-items: center;
+             gap: 8px;
+         }
+
+         .item-avatar {
+             font-size: 1.2rem;
+         }
+
+         .item-name {
+             color: #5c4033;
+             font-weight: bold;
+         }
+
+         .item-coins {
+             color: #2E8B57;
+             font-weight: bold;
+             text-align: right;
+         }
+
+         /* 當前玩家排名 */
+         .current-player-rank {
+             background: linear-gradient(180deg, #E6F3FF 80%, #B3D9FF 100%);
+             border: 3px solid #4A90E2;
+             border-radius: 12px;
+             padding: 12px;
+             margin-bottom: 16px;
+         }
+
+         .current-player-label {
+             text-align: center;
+             color: #2C5282;
+             font-weight: bold;
+             margin-bottom: 8px;
+             font-size: 0.9rem;
+         }
+
+         .current-player-info {
+             display: grid;
+             grid-template-columns: 60px 40px 1fr 100px;
+             gap: 12px;
+             align-items: center;
+         }
+
+         .current-rank {
+             font-weight: bold;
+             color: #2C5282;
+             text-align: center;
+             background: white;
+             padding: 4px;
+             border-radius: 6px;
+             border: 1px solid #4A90E2;
+         }
+
+         .current-avatar {
+             font-size: 1.5rem;
+             text-align: center;
+         }
+
+         .current-name {
+             color: #2C5282;
+             font-weight: bold;
+         }
+
+         .current-coins {
+             color: #2E8B57;
+             font-weight: bold;
+             text-align: right;
+         }
+
+         /* 排行榜底部 */
+         .leaderboard-footer {
+             margin-top: auto;
+             flex-shrink: 0;
+             border-top: 3px solid #b98c5c;
+             padding-top: 16px;
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+         }
+
+         .refresh-info {
+             color: #8B4513;
+             font-size: 0.9rem;
+         }
+
+         /* 響應式設計 */
+         @media (max-width: 600px) {
+             .top-three {
+                 flex-direction: column;
+                 align-items: center;
+             }
+             
+             .podium-item.first-place {
+                 order: 1;
+                 transform: none;
+             }
+             
+             .podium-item.second-place {
+                 order: 2;
+                 transform: none;
+             }
+             
+             .podium-item.third-place {
+                 order: 3;
+                 transform: none;
+             }
+
+             .leaderboard-list-header,
+             .leaderboard-item,
+             .current-player-info {
+                 grid-template-columns: 50px 1fr 80px;
+                 gap: 8px;
+             }
+         }
+
+         /* === 好友系統彈窗樣式 === */
+         #friends-modal {
+             position: fixed;
+             top: 0;
+             left: 0;
+             width: 100%;
+             height: 100%;
+             background: rgba(0, 0, 0, 0.8);
+             z-index: 1600;
+             display: none;
+             align-items: center;
+             justify-content: center;
+         }
+
+         #friends-modal.active {
+             display: flex;
+         }
+
+         .friends-panel {
+             background: #f5e1c6;
+             border: 4px solid #b98c5c;
+             border-radius: 16px;
+             box-shadow: 8px 8px 0 #a17d5c;
+             width: 95%;
+             max-width: 1000px;
+             height: 90vh;
+             max-height: 700px;
+             overflow: hidden;
+             position: relative;
+             padding: 20px;
+             font-family: 'Zpix', monospace;
+             display: flex;
+             flex-direction: column;
+         }
+
+         .friends-header {
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+             padding-bottom: 16px;
+             border-bottom: 3px solid #b98c5c;
+             margin-bottom: 20px;
+         }
+
+         .friends-header h2 {
+             color: #5c4033;
+             font-size: 1.8rem;
+             text-shadow: 2px 2px 0 #fffbe6;
+             margin: 0;
+         }
+
+         .online-status {
+             background: #4CAF50;
+             color: white;
+             padding: 6px 12px;
+             border-radius: 12px;
+             font-size: 0.9rem;
+             font-weight: bold;
+             border: 2px solid #388E3C;
+             box-shadow: 2px 2px 0 #2E7D32;
+         }
+
+         .friends-content {
+             display: flex;
+             flex: 1;
+             gap: 20px;
+             overflow: hidden;
+         }
+
+         /* 左側選單 */
+         .friends-sidebar {
+             width: 200px;
+             flex-shrink: 0;
+         }
+
+         .friends-tabs {
+             display: flex;
+             flex-direction: column;
+             gap: 8px;
+         }
+
+         .friends-tab {
+             background: #ffe7b2;
+             border: 3px solid #d1914e;
+             border-radius: 12px;
+             padding: 12px;
+             cursor: pointer;
+             transition: all 0.2s ease;
+             display: flex;
+             align-items: center;
+             gap: 8px;
+             font-family: 'Zpix', monospace;
+             font-size: 0.9rem;
+             font-weight: bold;
+             color: #5c4033;
+             box-shadow: 3px 3px 0 #a17d5c;
+         }
+
+         .friends-tab:hover {
+             background: #ffeaa0;
+             transform: translate(-1px, -1px);
+             box-shadow: 4px 4px 0 #a17d5c;
+         }
+
+         .friends-tab.active {
+             background: linear-gradient(180deg, #FFD700 80%, #DAA520 100%);
+             border-color: #FFD700;
+             transform: translate(-1px, -1px);
+             box-shadow: 4px 4px 0 #a17d5c;
+         }
+
+         .tab-icon {
+             font-size: 1.2rem;
+         }
+
+         .tab-text {
+             flex: 1;
+         }
+
+         .tab-badge {
+             background: #ff4444;
+             color: white;
+             font-size: 0.7rem;
+             padding: 2px 6px;
+             border-radius: 8px;
+             min-width: 18px;
+             text-align: center;
+             border: 1px solid #cc0000;
+         }
+
+         /* 右側主要內容 */
+         .friends-main {
+             flex: 1;
+             background: rgba(255, 255, 255, 0.7);
+             border: 2px solid #d1914e;
+             border-radius: 12px;
+             padding: 16px;
+             overflow: hidden;
+             display: flex;
+             flex-direction: column;
+         }
+
+         .friends-tab-content {
+             display: none;
+             flex-direction: column;
+             height: 100%;
+         }
+
+         .friends-tab-content.active {
+             display: flex;
+         }
+
+         /* 好友列表頁面 */
+         .friends-list-header {
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+             margin-bottom: 16px;
+             padding-bottom: 12px;
+             border-bottom: 2px solid #d1914e;
+         }
+
+         .friends-list-header h3 {
+             color: #5c4033;
+             margin: 0;
+             font-size: 1.3rem;
+         }
+
+         .list-controls {
+             display: flex;
+             gap: 12px;
+             align-items: center;
+         }
+
+         .pixel-input {
+             background: white;
+             border: 2px solid #d1914e;
+             border-radius: 8px;
+             padding: 8px 12px;
+             font-family: 'Zpix', monospace;
+             font-size: 0.9rem;
+             color: #5c4033;
+         }
+
+         .pixel-input:focus {
+             outline: none;
+             border-color: #DAA520;
+             box-shadow: 0 0 0 2px rgba(218, 165, 32, 0.3);
+         }
+
+         .pixel-input.large {
+             width: 100%;
+             padding: 12px;
+             font-size: 1rem;
+         }
+
+         .pixel-select {
+             background: white;
+             border: 2px solid #d1914e;
+             border-radius: 8px;
+             padding: 8px 12px;
+             font-family: 'Zpix', monospace;
+             font-size: 0.9rem;
+             color: #5c4033;
+             cursor: pointer;
+         }
+
+         .friends-list {
+             flex: 1;
+             overflow-y: auto;
+             display: flex;
+             flex-direction: column;
+             gap: 8px;
+         }
+
+         .friend-item {
+             background: #ffe7b2;
+             border: 2px solid #d1914e;
+             border-radius: 12px;
+             padding: 12px;
+             display: flex;
+             align-items: center;
+             gap: 12px;
+             transition: all 0.2s ease;
+         }
+
+         .friend-item:hover {
+             background: #ffeaa0;
+             transform: translate(-1px, -1px);
+             box-shadow: 3px 3px 0 #a17d5c;
+         }
+
+         .friend-avatar {
+             width: 48px;
+             height: 48px;
+             border-radius: 50%;
+             background: #fff;
+             border: 2px solid #d1914e;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             font-size: 1.8rem;
+             flex-shrink: 0;
+         }
+
+         .friend-info {
+             flex: 1;
+         }
+
+         .friend-name {
+             font-weight: bold;
+             color: #5c4033;
+             font-size: 1.1rem;
+             margin-bottom: 4px;
+         }
+
+         .friend-status {
+             font-size: 0.8rem;
+             color: #8B4513;
+             display: flex;
+             align-items: center;
+             gap: 4px;
+         }
+
+         .status-indicator {
+             width: 8px;
+             height: 8px;
+             border-radius: 50%;
+             display: inline-block;
+         }
+
+         .status-online {
+             background: #4CAF50;
+         }
+
+         .status-offline {
+             background: #999;
+         }
+
+         .friend-actions {
+             display: flex;
+             gap: 8px;
+         }
+
+         .action-btn {
+             background: #DAA520;
+             border: 2px solid #FFD700;
+             border-radius: 8px;
+             padding: 6px 10px;
+             color: white;
+             font-family: 'Zpix', monospace;
+             font-size: 0.8rem;
+             cursor: pointer;
+             transition: all 0.2s ease;
+             box-shadow: 2px 2px 0 #a17d5c;
+         }
+
+         .action-btn:hover {
+             background: #FFD700;
+             transform: translate(-1px, -1px);
+             box-shadow: 3px 3px 0 #a17d5c;
+         }
+
+         .action-btn.danger {
+             background: #ff4444;
+             border-color: #ff6666;
+         }
+
+         .action-btn.danger:hover {
+             background: #ff6666;
+         }
+
+         /* 好友邀請頁面 */
+         .requests-header {
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+             margin-bottom: 16px;
+             padding-bottom: 12px;
+             border-bottom: 2px solid #d1914e;
+         }
+
+         .requests-section {
+             margin-bottom: 24px;
+         }
+
+         .requests-section h4 {
+             color: #5c4033;
+             margin-bottom: 12px;
+             font-size: 1.1rem;
+         }
+
+         .requests-list {
+             display: flex;
+             flex-direction: column;
+             gap: 8px;
+         }
+
+         .request-item {
+             background: #E6F3FF;
+             border: 2px solid #4A90E2;
+             border-radius: 12px;
+             padding: 12px;
+             display: flex;
+             align-items: center;
+             gap: 12px;
+         }
+
+         .request-info {
+             flex: 1;
+         }
+
+         .request-name {
+             font-weight: bold;
+             color: #2C5282;
+             margin-bottom: 4px;
+         }
+
+         .request-time {
+             font-size: 0.8rem;
+             color: #4A90E2;
+         }
+
+         .request-actions {
+             display: flex;
+             gap: 8px;
+         }
+
+         .accept-btn {
+             background: #4CAF50;
+             border-color: #66BB6A;
+         }
+
+         .reject-btn {
+             background: #ff4444;
+             border-color: #ff6666;
+         }
+
+         /* 新增好友頁面 */
+         .add-friend-form {
+             display: flex;
+             flex-direction: column;
+             gap: 20px;
+         }
+
+         .input-group {
+             display: flex;
+             flex-direction: column;
+             gap: 8px;
+         }
+
+         .input-group label {
+             color: #5c4033;
+             font-weight: bold;
+             font-size: 1rem;
+         }
+
+         .search-tabs {
+             display: flex;
+             gap: 8px;
+         }
+
+         .search-tab {
+             background: #ffe7b2;
+             border: 2px solid #d1914e;
+             border-radius: 8px;
+             padding: 8px 16px;
+             cursor: pointer;
+             font-family: 'Zpix', monospace;
+             font-size: 0.9rem;
+             color: #5c4033;
+             transition: all 0.2s ease;
+         }
+
+         .search-tab.active {
+             background: #FFD700;
+             border-color: #DAA520;
+         }
+
+         .input-group:has(.large) {
+             flex-direction: row;
+             align-items: center;
+         }
+
+         .search-results {
+             background: rgba(255, 255, 255, 0.5);
+             border: 2px solid #d1914e;
+             border-radius: 12px;
+             padding: 16px;
+             min-height: 200px;
+             display: flex;
+             flex-direction: column;
+             gap: 8px;
+         }
+
+         .no-results {
+             text-align: center;
+             color: #8B4513;
+             font-style: italic;
+             margin-top: 60px;
+         }
+
+         .search-result-item {
+             background: #ffe7b2;
+             border: 2px solid #d1914e;
+             border-radius: 12px;
+             padding: 12px;
+             display: flex;
+             align-items: center;
+             gap: 12px;
+         }
+
+         /* 聊天室頁面 */
+         .chat-header {
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+             margin-bottom: 16px;
+             padding-bottom: 12px;
+             border-bottom: 2px solid #d1914e;
+         }
+
+         .chat-controls {
+             display: flex;
+             gap: 8px;
+         }
+
+         .chat-layout {
+             display: flex;
+             flex: 1;
+             gap: 16px;
+             overflow: hidden;
+         }
+
+         .chat-rooms-list {
+             width: 250px;
+             flex-shrink: 0;
+             background: rgba(255, 255, 255, 0.5);
+             border: 2px solid #d1914e;
+             border-radius: 12px;
+             padding: 12px;
+             overflow-y: auto;
+         }
+
+         .chat-rooms-header {
+             font-weight: bold;
+             color: #5c4033;
+             margin-bottom: 12px;
+             padding-bottom: 8px;
+             border-bottom: 1px solid #d1914e;
+         }
+
+         .chat-room-item {
+             background: #ffe7b2;
+             border: 2px solid #d1914e;
+             border-radius: 8px;
+             padding: 10px;
+             margin-bottom: 8px;
+             cursor: pointer;
+             transition: all 0.2s ease;
+         }
+
+         .chat-room-item:hover,
+         .chat-room-item.active {
+             background: #FFD700;
+             transform: translate(-1px, -1px);
+             box-shadow: 2px 2px 0 #a17d5c;
+         }
+
+         .room-name {
+             font-weight: bold;
+             color: #5c4033;
+             margin-bottom: 4px;
+         }
+
+         .room-last-message {
+             font-size: 0.8rem;
+             color: #8B4513;
+             overflow: hidden;
+             text-overflow: ellipsis;
+             white-space: nowrap;
+         }
+
+         .room-unread {
+             background: #ff4444;
+             color: white;
+             font-size: 0.7rem;
+             padding: 2px 6px;
+             border-radius: 8px;
+             float: right;
+         }
+
+         .chat-window {
+             flex: 1;
+             background: white;
+             border: 2px solid #d1914e;
+             border-radius: 12px;
+             display: flex;
+             flex-direction: column;
+             overflow: hidden;
+         }
+
+         .chat-window-header {
+             background: #d1914e;
+             color: white;
+             padding: 12px 16px;
+             font-weight: bold;
+             border-bottom: 2px solid #b98c5c;
+         }
+
+         .chat-messages {
+             flex: 1;
+             padding: 16px;
+             overflow-y: auto;
+             display: flex;
+             flex-direction: column;
+             gap: 12px;
+         }
+
+         .no-chat-selected {
+             text-align: center;
+             color: #8B4513;
+             font-style: italic;
+             margin-top: 100px;
+         }
+
+         .message {
+             display: flex;
+             align-items: flex-start;
+             gap: 8px;
+         }
+
+         .message.own {
+             flex-direction: row-reverse;
+         }
+
+         .message-avatar {
+             width: 32px;
+             height: 32px;
+             border-radius: 50%;
+             background: #ffe7b2;
+             border: 2px solid #d1914e;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             font-size: 1rem;
+             flex-shrink: 0;
+         }
+
+         .message-content {
+             background: #ffe7b2;
+             border: 2px solid #d1914e;
+             border-radius: 12px;
+             padding: 8px 12px;
+             max-width: 70%;
+             position: relative;
+         }
+
+         .message.own .message-content {
+             background: #E6F3FF;
+             border-color: #4A90E2;
+         }
+
+         .message-text {
+             color: #5c4033;
+             margin-bottom: 4px;
+         }
+
+         .message-time {
+             font-size: 0.7rem;
+             color: #8B4513;
+         }
+
+         .chat-input-area {
+             border-top: 2px solid #d1914e;
+             padding: 12px 16px;
+             background: #f9f9f9;
+         }
+
+         .chat-input-group {
+             display: flex;
+             gap: 8px;
+             align-items: center;
+         }
+
+         .chat-input {
+             flex: 1;
+             background: white;
+             border: 2px solid #d1914e;
+             border-radius: 8px;
+             padding: 10px 12px;
+             font-family: 'Zpix', monospace;
+             font-size: 0.9rem;
+             color: #5c4033;
+         }
+
+         .chat-send-btn {
+             background: #4CAF50;
+             border: 2px solid #66BB6A;
+             border-radius: 8px;
+             padding: 10px 12px;
+             color: white;
+             cursor: pointer;
+             transition: all 0.2s ease;
+             box-shadow: 2px 2px 0 #388E3C;
+         }
+
+         .chat-send-btn:hover {
+             background: #66BB6A;
+             transform: translate(-1px, -1px);
+             box-shadow: 3px 3px 0 #388E3C;
+         }
+
+         /* 響應式設計 */
+         @media (max-width: 800px) {
+             .friends-panel {
+                 width: 98%;
+                 height: 95vh;
+                 padding: 16px;
+             }
+
+             .friends-content {
+                 flex-direction: column;
+                 gap: 16px;
+             }
+
+             .friends-sidebar {
+                 width: 100%;
+             }
+
+             .friends-tabs {
+                 flex-direction: row;
+                 overflow-x: auto;
+             }
+
+             .friends-tab {
+                 flex-shrink: 0;
+                 min-width: 120px;
+             }
+
+             .chat-layout {
+                 flex-direction: column;
+                 height: 400px;
+             }
+
+             .chat-rooms-list {
+                 width: 100%;
+                 height: 150px;
+             }
+         }
+
+         /* === 好友個人資料彈窗樣式 === */
+         #friend-profile-modal {
+             position: fixed;
+             top: 0;
+             left: 0;
+             width: 100%;
+             height: 100%;
+             background: rgba(0, 0, 0, 0.8);
+             z-index: 1700;
+             display: none;
+             align-items: center;
+             justify-content: center;
+         }
+
+         #friend-profile-modal.active {
+             display: flex;
+         }
+
+         .friend-profile-panel {
+             background: #f5e1c6;
+             border: 4px solid #b98c5c;
+             border-radius: 16px;
+             box-shadow: 8px 8px 0 #a17d5c;
+             width: 95%;
+             max-width: 900px;
+             height: 90vh;
+             max-height: 650px;
+             overflow: hidden;
+             position: relative;
+             padding: 20px;
+             font-family: 'Zpix', monospace;
+             display: flex;
+             flex-direction: column;
+         }
+
+         .friend-profile-header {
+             display: flex;
+             align-items: center;
+             gap: 20px;
+             padding-bottom: 20px;
+             border-bottom: 3px solid #b98c5c;
+             margin-bottom: 20px;
+         }
+
+         .profile-avatar-large {
+             width: 80px;
+             height: 80px;
+             border-radius: 50%;
+             background: white;
+             border: 4px solid #d1914e;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             font-size: 2.5rem;
+             flex-shrink: 0;
+             box-shadow: 4px 4px 0 #a17d5c;
+         }
+
+         .profile-basic-info {
+             flex: 1;
+         }
+
+         .profile-basic-info h2 {
+             color: #5c4033;
+             font-size: 1.8rem;
+             margin: 0 0 8px 0;
+             text-shadow: 2px 2px 0 #fffbe6;
+         }
+
+         .profile-status-line {
+             display: flex;
+             align-items: center;
+             gap: 12px;
+             margin-bottom: 8px;
+             font-size: 1rem;
+             color: #5c4033;
+         }
+
+         .profile-level {
+             background: #DAA520;
+             color: white;
+             padding: 4px 8px;
+             border-radius: 8px;
+             font-size: 0.9rem;
+             font-weight: bold;
+             border: 2px solid #FFD700;
+         }
+
+         .profile-join-date {
+             font-size: 0.9rem;
+             color: #8B4513;
+         }
+
+         .profile-quick-actions {
+             display: flex;
+             flex-direction: column;
+             gap: 8px;
+         }
+
+         .action-btn.primary {
+             background: #4CAF50;
+             border: 2px solid #66BB6A;
+         }
+
+         .action-btn.primary:hover {
+             background: #66BB6A;
+         }
+
+         .action-btn.secondary {
+             background: #FF9800;
+             border: 2px solid #FFB74D;
+         }
+
+         .action-btn.secondary:hover {
+             background: #FFB74D;
+         }
+
+         .friend-profile-content {
+             display: flex;
+             flex: 1;
+             gap: 20px;
+             overflow: hidden;
+         }
+
+         .profile-left-section,
+         .profile-right-section {
+             flex: 1;
+             overflow-y: auto;
+             padding-right: 8px;
+         }
+
+         .profile-section {
+             background: rgba(255, 255, 255, 0.7);
+             border: 2px solid #d1914e;
+             border-radius: 12px;
+             padding: 16px;
+             margin-bottom: 16px;
+         }
+
+         .profile-section h3 {
+             color: #5c4033;
+             font-size: 1.2rem;
+             margin: 0 0 12px 0;
+             text-align: center;
+             border-bottom: 2px solid #d1914e;
+             padding-bottom: 8px;
+         }
+
+         .shop-info-grid {
+             display: grid;
+             grid-template-columns: 1fr 1fr;
+             gap: 12px;
+         }
+
+         .info-item {
+             background: #ffe7b2;
+             border: 2px solid #d1914e;
+             border-radius: 8px;
+             padding: 10px;
+             text-align: center;
+         }
+
+         .info-label {
+             font-size: 0.8rem;
+             color: #8B4513;
+             margin-bottom: 4px;
+         }
+
+         .info-value {
+             font-weight: bold;
+             color: #5c4033;
+             font-size: 1rem;
+         }
+
+         .stats-grid {
+             display: grid;
+             grid-template-columns: 1fr 1fr;
+             gap: 12px;
+         }
+
+         .stat-item {
+             background: #ffe7b2;
+             border: 2px solid #d1914e;
+             border-radius: 8px;
+             padding: 12px;
+             display: flex;
+             align-items: center;
+             gap: 10px;
+         }
+
+         .stat-icon {
+             font-size: 1.5rem;
+         }
+
+         .stat-info {
+             flex: 1;
+         }
+
+         .stat-value {
+             font-weight: bold;
+             color: #5c4033;
+             font-size: 1.1rem;
+         }
+
+         .stat-label {
+             font-size: 0.8rem;
+             color: #8B4513;
+         }
+
+         .achievements-list {
+             display: flex;
+             flex-direction: column;
+             gap: 8px;
+             max-height: 200px;
+             overflow-y: auto;
+         }
+
+         .achievement-item {
+             background: #E6F3FF;
+             border: 2px solid #4A90E2;
+             border-radius: 8px;
+             padding: 10px;
+             display: flex;
+             align-items: center;
+             gap: 10px;
+         }
+
+         .achievement-icon {
+             font-size: 1.5rem;
+         }
+
+         .achievement-info {
+             flex: 1;
+         }
+
+         .achievement-name {
+             font-weight: bold;
+             color: #2C5282;
+             font-size: 0.9rem;
+         }
+
+         .achievement-desc {
+             font-size: 0.8rem;
+             color: #4A90E2;
+         }
+
+         .activity-list {
+             display: flex;
+             flex-direction: column;
+             gap: 8px;
+             max-height: 180px;
+             overflow-y: auto;
+         }
+
+         .activity-item {
+             background: #FFF3E0;
+             border: 2px solid #FF9800;
+             border-radius: 8px;
+             padding: 10px;
+         }
+
+         .activity-time {
+             font-size: 0.7rem;
+             color: #E65100;
+             margin-bottom: 4px;
+         }
+
+         .activity-desc {
+             font-size: 0.8rem;
+             color: #BF360C;
+         }
+
+         .signature-products {
+             display: flex;
+             flex-direction: column;
+             gap: 8px;
+         }
+
+         .product-item {
+             background: #E8F5E8;
+             border: 2px solid #4CAF50;
+             border-radius: 8px;
+             padding: 10px;
+             display: flex;
+             align-items: center;
+             gap: 10px;
+         }
+
+         .product-icon {
+             font-size: 1.5rem;
+         }
+
+         .product-info {
+             flex: 1;
+         }
+
+         .product-name {
+             font-weight: bold;
+             color: #2E7D32;
+             font-size: 0.9rem;
+         }
+
+         .product-sales {
+             font-size: 0.8rem;
+             color: #4CAF50;
+         }
+
+         /* 響應式設計 */
+         @media (max-width: 800px) {
+             .friend-profile-panel {
+                 width: 98%;
+                 height: 95vh;
+                 padding: 16px;
+             }
+
+             .friend-profile-header {
+                 flex-direction: column;
+                 text-align: center;
+                 gap: 16px;
+             }
+
+             .profile-quick-actions {
+                 flex-direction: row;
+                 justify-content: center;
+             }
+
+             .friend-profile-content {
+                 flex-direction: column;
+                 gap: 16px;
+             }
+
+             .shop-info-grid,
+             .stats-grid {
+                 grid-template-columns: 1fr;
+             }
+         }
+
+        /* === 遊戲設定樣式 === */
+        .setting-item {
+          display: flex;
+          align-items: center;
+          gap: 18px;
+          margin-bottom: 18px;
+        }
+        .setting-item label {
+          min-width: 110px;
+          font-weight: bold;
+          color: #a0522d;
+        }
+        .setting-item input[type="range"] {
+          flex: 1;
+          margin-right: 24px;
+          accent-color: #b98c5c;
+        }
+        .setting-item span[id$="-value"] {
+          min-width: 48px;
+          text-align: right;
+          margin-left: 12px;
+          font-family: 'Zpix', monospace;
+          color: #7c4a18;
+          font-size: 1.1em;
+        }
+
+        /* ...原有樣式... */
+        .pixel-btn.stock {
+          font-family: 'Zpix', monospace;
+          font-size: 1.4rem;
+          background: linear-gradient(180deg, #ffe7b2 80%, #b98c5c 100%);
+          color: #7c4a18;
+          border-radius: 0;
+          border: 4px solid #a0522d;
+          box-shadow: 4px 4px 0 #d1914e, 0 0 0 2px #fff inset;
+          padding: 18px 38px 16px 28px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          cursor: pointer;
+          transition: box-shadow 0.1s, background 0.1s, filter 0.2s;
+          outline: none;
+          position: relative;
+          letter-spacing: 2px;
+        }
+        .pixel-btn.stock:hover {
+          background: linear-gradient(180deg, #fff2d0 80%, #b98c5c 100%);
+          box-shadow: 0 0 8px #ffe7b2, 0 0 0 2px #fff inset;
+          filter: drop-shadow(0 0 6px #fffbe6);
+        }
+        .pixel-btn.stock:active {
+          background: #e2c49a;
+          box-shadow: inset 2px 2px 0 #b98c5c;
+          filter: none;
+        }
+        .pixel-btn.stock .btn-icon {
+          font-size: 1.7rem;
+          background: #ffe7b2;
+          border-radius: 2px;
+          border: 2px solid #b98c5c;
+          width: 36px;
+          height: 36px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-right: 8px;
+        }
+        /* ...原有樣式... */
+
+        /* ...原有樣式... */
+        .story-control-btn.pixel-btn.primary {
+          min-width: 120px;
+          min-height: 48px;
+          justify-content: center;
+          font-size: 1.1rem;
+          padding: 10px 24px;
+          /* gap: 6px; */
+        }
+        .story-control-btn.pixel-btn.primary .btn-icon {
+          display: none;
+        }
+        .story-control-btn:disabled {
+          opacity: 0.5;
+          filter: grayscale(0.2);
+          cursor: not-allowed;
+        }
+        /* ...原有樣式... */
+
+        /* ...原有樣式... */
+        .modal-backdrop {
+          display: none;
+          position: fixed;
+          top: 0; left: 0; right: 0; bottom: 0;
+          width: 100vw; height: 100vh;
+          z-index: 1000;
+          background: rgba(40,32,16,0.32);
+          backdrop-filter: blur(3px);
+          align-items: center;
+          justify-content: center;
+        }
+        .modal-backdrop.active {
+          display: flex;
+        }
+
+        /* ...原有樣式... */
+        .indicator-panel {
+          background: linear-gradient(180deg, #f5e9d3 80%, #e2c49a 100%);
+          border: 4px solid #a0522d;
+          box-shadow: 6px 6px 0 #b98c5c, 0 0 0 3px #fff inset;
+          border-radius: 22px;
+          padding: 32px 32px 24px 32px;
+          min-width: 320px;
+          max-width: 480px;
+          width: 96vw;
+          margin: 0 auto;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          word-break: break-all;
+        }
+        .indicator-panel .modal-title {
+          font-size: 1.4rem;
+          font-family: 'Zpix', monospace;
+          color: #7c4a18;
+          letter-spacing: 2px;
+          margin: 0;
+        }
+        .indicator-panel .modal-close {
+          background: #f5e9d3;
+          border: 2px solid #a0522d;
+          border-radius: 8px;
+          color: #a0522d;
+          font-family: 'Zpix', monospace;
+          font-size: 1.1rem;
+          width: 36px;
+          height: 36px;
+          cursor: pointer;
+          box-shadow: 2px 2px 0 #b98c5c;
+          transition: background 0.1s, box-shadow 0.1s;
+        }
+        .indicator-panel .modal-close:hover {
+          background: #ffe7b2;
+          box-shadow: 0 0 8px #ffe7b2;
+        }
+        .indicator-panel .modal-content {
+          margin-top: 8px;
+          padding: 0 2px;
+        }
+    </style>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const btn = document.getElementById('open-stocking-button');
+      if (btn) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.pointerEvents = 'auto';
+        btn.classList.remove('disabled');
+      }
+    });
+    </script>
+</body>
+</html>

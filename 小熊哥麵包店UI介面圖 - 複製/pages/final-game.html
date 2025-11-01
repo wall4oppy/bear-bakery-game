@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小熊哥麵包店 - 最終成品</title>
+    <style>
+        /* === 全域與字體設定 === */
+        body {
+            font-family: monospace, 'Microsoft JhengHei', sans-serif;
+            background: #f7ecd7;
+            margin: 0;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* === 角落 UI 通用樣式 === */
+        .corner-block {
+            position: fixed;
+            z-index: 10;
+        }
+
+        /* === 左上角：玩家資料 === */
+        .profile-block {
+            top: 24px;
+            left: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f5e1c6;
+            border: 2.5px solid #b98c5c;
+            border-radius: 16px;
+            box-shadow: 2px 2px 0 #b98c5c;
+            padding: 14px 18px;
+            cursor: pointer;
+        }
+        .profile-avatar {
+            width: 44px; height: 44px;
+            background: #e2c49a;
+            border: 2px solid #b98c5c;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.2rem;
+        }
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .profile-name, .profile-level {
+            color: #7c4a18;
+            white-space: nowrap;
+        }
+        .profile-name { font-size: 1.1rem; }
+        .profile-level { font-size: 0.95rem; color: #b98c5c; }
+
+        /* === 右上角：天數與蜂蜜幣 === */
+        .status-row {
+            top: 24px;
+            right: 24px;
+            position: fixed;
+            display: flex;
+            gap: 16px;
+            z-index: 10;
+        }
+        .status-block {
+            background-color: #f5e1c6;
+            border: 2.5px solid #b98c5c;
+            border-radius: 16px;
+            box-shadow: 2px 2px 0 #b98c5c;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .status-item {
+            color: #7c4a18;
+            font-size: 1rem;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .status-icon {
+            font-size: 1.2rem;
+        }
+
+        /* === 左下角 & 右下角 按鈕 === */
+        .menu-block { left: 32px; bottom: 32px; display: flex; flex-direction: column; gap: 16px; }
+        .stock-btn-block { right: 32px; bottom: 32px; }
+        .pixel-button {
+            font-family: monospace, 'Microsoft JhengHei', sans-serif;
+            font-size: 1rem;
+            background: linear-gradient(180deg, #ffe7b2 80%, #b98c5c 100%);
+            color: #7c4a18;
+            border: 2.5px solid #b98c5c;
+            border-radius: 8px;
+            box-shadow: 2px 2px 0 #b98c5c;
+            padding: 10px 18px;
+            display: flex; align-items: center; gap: 8px;
+            cursor: pointer;
+        }
+        
+        /* === 中間故事對話框 === */
+        .main-area { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .story-box { max-width: 480px; background: #fff8e6; border: 3px solid #b98c5c; border-radius: 18px; box-shadow: 4px 4px 0 #b98c5c; padding: 32px; text-align: center; }
+        .story-title { font-size: 1.3rem; color: #7c4a18; margin-bottom: 18px; }
+        .story-content { font-size: 1.08rem; color: #5c4033; margin-bottom: 28px; min-height: 60px; }
+        .story-controls { display: flex; align-items: center; justify-content: center; gap: 18px; }
+        .story-page-indicator { font-size: 1.05rem; color: #b98c5c; min-width: 60px; }
+        .story-control-btn { min-width: 110px; padding: 8px 10px; font-size: 1rem; text-align: center; background: linear-gradient(180deg, #ffe7b2 80%, #b98c5c 100%); color: #7c4a18; border: 2.5px solid #b98c5c; border-radius: 8px; box-shadow: 2px 2px 0 #b98c5c; }
+        .story-control-btn:disabled { background: #e0d8cd; color: #a99a8a; box-shadow: 2px 2px 0 #b9b0a4; border-color: #b9b0a4; cursor: not-allowed; }
+
+        /* === Modal 彈窗與頁籤樣式 (關鍵) === */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+        .modal-backdrop.active {
+            display: flex;
+        }
+        .modal-panel {
+            background: #fff8e6;
+            border-radius: 18px;
+            box-shadow: 6px 6px 0 #b98c5c;
+            width: 90vw;
+            max-width: 800px;
+            height: 80vh;
+            position: relative;
+            display: flex;
+            overflow: hidden;
+            border: 3px solid #b98c5c;
+        }
+        .modal-close {
+            position: absolute;
+            top: 8px; right: 12px;
+            background: none; border: none;
+            font-size: 2.5rem; color: #b98c5c;
+            cursor: pointer; z-index: 10;
+        }
+        .modal-tabs {
+            display: flex;
+            flex-direction: column;
+            background: #e2c49a;
+            border-right: 3px solid #b98c5c;
+            padding: 20px 0;
+            flex-shrink: 0;
+        }
+        .modal-tab {
+            font-family: monospace, 'Microsoft JhengHei', sans-serif;
+            font-size: 1.1rem; color: #7c4a18;
+            background: transparent; border: none;
+            padding: 18px 24px; cursor: pointer;
+            border-left: 4px solid transparent; text-align: left;
+        }
+        .modal-tab.active { background: #fff8e6; color: #a0522d; font-weight: bold; border-left: 4px solid #d1914e; }
+        .modal-content { flex-grow: 1; padding: 30px; overflow-y: auto; }
+
+        /* 動畫 */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes scaleUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-backdrop.active { animation: fadeIn 0.3s ease; }
+        .modal-backdrop.active .modal-panel { animation: scaleUp 0.3s ease; }
+
+    </style>
+</head>
+<body>
+
+    <div class="corner-block profile-block" id="open-profile-button">
+        <div class="profile-avatar">🐻</div>
+        <div class="profile-info">
+            <div class="profile-name">訪客玩家</div>
+            <div class="profile-level">Lv. 1</div>
+        </div>
+    </div>
+
+    <div class="status-row">
+        <div class="status-block"><div class="status-item"><span class="status-icon">☀️</span>天數: <span>1</span></div></div>
+        <div class="status-block"><div class="status-item"><span class="status-icon">🍯</span>蜂蜜幣: <span>500</span></div></div>
+    </div>
+
+    <div class="corner-block menu-block">
+        <button class="pixel-button" id="open-achievements-button"><span class="btn-icon">🏆</span>成就</button>
+        <button class="pixel-button" id="open-leaderboard-button"><span class="btn-icon">📊</span>排行榜</button>
+    </div>
+
+    <div class="corner-block stock-btn-block">
+        <button class="pixel-button" id="open-stocking-button"><span class="btn-icon">📦</span>進貨</button>
+    </div>
+    
+    <div class="main-area">
+        <div class="story-box">
+            <div class="story-title">第一章：開店準備</div>
+            <div class="story-content">小熊哥決定開一家麵包店...</div>
+            <div class="story-controls">
+                <button class="story-control-btn" disabled>上一頁</button>
+                <span class="story-page-indicator">1 / 4</span>
+                <button class="story-control-btn">下一頁</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="main-modal">
+      <div class="modal-panel">
+        <button class="modal-close" data-modal-close>×</button>
+        <div class="modal-tabs">
+          <button class="modal-tab active" data-tab="profile">個人信息</button>
+          <button class="modal-tab" data-tab="achievements">成就</button>
+          <button class="modal-tab" data-tab="leaderboard">排行榜</button>
+          <button class="modal-tab" data-tab="stock">進貨</button>
+          <button class="modal-tab" data-tab="settings">遊戲設置</button>
+        </div>
+        <div class="modal-content">
+          </div>
+      </div>
+    </div>
+
+    <script>
+    // === Modal 互動功能 ===
+    document.addEventListener('DOMContentLoaded', function() {
+        const mainModal = document.getElementById('main-modal');
+        if (!mainModal) {
+            console.error('錯誤：找不到 Modal 元素！');
+            return;
+        }
+
+        const modalCloseBtn = mainModal.querySelector('[data-modal-close]');
+        const modalTabs = mainModal.querySelectorAll('.modal-tab');
+        const modalContent = mainModal.querySelector('.modal-content');
+
+        // 開啟 Modal 的按鈕們
+        const openProfileBtn = document.getElementById('open-profile-button');
+        const openAchievementsBtn = document.getElementById('open-achievements-button');
+        const openLeaderboardBtn = document.getElementById('open-leaderboard-button');
+        const openStockBtn = document.getElementById('open-stocking-button');
+
+        // 關閉 Modal 的通用函式
+        function closeModal() {
+            mainModal.classList.remove('active');
+        }
+
+        // 開啟 Modal 並切換到指定頁籤的函式
+        function openModal(tabName) {
+            modalTabs.forEach(t => t.classList.remove('active'));
+            const targetTab = mainModal.querySelector(`.modal-tab[data-tab="${tabName}"]`);
+            if(targetTab) {
+                targetTab.classList.add('active');
+            }
+            updateModalContent(tabName);
+            mainModal.classList.add('active');
+        }
+
+        // 更新 Modal 內容的函式
+        function updateModalContent(tabName) {
+            const contentTitle = tabName.charAt(0).toUpperCase() + tabName.slice(1);
+            modalContent.innerHTML = `<h1>${contentTitle}</h1><p>這裡是 ${tabName} 的內容。</p>`;
+        }
+
+        // 綁定事件
+        if (openProfileBtn) openProfileBtn.addEventListener('click', () => openModal('profile'));
+        if (openAchievementsBtn) openAchievementsBtn.addEventListener('click', () => openModal('achievements'));
+        if (openLeaderboardBtn) openLeaderboardBtn.addEventListener('click', () => openModal('leaderboard'));
+        if (openStockBtn) openStockBtn.addEventListener('click', () => openModal('stock'));
+
+        modalTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.dataset.tab;
+                modalTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                updateModalContent(tabName);
+            });
+        });
+
+        if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeModal);
+        mainModal.addEventListener('click', (e) => {
+            if (e.target === mainModal) {
+                closeModal();
+            }
+        });
+    });
+    </script>
+</body>
+</html>

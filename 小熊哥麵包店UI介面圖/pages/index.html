@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小熊哥麵包坊</title>
+    <link rel="stylesheet" href="../styles/styles.css">
+    
+    <script type="module" src="../scripts/modules/audio.js"></script>
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    
+    <style>
+        @font-face {
+            font-family: 'Zpix';
+            src: url('../assets/fonts/Zpix.ttf') format('truetype');
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Zpix', 'Press Start 2P', monospace;
+            background: url('../assets/backgrounds/登入背景2.gif') center center / cover no-repeat;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* 主要容器 */
+        .main-container {
+            text-align: center;
+            z-index: 10;
+            position: relative;
+            padding: 40px 40px 60px 40px;
+            margin-top: -100px;
+        }
+        
+        /* 主標題圖片 */
+        .title-image {
+            width: 500px;
+            max-width: 90vw;
+            height: auto;
+            margin-bottom: 30px;
+            filter: drop-shadow(4px 4px 8px rgba(0, 0, 0, 0.3));
+            animation: titleFloat 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes titleFloat {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-10px); }
+        }
+        
+        /* 按鈕容器 */
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        /* 按鈕樣式 */
+        .menu-btn {
+            padding: 20px 60px;
+            font-family: 'Zpix', monospace;
+            font-size: 18px;
+            background: linear-gradient(145deg, #DEB887, #CD853F);
+            color: white;
+            border: 4px solid #B8860B;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 6px 0 #8B7355,
+                0 8px 20px rgba(0,0,0,0.3);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+            min-width: 300px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .menu-btn:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s;
+        }
+        
+        .menu-btn:hover:before {
+            left: 100%;
+        }
+        
+        .menu-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 9px 0 #8B7355,
+                0 12px 25px rgba(0,0,0,0.4);
+            background: linear-gradient(145deg, #F4A460, #DEB887);
+        }
+        
+        .menu-btn:active {
+            transform: translateY(3px);
+            box-shadow: 
+                0 3px 0 #8B7355,
+                0 5px 10px rgba(0,0,0,0.3);
+        }
+        
+        /* 特殊按鈕顏色 */
+        .menu-btn.start-game {
+            background: linear-gradient(145deg, #DAA520, #B8860B);
+            border-color: #CD853F;
+            box-shadow: 0 6px 0 #8B7355, 0 8px 20px rgba(0,0,0,0.3);
+        }
+        
+        .menu-btn.start-game:hover {
+            background: linear-gradient(145deg, #F4A460, #DAA520);
+            box-shadow: 0 9px 0 #8B7355, 0 12px 25px rgba(0,0,0,0.4);
+        }
+        
+        .menu-btn.start-game:active {
+            box-shadow: 0 3px 0 #8B7355, 0 5px 10px rgba(0,0,0,0.3);
+        }
+        
+        .menu-btn.quit {
+            background: linear-gradient(145deg, #CD5C5C, #B22222);
+            border-color: #8B0000;
+            box-shadow: 0 6px 0 #600000, 0 8px 20px rgba(0,0,0,0.3);
+        }
+        
+        .menu-btn.quit:hover {
+            background: linear-gradient(145deg, #DC143C, #CD5C5C);
+            box-shadow: 0 9px 0 #600000, 0 12px 25px rgba(0,0,0,0.4);
+        }
+        
+        .menu-btn.quit:active {
+            box-shadow: 0 3px 0 #600000, 0 5px 10px rgba(0,0,0,0.3);
+        }
+        
+        /* 設定面板覆蓋層 */
+        .settings-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .settings-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 4px solid #2c3e50;
+        }
+        
+        .settings-panel h2 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 24px;
+        }
+        
+        .setting-item {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .setting-item label {
+            color: #2c3e50;
+            font-size: 14px;
+        }
+        
+        .setting-item input[type="range"] {
+            width: 150px;
+        }
+        
+        .account-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .menu-btn.login-setting,
+        .menu-btn.register-setting {
+            padding: 8px 16px;
+            font-size: 12px;
+            margin: 0;
+            min-width: auto;
+            flex: 1;
+        }
+        
+        .menu-btn.login-setting {
+            background: linear-gradient(145deg, #D2691E, #A0522D);
+            border-color: #8B4513;
+            box-shadow: 0 3px 0 #654321, 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        .menu-btn.login-setting:hover {
+            background: linear-gradient(145deg, #F4A460, #D2691E);
+            box-shadow: 0 4px 0 #654321, 0 6px 12px rgba(0,0,0,0.3);
+        }
+        
+        .menu-btn.register-setting {
+            background: linear-gradient(145deg, #BC9A6A, #8B7355);
+            border-color: #654321;
+            box-shadow: 0 3px 0 #3E2723, 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        .menu-btn.register-setting:hover {
+            background: linear-gradient(145deg, #DEB887, #BC9A6A);
+            box-shadow: 0 4px 0 #3E2723, 0 6px 12px rgba(0,0,0,0.3);
+        }
+        
+        .close-settings {
+            background: linear-gradient(145deg, #A0826D, #8B7765);
+            border-color: #654321;
+            box-shadow: 0 4px 0 #3E2723, 0 6px 15px rgba(0,0,0,0.2);
+            margin-top: 20px;
+            width: 100%;
+        }
+        
+        .close-settings:hover {
+            background: linear-gradient(145deg, #BC9A6A, #A0826D);
+            box-shadow: 0 6px 0 #3E2723, 0 8px 20px rgba(0,0,0,0.3);
+        }
+        
+        /* 登入狀態提示 */
+        .login-status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: rgba(46, 204, 113, 0.9);
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            display: none;
+        }
+        
+        .login-status.logged-out {
+            background: rgba(231, 76, 60, 0.9);
+        }
+        
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 40px 20px;
+            }
+            
+            .title-image {
+                width: 400px;
+                margin-bottom: 40px;
+            }
+            
+            .menu-btn {
+                padding: 15px 40px;
+                font-size: 16px;
+                min-width: 250px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .title-image {
+                width: 300px;
+                margin-bottom: 30px;
+            }
+            
+            .menu-btn {
+                padding: 12px 30px;
+                font-size: 14px;
+                min-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- 主要內容 -->
+    <div class="main-container">
+        <!-- 主標題圖片 -->
+        <img src="../assets/images/Bear&Bread.png" alt="小熊哥麵包店" class="title-image">
+        
+        <!-- 菜單按鈕 -->
+        <div class="menu-buttons">
+            <button class="menu-btn start-game" id="startGameBtn">START GAME</button>
+            <button class="menu-btn options" id="optionsBtn">OPTIONS</button>
+            <button class="menu-btn quit" id="quitBtn">QUIT</button>
+        </div>
+    </div>
+    
+    <!-- 設定面板覆蓋層 -->
+    <div class="settings-overlay" id="settingsOverlay">
+        <div class="settings-panel">
+            <h2>遊戲設定</h2>
+            <div class="setting-item">
+                <label for="musicVolume">背景音樂音量</label>
+                <input type="range" id="musicVolume" min="0" max="100" value="50">
+                <span id="volumeValue">50%</span>
+            </div>
+            <div class="setting-item">
+                <label for="sfxVolume">音效音量</label>
+                <input type="range" id="sfxVolume" min="0" max="100" value="70">
+                <span id="sfxVolumeValue">70%</span>
+            </div>
+            <div class="setting-item">
+                <label>音效</label>
+                <input type="checkbox" id="soundEffects" checked>
+            </div>
+            <div class="setting-item">
+                <label>背景音樂：</label>
+                <input type="checkbox" id="backgroundMusic" checked>
+                <span id="musicStatus">🎵 播放中</span>
+            </div>
+            <div class="setting-item">
+                <label>亮度：</label>
+                <input type="range" id="brightness" min="30" max="150" value="100" step="10">
+            </div>
+            <div class="setting-item">
+                <label>帳號管理：</label>
+                <div class="account-buttons">
+                    <button class="menu-btn login-setting" id="loginSetting">登入</button>
+                    <button class="menu-btn register-setting" id="registerSetting">註冊</button>
+                </div>
+            </div>
+            <button class="menu-btn close-settings" id="closeSettings">關閉設定</button>
+        </div>
+    </div>
+
+    <!-- START GAME 專用自訂彈窗 -->
+    <div id="start-modal" class="player-modal hidden">
+      <div class="player-modal-content">
+        <h2 class="modal-title">歡迎來到小熊哥麵包店！</h2>
+        <div class="modal-desc">請選擇您的遊戲模式：</div>
+        <ul class="modal-mode-list">
+          <li><b>登入模式：</b>保存進度、完整體驗、成就系統</li>
+          <li><b>訪客模式：</b>體驗遊戲但不保存進度</li>
+        </ul>
+        <div class="modal-actions">
+          <button id="login-btn" class="menu-btn start-game">登入</button>
+          <button id="guest-btn" class="menu-btn">訪客</button>
+        </div>
+      </div>
+    </div>
+    <!-- END START GAME 專用自訂彈窗 -->
+
+    <script>
+        // 遊戲狀態管理
+        let gameState = {
+            isLoggedIn: false,
+            isGuestMode: false,
+            playerData: {
+                name: '',
+                email: '',
+                avatar: '🧑‍🍳',
+                level: 1,
+                coins: 1000,
+                experience: 0
+            },
+            settings: {
+                musicVolume: 50,
+                soundEffects: true,
+                backgroundMusic: true,
+                brightness: 100,
+                sfxVolume: 70
+            }
+        };
+
+        // 主初始化流程
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 封面頁面初始化開始');
+            checkSavedLoginState();
+            checkLoginStatus();
+            setupEventListeners();
+            loadSettings();
+            setTimeout(() => {
+                if (window.musicManager) {
+                    if (gameState.settings.backgroundMusic && window.musicManager.musicEnabled) {
+                        console.log('🎵 準備播放主題音樂（等待用戶互動）');
+                    }
+                    console.log('🎵 音樂管理器狀態:', window.musicManager.getStatus());
+                }
+            }, 500);
+            console.log('✅ 初始化完成');
+            console.log('最終遊戲狀態:', gameState);
+        });
+
+        // 檢查儲存的登入狀態
+        function checkSavedLoginState() {
+            const savedState = localStorage.getItem('bearBakeryGameState');
+            if (savedState) {
+                try {
+                    const parsedState = JSON.parse(savedState);
+                    
+                    // 只有在真正登入時才載入狀態
+                    if (parsedState.isLoggedIn && !parsedState.isGuestMode && parsedState.playerData && parsedState.playerData.email && parsedState.playerData.email !== 'guest@bearBakery.com') {
+                        gameState = {
+                            ...gameState,
+                            ...parsedState,
+                            settings: { ...gameState.settings, ...(parsedState.settings || {}) },
+                            playerData: { ...gameState.playerData, ...(parsedState.playerData || {}) }
+                        };
+                        console.log('載入已登入用戶狀態:', gameState.playerData.name);
+                    } else {
+                        console.log('檢測到訪客模式或未登入狀態，保持預設未登入狀態');
+                        // 清除訪客模式，重新開始
+                        localStorage.removeItem('bearBakeryGameState');
+                    }
+                } catch (error) {
+                    console.error('載入狀態失敗:', error);
+                    localStorage.removeItem('bearBakeryGameState');
+                }
+            } else {
+                console.log('未找到儲存狀態，使用預設未登入狀態');
+            }
+        }
+
+        // 儲存遊戲狀態
+        function saveGameState() {
+            localStorage.setItem('bearBakeryGameState', JSON.stringify(gameState));
+            console.log('遊戲狀態已儲存');
+        }
+
+        // 設定事件監聽器
+        function setupEventListeners() {
+            // START GAME 按鈕 - 顯示自訂彈窗
+            document.getElementById('startGameBtn').addEventListener('click', function() {
+                playClickSound();
+                document.getElementById('start-modal').classList.remove('hidden');
+            });
+
+            // 綁定登入/訪客按鈕
+            document.getElementById('login-btn').onclick = function() {
+                document.getElementById('start-modal').classList.add('hidden');
+                window.location.href = 'login.html';
+            };
+            document.getElementById('guest-btn').onclick = function() {
+                document.getElementById('start-modal').classList.add('hidden');
+                startGuestMode();
+            };
+
+            // OPTIONS 按鈕
+            document.getElementById('optionsBtn').addEventListener('click', function() {
+                playClickSound();
+                showSettings();
+            });
+
+            // QUIT 按鈕
+            document.getElementById('quitBtn').addEventListener('click', function() {
+                playClickSound();
+                
+                const confirmQuit = confirm('確定要離開遊戲嗎？');
+                if (confirmQuit) {
+                    // 保存當前遊戲狀態
+                    if (gameState.isLoggedIn) {
+                        saveGameState();
+                    }
+                    
+                    // 嘗試關閉視窗
+                    try {
+                        window.close();
+                        // 如果無法關閉，顯示替代訊息
+                        setTimeout(() => {
+                            alert('感謝您遊玩小熊哥麵包店！🍞\n\n請手動關閉此分頁。');
+                        }, 100);
+                    } catch (error) {
+                        alert('感謝您遊玩小熊哥麵包店！🍞\n\n請手動關閉此分頁。');
+                    }
+                }
+            });
+
+            // 關閉設定按鈕
+            document.getElementById('closeSettings').addEventListener('click', function() {
+                playClickSound();
+                hideSettings();
+            });
+
+            // 設定面板中的登入按鈕
+            document.getElementById('loginSetting').addEventListener('click', function() {
+                playClickSound();
+                hideSettings();
+                window.location.href = 'login.html';
+            });
+
+            // 設定面板中的註冊按鈕
+            document.getElementById('registerSetting').addEventListener('click', function() {
+                playClickSound();
+                hideSettings();
+                window.location.href = 'register.html';
+            });
+
+            // 設定面板點擊外部關閉
+            document.getElementById('settingsOverlay').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideSettings();
+                }
+            });
+
+            // 設定項目變更事件
+            document.getElementById('musicVolume').addEventListener('input', function() {
+                const volume = parseInt(this.value) / 100;
+                gameState.settings.musicVolume = this.value;
+                
+                // 更新音樂管理器音量
+                if (window.musicManager) {
+                    window.musicManager.setVolume(volume);
+                }
+                
+                // 更新顯示
+                document.getElementById('volumeValue').textContent = this.value + '%';
+                
+                saveGameState();
+            });
+
+            document.getElementById('soundEffects').addEventListener('change', function() {
+                gameState.settings.soundEffects = this.checked;
+                saveGameState();
+            });
+
+            document.getElementById('backgroundMusic').addEventListener('change', function() {
+                gameState.settings.backgroundMusic = this.checked;
+                
+                // 控制音樂管理器
+                if (window.musicManager) {
+                    if (this.checked) {
+                        window.musicManager.musicEnabled = true;
+                        window.musicManager.play('main');
+                        document.getElementById('musicStatus').textContent = '🎵 播放中';
+                    } else {
+                        window.musicManager.musicEnabled = false;
+                        window.musicManager.stop();
+                        document.getElementById('musicStatus').textContent = '🔇 已關閉';
+                    }
+                    window.musicManager.saveSettings();
+                }
+                
+                saveGameState();
+            });
+
+            document.getElementById('brightness').addEventListener('input', function() {
+                gameState.settings.brightness = parseInt(this.value);
+                applyBrightnessSetting(parseInt(this.value));
+                saveGameState();
+            });
+
+            document.getElementById('sfxVolume').addEventListener('input', function() {
+                const value = parseInt(this.value);
+                window.musicManager.setSfxVolume(value / 100);
+                document.getElementById('sfxVolumeValue').textContent = value + '%';
+                saveGameState();
+            });
+        }
+
+        // 顯示設定面板
+        function showSettings() {
+            document.getElementById('settingsOverlay').style.display = 'flex';
+            loadSettings();
+        }
+
+        // 隱藏設定面板
+        function hideSettings() {
+            document.getElementById('settingsOverlay').style.display = 'none';
+        }
+
+        // 載入設定到UI
+        function loadSettings() {
+            // 從音樂管理器同步設定
+            if (window.musicManager) {
+                const musicStatus = window.musicManager.getStatus();
+                gameState.settings.backgroundMusic = musicStatus.musicEnabled;
+                gameState.settings.musicVolume = Math.round(musicStatus.volume * 100);
+                gameState.settings.sfxVolume = Math.round((musicStatus.sfxVolume ?? 0.7) * 100);
+            }
+            
+            document.getElementById('musicVolume').value = gameState.settings.musicVolume;
+            document.getElementById('volumeValue').textContent = gameState.settings.musicVolume + '%';
+            document.getElementById('soundEffects').checked = gameState.settings.soundEffects;
+            document.getElementById('backgroundMusic').checked = gameState.settings.backgroundMusic;
+            document.getElementById('musicStatus').textContent = gameState.settings.backgroundMusic ? '🎵 播放中' : '🔇 已關閉';
+            document.getElementById('brightness').value = gameState.settings.brightness || 100;
+            applyBrightnessSetting(gameState.settings.brightness || 100);
+            document.getElementById('sfxVolume').value = gameState.settings.sfxVolume ?? 70;
+            document.getElementById('sfxVolumeValue').textContent = (gameState.settings.sfxVolume ?? 70) + '%';
+        }
+
+        // 應用亮度設定
+        function applyBrightnessSetting(brightness) {
+            const body = document.body;
+            // 將滑桿值(30-150)轉換為CSS brightness值(0.3-1.5)
+            const brightnessValue = brightness / 100;
+            body.style.filter = `brightness(${brightnessValue})`;
+        }
+
+        // 音效播放功能
+        function playClickSound() {
+            if (!gameState.settings.soundEffects) return;
+            
+            // 創建簡單的點擊音效
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.type = 'square';
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.1);
+            } catch (error) {
+                console.log('音效播放失敗:', error);
+            }
+        }
+
+        // 檢查URL參數是否有登入狀態
+        function checkLoginStatus() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('logged_in') === 'true') {
+                const name = urlParams.get('name') || '玩家';
+                const email = urlParams.get('email') || '';
+                
+                console.log('檢測到登入URL參數:', { name, email });
+                
+                // 設定真實登入狀態
+                gameState.isLoggedIn = true;
+                gameState.isGuestMode = false;
+                gameState.playerData.name = name;
+                gameState.playerData.email = email;
+                gameState.playerData.avatar = '🧑‍🍳';
+                gameState.playerData.level = 1;
+                gameState.playerData.coins = 1000;
+                gameState.playerData.experience = 0;
+                
+                // 儲存狀態
+                saveGameState();
+                
+                // 清除URL參數
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                // 顯示歡迎訊息
+                alert(`🎉 歡迎回來，${name}！\n\n您已成功登入小熊哥麵包店。`);
+                
+                // 自動進入遊戲頁
+                enterGame();
+            }
+        }
+
+        // 開始訪客模式
+        function startGuestMode() {
+            console.log('🎮 開始訪客模式');
+            
+            // 設定訪客狀態
+            gameState.isLoggedIn = true;
+            gameState.isGuestMode = true;
+            gameState.playerData.name = '訪客玩家';
+            gameState.playerData.email = 'guest@bearBakery.com';
+            gameState.playerData.avatar = '👤';
+            gameState.playerData.level = 1;
+            gameState.playerData.coins = 1000;
+            gameState.playerData.experience = 0;
+            
+            // 儲存狀態
+            saveGameState();
+            
+            // 顯示歡迎訊息
+            alert('🎉 歡迎訪客玩家！\n\n您現在可以體驗遊戲基本功能。\n想要完整體驗請註冊帳號。');
+            
+            // 進入遊戲
+            enterGame();
+        }
+
+        // 進入遊戲
+        function enterGame() {
+            saveGameState(); // 確保最新狀態已寫入
+            console.log('🎮 進入遊戲頁面');
+            try {
+                window.location.href = 'MyPerfectGame.html';
+            } catch (error) {
+                console.error('跳轉失敗:', error);
+                window.open('MyPerfectGame.html', '_self');
+            }
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitnessPro - 健身遊戲App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: #f8f9fa;
+            min-height: 100vh;
+            position: relative;
+            padding-bottom: 80px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 20px 30px;
+            border-radius: 0 0 25px 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .avatar:hover {
+            border-color: #fff;
+            transform: scale(1.05);
+        }
+
+        .user-level {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .welcome-text {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .streak-info {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 20px;
+            display: none;
+        }
+
+        .main-content.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .card-icon {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #f1f3f4;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e8eaed;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .checkin-container {
+            text-align: center;
+        }
+
+        .checkin-days {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+            margin: 10px 0;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .xp-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 200px;
+            margin: 20px 0;
+        }
+
+        .chart-small {
+            height: 150px;
+        }
+
+        .tasks-list {
+            list-style: none;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            gap: 12px;
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .task-checkbox.completed {
+            background: #667eea;
+            border-color: #667eea;
+            position: relative;
+        }
+
+        .task-checkbox.completed::after {
+            content: '✓';
+            color: white;
+            font-size: 12px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .task-text {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .task-text.completed {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .achievement-badge {
+            aspect-ratio: 1;
+            background: #f8f9fa;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .achievement-badge.unlocked {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+            animation: badgeUnlock 0.5s ease;
+        }
+
+        @keyframes badgeUnlock {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .achievement-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .achievement-title {
+            font-size: 10px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            gap: 15px;
+        }
+
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+
+        .rank-number {
+            width: 30px;
+            height: 30px;
+            background: #f1f3f4;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .rank-number.top3 {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #333;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .user-stats {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .recipe-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .recipe-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .recipe-content {
+            padding: 15px;
+        }
+
+        .recipe-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .recipe-nutrients {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .comparison-container {
+            display: flex;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .comparison-item {
+            flex: 1;
+            text-align: center;
+        }
+
+        .comparison-image {
+            width: 100%;
+            height: 200px;
+            border-radius: 15px;
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+
+        .comparison-label {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .comparison-stats {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 414px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 8px;
+        }
+
+        .nav-item.active {
+            color: #667eea;
+        }
+
+        .nav-item:hover {
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .nav-label {
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .flow-meter {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .flow-percentage {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+            margin-top: 10px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px;
+            max-width: 300px;
+            text-align: center;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .level-up-icon {
+            font-size: 60px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .offline-banner {
+            background: #ff6b6b;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+            display: none;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .header {
+                border-radius: 0 0 20px 20px;
+            }
+            
+            .card {
+                margin: 10px;
+                border-radius: 15px;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-banner" id="offlineBanner">
+        <i class="fas fa-wifi"></i> 網路連線中斷，部分功能可能無法使用
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-top">
+                <div class="user-info">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" 
+                         alt="用戶頭像" class="avatar" id="userAvatar">
+                    <div>
+                        <div class="user-level" id="userLevel">LV 1</div>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <i class="fas fa-fire" style="color: #ff6b6b;"></i>
+                    <span id="checkinStreak">0</span>
+                </div>
+            </div>
+            <div class="welcome-text" id="welcomeText">早安，健身勇者！</div>
+            <div class="streak-info">今天也要保持活力喔 💪</div>
+        </div>
+
+        <!-- 首頁內容 -->
+        <div class="main-content active" id="homeContent">
+            <!-- 每日簽到 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">每日簽到</h3>
+                    <div class="card-icon"><i class="fas fa-calendar-check"></i></div>
+                </div>
+                <div class="checkin-container">
+                    <div class="checkin-days" id="checkinDays">0</div>
+                    <p>連續打卡天數</p>
+                    <button class="btn" id="checkinBtn" onclick="dailyCheckin()">
+                        <i class="fas fa-check"></i> 今日簽到
+                    </button>
+                </div>
+            </div>
+
+            <!-- 等級系統 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">等級進度</h3>
+                    <div class="card-icon"><i class="fas fa-star"></i></div>
+                </div>
+                <div class="chart-container chart-small">
+                    <canvas id="xpChart"></canvas>
+                </div>
+                <div class="xp-info">
+                    <span id="currentXP">0 XP</span>
+                    <span id="nextLevelXP">/ 100 XP</span>
+                </div>
+            </div>
+
+            <!-- Flow Meter -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">心流狀態</h3>
+                    <div class="card-icon"><i class="fas fa-bolt"></i></div>
+                </div>
+                <div class="flow-meter">
+                    <div class="chart-container chart-small">
+                        <canvas id="flowChart"></canvas>
+                    </div>
+                    <div class="flow-percentage" id="flowPercentage">0%</div>
+                    <p>完成任務獲得心流加成</p>
+                </div>
+            </div>
+
+            <!-- 今日任務 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">今日任務</h3>
+                    <div class="card-icon"><i class="fas fa-tasks"></i></div>
+                </div>
+                <ul class="tasks-list" id="tasksList">
+                    <!-- 動態生成任務 -->
+                </ul>
+                <button class="btn btn-secondary" onclick="generateDailyTasks()">
+                    <i class="fas fa-refresh"></i> 重新生成任務
+                </button>
+            </div>
+        </div>
+
+        <!-- 訓練內容 -->
+        <div class="main-content" id="workoutContent">
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">訓練統計</h3>
+                    <div class="card-icon"><i class="fas fa-dumbbell"></i></div>
+                </div>
+                <p>本週完成 3 次訓練</p>
+                <p>燃燒卡路里：1,250 cal</p>
+                <button class="btn">開始今日訓練</button>
+            </div>
+        </div>
+
+        <!-- 飲食內容 -->
+        <div class="main-content" id="dietContent">
+            <!-- 營養分析 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">今日營養</h3>
+                    <div class="card-icon"><i class="fas fa-apple-alt"></i></div>
+                </div>
+                <div class="chart-container chart-small">
+                    <canvas id="nutritionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 食譜推薦 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">推薦食譜</h3>
+                    <div class="card-icon"><i class="fas fa-utensils"></i></div>
+                </div>
+                <div id="recipeContainer">
+                    <!-- 動態生成食譜 -->
+                </div>
+                <button class="btn btn-secondary" onclick="loadRecipes()">
+                    <i class="fas fa-refresh"></i> 更多食譜
+                </button>
+            </div>
+        </div>
+
+        <!-- Avatar內容 -->
+        <div class="main-content" id="avatarContent">
+            <!-- Avatar展示 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">我的Avatar</h3>
+                    <div class="card-icon"><i class="fas fa-user-ninja"></i></div>
+                </div>
+                <div style="text-align: center;">
+                    <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=200&fit=crop" 
+                         alt="Avatar" id="avatarDisplay" style="width: 150px; height: 150px; border-radius: 15px; margin: 20px 0;">
+                    <p id="avatarDescription">運動新手裝備</p>
+                </div>
+            </div>
+
+            <!-- 身材對比 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">身材對比</h3>
+                    <div class="card-icon"><i class="fas fa-chart-line"></i></div>
+                </div>
+                <div class="comparison-container">
+                    <div class="comparison-item">
+                        <img src="https://images.unsplash.com/photo-1594736797933-d0f5e0822dd3?w=200&h=200&fit=crop" 
+                             alt="過去" class="comparison-image">
+                        <div class="comparison-label">3個月前</div>
+                        <div class="comparison-stats">75kg | 22% 體脂</div>
+                    </div>
+                    <div class="comparison-item">
+                        <img src="https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=200&h=200&fit=crop" 
+                             alt="現在" class="comparison-image">
+                        <div class="comparison-label">現在</div>
+                        <div class="comparison-stats">72kg | 18% 體脂</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 成就系統 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">成就徽章</h3>
+                    <div class="card-icon"><i class="fas fa-trophy"></i></div>
+                </div>
+                <div class="achievements-grid" id="achievementsGrid">
+                    <!-- 動態生成成就 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 設定內容 -->
+        <div class="main-content" id="settingsContent">
+            <!-- 排行榜 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">排行榜</h3>
+                    <div class="card-icon"><i class="fas fa-crown"></i></div>
+                </div>
+                <div id="leaderboardContainer">
+                    <!-- 動態生成排行榜 -->
+                </div>
+            </div>
+
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">設定</h3>
+                    <div class="card-icon"><i class="fas fa-cog"></i></div>
+                </div>
+                <button class="btn btn-secondary">個人資料</button>
+                <button class="btn btn-secondary" style="margin-top: 10px;">通知設定</button>
+                <button class="btn btn-secondary" style="margin-top: 10px;">隱私政策</button>
+            </div>
+        </div>
+
+        <!-- 底部導航 -->
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="switchTab('home')">
+                <div class="nav-icon"><i class="fas fa-home"></i></div>
+                <div class="nav-label">首頁</div>
+            </div>
+            <div class="nav-item" onclick="switchTab('workout')">
+                <div class="nav-icon"><i class="fas fa-dumbbell"></i></div>
+                <div class="nav-label">訓練</div>
+            </div>
+            <div class="nav-item" onclick="switchTab('diet')">
+                <div class="nav-icon"><i class="fas fa-apple-alt"></i></div>
+                <div class="nav-label">飲食</div>
+            </div>
+            <div class="nav-item" onclick="switchTab('avatar')">
+                <div class="nav-icon"><i class="fas fa-user"></i></div>
+                <div class="nav-label">Avatar</div>
+            </div>
+            <div class="nav-item" onclick="switchTab('settings')">
+                <div class="nav-icon"><i class="fas fa-cog"></i></div>
+                <div class="nav-label">設定</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 升級彈窗 -->
+    <div class="modal" id="levelUpModal">
+        <div class="modal-content">
+            <div class="level-up-icon">🎉</div>
+            <h3>恭喜升級！</h3>
+            <p id="levelUpText">您已達到等級 2</p>
+            <button class="btn" onclick="closeLevelUpModal()">太棒了！</button>
+        </div>
+    </div>
+
+    <script>
+        // Firebase 模擬配置
+        const firebaseConfig = {
+            // 模擬配置
+            apiKey: "模擬-api-key",
+            authDomain: "fitness-app.firebaseapp.com",
+            projectId: "fitness-app",
+            storageBucket: "fitness-app.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "模擬-app-id"
+        };
+
+        // 模擬用戶數據
+        let userData = {
+            profile: {
+                name: "健身勇者",
+                avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+                email: "user@fitness.com"
+            },
+            stats: {
+                level: 1,
+                XP: 0,
+                flowState: 0,
+                currentWeight: 72,
+                bodyFat: 18
+            },
+            progress: {
+                checkinDays: [],
+                workoutHistory: [],
+                dietHistory: [],
+                unlockedAchievements: [],
+                avatarItems: ['basic']
+            },
+            tasks: {
+                todayTasks: []
+            },
+            leaderboardSnapshot: {
+                XP: 0,
+                checkinStreak: 0,
+                taskCompletionRate: 0
+            }
+        };
+
+        // 模擬排行榜數據
+        const leaderboardData = [
+            { name: "健身達人", avatar: "https://images.unsplash.com/photo-1517849845537-4d257902454a?w=50&h=50&fit=crop&crop=face", level: 15, XP: 1500 },
+            { name: "運動女神", avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b3e5?w=50&h=50&fit=crop&crop=face", level: 12, XP: 1200 },
+            { name: "肌肉猛男", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face", level: 10, XP: 1000 },
+            { name: "瑜伽大師", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50&h=50&fit=crop&crop=face", level: 8, XP: 800 },
+            { name: "跑步狂人", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=50&h=50&fit=crop&crop=face", level: 7, XP: 700 }
+        ];
+
+        // 成就數據
+        const achievements = [
+            { id: 'first_checkin', title: '初次簽到', icon: '📅', condition: 'checkin_1', unlocked: false },
+            { id: 'week_streak', title: '連續7天', icon: '🔥', condition: 'checkin_7', unlocked: false },
+            { id: 'level_5', title: '等級5', icon: '⭐', condition: 'level_5', unlocked: false },
+            { id: 'diet_master', title: '飲食達人', icon: '🍎', condition: 'diet_perfect', unlocked: false },
+            { id: 'workout_beast', title: '訓練野獸', icon: '💪', condition: 'workout_10', unlocked: false },
+            { id: 'flow_master', title: '心流大師', icon: '⚡', condition: 'flow_100', unlocked: false }
+        ];
+
+        // 食譜數據
+        const recipes = [
+            {
+                title: "雞胸肉沙拉",
+                image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=300&h=200&fit=crop",
+                calories: 320,
+                protein: 35,
+                carbs: 12,
+                fat: 8
+            },
+            {
+                title: "鮭魚酪梨卷",
+                image: "https://images.unsplash.com/photo-1579952363873-27d3bfad9c0d?w=300&h=200&fit=crop",
+                calories: 280,
+                protein: 25,
+                carbs: 8,
+                fat: 15
+            },
+            {
+                title: "蛋白質奶昔",
+                image: "https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=300&h=200&fit=crop",
+                calories: 250,
+                protein: 30,
+                carbs: 15,
+                fat: 5
+            }
+        ];
+
+        // Chart.js 圖表
+        let xpChart, flowChart, nutritionChart;
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            loadUserData();
+            updateUI();
+            generateDailyTasks();
+            loadRecipes();
+            loadLeaderboard();
+            loadAchievements();
+            checkNetworkStatus();
+        });
+
+        function initializeApp() {
+            console.log('FitnessPro App 初始化成功');
+            
+            // 初始化圖表
+            setTimeout(() => {
+                initializeCharts();
+            }, 100);
+        }
+
+        function loadUserData() {
+            // 從 localStorage 讀取數據（模擬 Firebase）
+            const saved = localStorage.getItem('fitnessUserData');
+            if (saved) {
+                userData = { ...userData, ...JSON.parse(saved) };
+            }
+        }
+
+        function saveUserData() {
+            // 保存到 localStorage（模擬 Firebase）
+            localStorage.setItem('fitnessUserData', JSON.stringify(userData));
+        }
+
+        function updateUI() {
+            // 更新用戶頭像和等級
+            document.getElementById('userAvatar').src = userData.profile.avatarUrl;
+            document.getElementById('userLevel').textContent = `LV ${userData.stats.level}`;
+            document.getElementById('checkinStreak').textContent = userData.progress.checkinDays.length;
+            document.getElementById('welcomeText').textContent = getWelcomeMessage();
+            
+            // 更新簽到天數
+            document.getElementById('checkinDays').textContent = userData.progress.checkinDays.length;
+            
+            // 更新XP信息
+            const currentXP = userData.stats.XP;
+            const nextLevelXP = userData.stats.level * 100;
+            document.getElementById('currentXP').textContent = `${currentXP} XP`;
+            document.getElementById('nextLevelXP').textContent = `/ ${nextLevelXP} XP`;
+            
+            // 更新Flow狀態
+            document.getElementById('flowPercentage').textContent = `${userData.stats.flowState}%`;
+            
+            // 更新Avatar
+            updateAvatar();
+            
+            // 檢查簽到按鈕狀態
+            checkCheckinStatus();
+        }
+
+        function getWelcomeMessage() {
+            const hour = new Date().getHours();
+            if (hour < 12) return "早安，健身勇者！";
+            if (hour < 18) return "午安，健身勇者！";
+            return "晚安，健身勇者！";
+        }
+
+        function checkCheckinStatus() {
+            const today = new Date().toDateString();
+            const lastCheckin = userData.progress.checkinDays[userData.progress.checkinDays.length - 1];
+            const checkinBtn = document.getElementById('checkinBtn');
+            
+            if (lastCheckin && new Date(lastCheckin).toDateString() === today) {
+                checkinBtn.textContent = '✅ 今日已簽到';
+                checkinBtn.disabled = true;
+                checkinBtn.style.opacity = '0.6';
+            }
+        }
+
+        function dailyCheckin() {
+            const today = new Date().toISOString();
+            const checkinBtn = document.getElementById('checkinBtn');
+            
+            // 添加簽到記錄
+            userData.progress.checkinDays.push(today);
+            
+            // 增加XP
+            userData.stats.XP += 10;
+            
+            // 檢查升級
+            checkLevelUp();
+            
+            // 檢查成就
+            checkAchievements();
+            
+            // 更新UI
+            updateUI();
+            
+            // 更新圖表
+            updateCharts();
+            
+            // 保存數據
+            saveUserData();
+            
+            // 簽到動畫
+            checkinBtn.innerHTML = '<i class="fas fa-check"></i> 簽到成功！';
+            checkinBtn.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                checkinBtn.style.transform = 'scale(1)';
+                checkinBtn.textContent = '✅ 今日已簽到';
+                checkinBtn.disabled = true;
+                checkinBtn.style.opacity = '0.6';
+            }, 500);
+        }
+
+        function checkLevelUp() {
+            const currentLevel = userData.stats.level;
+            const requiredXP = currentLevel * 100;
+            
+            if (userData.stats.XP >= requiredXP) {
+                userData.stats.level++;
+                userData.stats.XP = 0; // 重置XP或計算剩餘XP
+                showLevelUpModal(userData.stats.level);
+            }
+        }
+
+        function showLevelUpModal(newLevel) {
+            document.getElementById('levelUpText').textContent = `您已達到等級 ${newLevel}！`;
+            document.getElementById('levelUpModal').classList.add('show');
+        }
+
+        function closeLevelUpModal() {
+            document.getElementById('levelUpModal').classList.remove('show');
+        }
+
+        function generateDailyTasks() {
+            const tasks = [
+                { title: "喝 8 杯水", type: "hydration", completed: false },
+                { title: "完成 30 分鐘有氧運動", type: "cardio", completed: false },
+                { title: "攝取 100g 蛋白質", type: "nutrition", completed: false },
+                { title: "步行 10,000 步", type: "walking", completed: false },
+                { title: "冥想 10 分鐘", type: "meditation", completed: false }
+            ];
+            
+            // 隨機選擇3個任務
+            const todayTasks = tasks.sort(() => 0.5 - Math.random()).slice(0, 3);
+            userData.tasks.todayTasks = todayTasks;
+            
+            renderTasks();
+            saveUserData();
+        }
+
+        function renderTasks() {
+            const tasksList = document.getElementById('tasksList');
+            tasksList.innerHTML = '';
+            
+            userData.tasks.todayTasks.forEach((task, index) => {
+                const taskItem = document.createElement('li');
+                taskItem.className = 'task-item';
+                taskItem.innerHTML = `
+                    <div class="task-checkbox ${task.completed ? 'completed' : ''}" 
+                         onclick="toggleTask(${index})"></div>
+                    <div class="task-text ${task.completed ? 'completed' : ''}">${task.title}</div>
+                `;
+                tasksList.appendChild(taskItem);
+            });
+        }
+
+        function toggleTask(index) {
+            const task = userData.tasks.todayTasks[index];
+            task.completed = !task.completed;
+            
+            if (task.completed) {
+                // 完成任務獲得XP和Flow
+                userData.stats.XP += 20;
+                userData.stats.flowState = Math.min(100, userData.stats.flowState + 10);
+                
+                checkLevelUp();
+                checkAchievements();
+            } else {
+                // 取消完成減少Flow
+                userData.stats.flowState = Math.max(0, userData.stats.flowState - 10);
+            }
+            
+            renderTasks();
+            updateUI();
+            updateCharts();
+            saveUserData();
+        }
+
+        function checkAchievements() {
+            achievements.forEach(achievement => {
+                if (!achievement.unlocked) {
+                    let shouldUnlock = false;
+                    
+                    switch(achievement.condition) {
+                        case 'checkin_1':
+                            shouldUnlock = userData.progress.checkinDays.length >= 1;
+                            break;
+                        case 'checkin_7':
+                            shouldUnlock = userData.progress.checkinDays.length >= 7;
+                            break;
+                        case 'level_5':
+                            shouldUnlock = userData.stats.level >= 5;
+                            break;
+                        case 'flow_100':
+                            shouldUnlock = userData.stats.flowState >= 100;
+                            break;
+                    }
+                    
+                    if (shouldUnlock) {
+                        achievement.unlocked = true;
+                        userData.progress.unlockedAchievements.push(achievement.id);
+                        showAchievementUnlock(achievement);
+                    }
+                }
+            });
+            
+            loadAchievements();
+        }
+
+        function showAchievementUnlock(achievement) {
+            // 可以添加成就解鎖動畫
+            console.log(`成就解鎖: ${achievement.title}`);
+        }
+
+        function loadAchievements() {
+            const grid = document.getElementById('achievementsGrid');
+            grid.innerHTML = '';
+            
+            achievements.forEach(achievement => {
+                const badge = document.createElement('div');
+                badge.className = `achievement-badge ${achievement.unlocked ? 'unlocked' : ''}`;
+                badge.innerHTML = `
+                    <div class="achievement-icon">${achievement.icon}</div>
+                    <div class="achievement-title">${achievement.title}</div>
+                `;
+                grid.appendChild(badge);
+            });
+        }
+
+        function loadRecipes() {
+            const container = document.getElementById('recipeContainer');
+            container.innerHTML = '';
+            
+            recipes.forEach(recipe => {
+                const recipeCard = document.createElement('div');
+                recipeCard.className = 'recipe-card';
+                recipeCard.innerHTML = `
+                    <img src="${recipe.image}" alt="${recipe.title}" class="recipe-image">
+                    <div class="recipe-content">
+                        <div class="recipe-title">${recipe.title}</div>
+                        <div class="recipe-nutrients">
+                            <span>🔥 ${recipe.calories} cal</span>
+                            <span>💪 ${recipe.protein}g 蛋白質</span>
+                            <span>🌾 ${recipe.carbs}g 碳水</span>
+                            <span>🥑 ${recipe.fat}g 脂肪</span>
+                        </div>
+                        <button class="btn" onclick="addToMeal('${recipe.title}')">
+                            <i class="fas fa-plus"></i> 加入今日飲食
+                        </button>
+                    </div>
+                `;
+                container.appendChild(recipeCard);
+            });
+        }
+
+        function addToMeal(recipeName) {
+            const recipe = recipes.find(r => r.title === recipeName);
+            if (recipe) {
+                userData.progress.dietHistory.push({
+                    date: new Date().toISOString(),
+                    recipe: recipe
+                });
+                
+                // 更新營養圖表
+                updateNutritionChart();
+                saveUserData();
+                
+                alert(`${recipeName} 已加入今日飲食！`);
+            }
+        }
+
+        function loadLeaderboard() {
+            const container = document.getElementById('leaderboardContainer');
+            container.innerHTML = '';
+            
+            // 添加當前用戶到排行榜
+            const allUsers = [...leaderboardData, {
+                name: userData.profile.name,
+                avatar: userData.profile.avatarUrl,
+                level: userData.stats.level,
+                XP: userData.stats.XP
+            }];
+            
+            // 排序
+            allUsers.sort((a, b) => b.XP - a.XP);
+            
+            allUsers.slice(0, 10).forEach((user, index) => {
+                const item = document.createElement('div');
+                item.className = 'leaderboard-item';
+                item.innerHTML = `
+                    <div class="rank-number ${index < 3 ? 'top3' : ''}">${index + 1}</div>
+                    <img src="${user.avatar}" alt="${user.name}" class="user-avatar">
+                    <div class="user-details">
+                        <div class="user-name">${user.name}</div>
+                        <div class="user-stats">LV ${user.level} • ${user.XP} XP</div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function updateAvatar() {
+            const level = userData.stats.level;
+            const avatarDisplay = document.getElementById('avatarDisplay');
+            const avatarDescription = document.getElementById('avatarDescription');
+            
+            if (level >= 10) {
+                avatarDisplay.src = "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=200&h=200&fit=crop";
+                avatarDescription.textContent = "戰鬥大師裝備";
+            } else if (level >= 5) {
+                avatarDisplay.src = "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=200&fit=crop";
+                avatarDescription.textContent = "運動背心套裝";
+            } else {
+                avatarDisplay.src = "https://images.unsplash.com/photo-1594736797933-d0f5e0822dd3?w=200&h=200&fit=crop";
+                avatarDescription.textContent = "運動新手裝備";
+            }
+        }
+
+        function initializeCharts() {
+            // XP進度條
+            const xpCtx = document.getElementById('xpChart');
+            if (xpCtx) {
+                xpChart = new Chart(xpCtx, {
+                    type: 'doughnut',
+                    data: {
+                        datasets: [{
+                            data: [userData.stats.XP, userData.stats.level * 100 - userData.stats.XP],
+                            backgroundColor: ['#667eea', '#f1f3f4'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '80%',
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+
+            // Flow Meter
+            const flowCtx = document.getElementById('flowChart');
+            if (flowCtx) {
+                flowChart = new Chart(flowCtx, {
+                    type: 'doughnut',
+                    data: {
+                        datasets: [{
+                            data: [userData.stats.flowState, 100 - userData.stats.flowState],
+                            backgroundColor: ['#ff6b6b', '#f1f3f4'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '80%',
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+
+            // 營養圖表
+            const nutritionCtx = document.getElementById('nutritionChart');
+            if (nutritionCtx) {
+                nutritionChart = new Chart(nutritionCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['蛋白質', '碳水化合物', '脂肪'],
+                        datasets: [{
+                            data: [30, 45, 25],
+                            backgroundColor: ['#667eea', '#764ba2', '#f093fb']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { fontSize: 12 }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function updateCharts() {
+            if (xpChart) {
+                const nextLevelXP = userData.stats.level * 100;
+                xpChart.data.datasets[0].data = [userData.stats.XP, nextLevelXP - userData.stats.XP];
+                xpChart.update();
+            }
+            
+            if (flowChart) {
+                flowChart.data.datasets[0].data = [userData.stats.flowState, 100 - userData.stats.flowState];
+                flowChart.update();
+            }
+        }
+
+        function updateNutritionChart() {
+            if (nutritionChart && userData.progress.dietHistory.length > 0) {
+                // 計算今日營養攝取
+                const today = new Date().toDateString();
+                const todayMeals = userData.progress.dietHistory.filter(entry => 
+                    new Date(entry.date).toDateString() === today
+                );
+                
+                let totalProtein = 0, totalCarbs = 0, totalFat = 0;
+                todayMeals.forEach(meal => {
+                    totalProtein += meal.recipe.protein;
+                    totalCarbs += meal.recipe.carbs;
+                    totalFat += meal.recipe.fat;
+                });
+                
+                const total = totalProtein + totalCarbs + totalFat;
+                if (total > 0) {
+                    nutritionChart.data.datasets[0].data = [
+                        (totalProtein / total * 100).toFixed(1),
+                        (totalCarbs / total * 100).toFixed(1),
+                        (totalFat / total * 100).toFixed(1)
+                    ];
+                    nutritionChart.update();
+                }
+            }
+        }
+
+        function switchTab(tab) {
+            // 隱藏所有內容
+            document.querySelectorAll('.main-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // 顯示選中的內容
+            document.getElementById(tab + 'Content').classList.add('active');
+            
+            // 更新導航狀態
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.nav-item').classList.add('active');
+        }
+
+        function checkNetworkStatus() {
+            const banner = document.getElementById('offlineBanner');
+            
+            function updateStatus() {
+                if (!navigator.onLine) {
+                    banner.style.display = 'block';
+                } else {
+                    banner.style.display = 'none';
+                }
+            }
+            
+            window.addEventListener('online', updateStatus);
+            window.addEventListener('offline', updateStatus);
+            updateStatus();
+        }
+
+        // 添加觸摸手勢支持
+        let startY = 0;
+        document.addEventListener('touchstart', function(e) {
+            startY = e.touches[0].clientY;
+        });
+
+        document.addEventListener('touchmove', function(e) {
+            const currentY = e.touches[0].clientY;
+            const diff = startY - currentY;
+            
+            // 實現下拉刷新等手勢
+            if (diff < -100 && window.scrollY === 0) {
+                // 觸發刷新
+                location.reload();
+            }
+        });
+
+        // 定期保存數據
+        setInterval(saveUserData, 30000); // 每30秒保存一次
+    </script>
+</body>
+</html> 

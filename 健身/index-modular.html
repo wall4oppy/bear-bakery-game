@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitnessPro - 健身遊戲App</title>
+    
+    <!-- 外部資源 -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 本地CSS文件 -->
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+    <link rel="stylesheet" href="assets/css/navigation.css">
+</head>
+<body>
+    <!-- 離線提示 -->
+    <div class="offline-banner" id="offlineBanner">
+        <i class="fas fa-wifi"></i> 網路連線中斷，部分功能可能無法使用
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-top">
+                <div class="user-info">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" 
+                         alt="用戶頭像" class="avatar" id="userAvatar">
+                    <div>
+                        <div class="user-level" id="userLevel">LV 1</div>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <i class="fas fa-fire" style="color: #ff6b6b;"></i>
+                    <span id="checkinStreak">0</span>
+                </div>
+            </div>
+            <div class="welcome-text" id="welcomeText">早安，健身勇者！</div>
+            <div class="streak-info">今天也要保持活力喔 💪</div>
+        </div>
+
+        <!-- 首頁內容 -->
+        <div class="main-content active" id="homeContent">
+            <!-- 每日簽到 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">每日簽到</h3>
+                    <div class="card-icon"><i class="fas fa-calendar-check"></i></div>
+                </div>
+                <div class="checkin-container">
+                    <div class="checkin-days" id="checkinDays">0</div>
+                    <p>連續打卡天數</p>
+                    <button class="btn" id="checkinBtn">
+                        <i class="fas fa-check"></i> 今日簽到
+                    </button>
+                </div>
+            </div>
+
+            <!-- 等級系統 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">等級進度</h3>
+                    <div class="card-icon"><i class="fas fa-star"></i></div>
+                </div>
+                <div class="chart-container chart-small">
+                    <canvas id="xpChart"></canvas>
+                </div>
+                <div class="xp-info">
+                    <span id="currentXP">0 XP</span>
+                    <span id="nextLevelXP">/ 100 XP</span>
+                </div>
+            </div>
+
+            <!-- Flow Meter -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">心流狀態</h3>
+                    <div class="card-icon"><i class="fas fa-bolt"></i></div>
+                </div>
+                <div class="flow-meter">
+                    <div class="chart-container chart-small">
+                        <canvas id="flowChart"></canvas>
+                    </div>
+                    <div class="flow-percentage" id="flowPercentage">0%</div>
+                    <p>完成任務獲得心流加成</p>
+                </div>
+            </div>
+
+            <!-- 今日任務 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">今日任務</h3>
+                    <div class="card-icon"><i class="fas fa-tasks"></i></div>
+                </div>
+                <ul class="tasks-list" id="tasksList">
+                    <!-- 動態生成任務 -->
+                </ul>
+                <button class="btn btn-secondary" id="generateTasksBtn">
+                    <i class="fas fa-refresh"></i> 重新生成任務
+                </button>
+            </div>
+        </div>
+
+        <!-- 訓練內容 -->
+        <div class="main-content" id="workoutContent">
+            <!-- 由 JS 動態渲染分類與運動卡片 -->
+        </div>
+
+        <!-- 飲食內容 -->
+        <div class="main-content" id="dietContent">
+            <!-- 營養分析 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">今日營養</h3>
+                    <div class="card-icon"><i class="fas fa-apple-alt"></i></div>
+                </div>
+                <div class="chart-container chart-small">
+                    <canvas id="nutritionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 食譜推薦 - 串連 meal.js 模組 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">推薦食譜</h3>
+                    <div class="card-icon"><i class="fas fa-utensils"></i></div>
+                </div>
+                <div id="mealContainer">
+                    <!-- 由 meal.js 模組動態生成食譜推薦 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Avatar內容 -->
+        <div class="main-content" id="avatarContent">
+            <!-- Avatar展示 - 串連 avatar.js 模組 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">我的Avatar</h3>
+                    <div class="card-icon"><i class="fas fa-user-ninja"></i></div>
+                </div>
+                <div id="avatarContainer">
+                    <!-- 由 avatar.js 模組動態生成Avatar展示 -->
+                </div>
+            </div>
+
+            <!-- 身材對比 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">身材對比</h3>
+                    <div class="card-icon"><i class="fas fa-chart-line"></i></div>
+                </div>
+                <div class="comparison-container">
+                    <div class="comparison-item">
+                        <img src="https://images.unsplash.com/photo-1594736797933-d0f5e0822dd3?w=200&h=200&fit=crop" 
+                             alt="過去" class="comparison-image">
+                        <div class="comparison-label">3個月前</div>
+                        <div class="comparison-stats">75kg | 22% 體脂</div>
+                    </div>
+                    <div class="comparison-item">
+                        <img src="https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=200&h=200&fit=crop" 
+                             alt="現在" class="comparison-image">
+                        <div class="comparison-label">現在</div>
+                        <div class="comparison-stats">72kg | 18% 體脂</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 成就系統 - 串連 achievement.js 模組 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">成就徽章</h3>
+                    <div class="card-icon"><i class="fas fa-trophy"></i></div>
+                </div>
+                <div id="achievementContainer">
+                    <!-- 由 achievement.js 模組動態生成成就 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 設定內容 -->
+        <div class="main-content" id="settingsContent">
+            <!-- 主題配色選擇 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">主題配色</h3>
+                    <div class="card-icon"><i class="fas fa-palette"></i></div>
+                </div>
+                <div class="theme-selector">
+                    <div class="theme-option active" data-theme="default">
+                        <div class="theme-preview default-theme">
+                            <div class="preview-header"></div>
+                            <div class="preview-content"></div>
+                        </div>
+                        <div class="theme-name">經典藍紫</div>
+                    </div>
+                    <div class="theme-option" data-theme="ocean">
+                        <div class="theme-preview ocean-theme">
+                            <div class="preview-header"></div>
+                            <div class="preview-content"></div>
+                        </div>
+                        <div class="theme-name">海洋藍</div>
+                    </div>
+                    <div class="theme-option" data-theme="sunset">
+                        <div class="theme-preview sunset-theme">
+                            <div class="preview-header"></div>
+                            <div class="preview-content"></div>
+                        </div>
+                        <div class="theme-name">夕陽橙</div>
+                    </div>
+                    <div class="theme-option" data-theme="forest">
+                        <div class="theme-preview forest-theme">
+                            <div class="preview-header"></div>
+                            <div class="preview-content"></div>
+                        </div>
+                        <div class="theme-name">森林綠</div>
+                    </div>
+                    <div class="theme-option" data-theme="lavender">
+                        <div class="theme-preview lavender-theme">
+                            <div class="preview-header"></div>
+                            <div class="preview-content"></div>
+                        </div>
+                        <div class="theme-name">薰衣草</div>
+                    </div>
+                    <div class="theme-option" data-theme="coral">
+                        <div class="theme-preview coral-theme">
+                            <div class="preview-header"></div>
+                            <div class="preview-content"></div>
+                        </div>
+                        <div class="theme-name">珊瑚粉</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 雲端同步設定 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">雲端同步</h3>
+                    <div class="card-icon"><i class="fas fa-cloud"></i></div>
+                </div>
+                <div style="padding: 20px;">
+                    <button class="btn btn-secondary" id="enableSyncBtn">
+                        <i class="fas fa-sync"></i> 啟用雲端同步
+                    </button>
+                    <button class="btn btn-secondary" id="backupDataBtn" style="margin-top: 10px;">
+                        <i class="fas fa-download"></i> 備份資料
+                    </button>
+                    <button class="btn btn-secondary" id="restoreDataBtn" style="margin-top: 10px;">
+                        <i class="fas fa-upload"></i> 恢復資料
+                    </button>
+                </div>
+            </div>
+
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">設定</h3>
+                    <div class="card-icon"><i class="fas fa-cog"></i></div>
+                </div>
+                <button class="btn btn-secondary">個人資料</button>
+                <button class="btn btn-secondary" style="margin-top: 10px;">通知設定</button>
+                <button class="btn btn-secondary" style="margin-top: 10px;">隱私政策</button>
+            </div>
+        </div>
+
+        <!-- 排行榜內容 -->
+        <div class="main-content" id="leaderboardContent">
+            <!-- 排行榜 - 串連 leaderboard.js 模組 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">排行榜</h3>
+                    <div class="card-icon"><i class="fas fa-crown"></i></div>
+                </div>
+                <div id="leaderboardContainer">
+                    <!-- 由 leaderboard.js 模組動態生成排行榜 -->
+                </div>
+            </div>
+
+            <!-- 排行榜統計 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">本週統計</h3>
+                    <div class="card-icon"><i class="fas fa-chart-bar"></i></div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">1,234</div>
+                        <div class="stat-label">活躍用戶</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">5,678</div>
+                        <div class="stat-label">完成任務</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">89,012</div>
+                        <div class="stat-label">總XP</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">456</div>
+                        <div class="stat-label">新成就</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 排行榜規則 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">排行榜規則</h3>
+                    <div class="card-icon"><i class="fas fa-info-circle"></i></div>
+                </div>
+                <div class="rules-list">
+                    <div class="rule-item">
+                        <i class="fas fa-star"></i>
+                        <span>等級越高排名越前</span>
+                    </div>
+                    <div class="rule-item">
+                        <i class="fas fa-fire"></i>
+                        <span>連續簽到天數影響排名</span>
+                    </div>
+                    <div class="rule-item">
+                        <i class="fas fa-trophy"></i>
+                        <span>完成任務獲得XP提升等級</span>
+                    </div>
+                    <div class="rule-item">
+                        <i class="fas fa-sync"></i>
+                        <span>排行榜每小時更新一次</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 熱量計算機內容 -->
+        <div class="main-content" id="calorieContent">
+            <div id="calorieCalculator"></div>
+        </div>
+
+        <!-- 底部導航 -->
+        <div class="bottom-nav">
+            <div class="nav-item active" data-tab="home">
+                <div class="nav-icon"><i class="fas fa-home"></i></div>
+                <div class="nav-label">首頁</div>
+            </div>
+            <div class="nav-item" data-tab="workout">
+                <div class="nav-icon"><i class="fas fa-dumbbell"></i></div>
+                <div class="nav-label">訓練</div>
+            </div>
+            <div class="nav-item" data-tab="diet">
+                <div class="nav-icon"><i class="fas fa-apple-alt"></i></div>
+                <div class="nav-label">飲食</div>
+            </div>
+            <div class="nav-item" data-tab="avatar">
+                <div class="nav-icon"><i class="fas fa-user"></i></div>
+                <div class="nav-label">Avatar</div>
+            </div>
+            <div class="nav-item" data-tab="calorie">
+                <div class="nav-icon"><i class="fas fa-fire"></i></div>
+                <div class="nav-label">熱量</div>
+            </div>
+            <div class="nav-item" data-tab="leaderboard">
+                <div class="nav-icon"><i class="fas fa-trophy"></i></div>
+                <div class="nav-label">排行榜</div>
+            </div>
+            <div class="nav-item" data-tab="settings">
+                <div class="nav-icon"><i class="fas fa-cog"></i></div>
+                <div class="nav-label">設定</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 升級彈窗 -->
+    <div class="modal" id="levelUpModal">
+        <div class="modal-content">
+            <div class="level-up-icon">🎉</div>
+            <h3>恭喜升級！</h3>
+            <p id="levelUpText">您已達到等級 2</p>
+            <button class="btn" id="closeLevelUpBtn">太棒了！</button>
+        </div>
+    </div>
+
+    <!-- JavaScript 文件 -->
+    <!-- 配置和工具 -->
+    <script src="config/config.js"></script>
+    <script src="assets/js/utils/storage.js"></script>
+    <script src="assets/js/utils/helpers.js"></script>
+    
+    <!-- Firebase 雲端同步 -->
+    <script src="assets/js/firebase.js"></script>
+    
+    <!-- 功能模組 -->
+    <script src="assets/js/modules/checkin.js"></script>
+    <script src="assets/js/modules/task.js"></script>
+    
+    <!-- 新增模組 -->
+    <script src="assets/js/modules/avatar.js"></script>
+    <script src="assets/js/modules/achievement.js"></script>
+    <script src="assets/js/modules/meal.js"></script>
+    <script src="assets/js/modules/leaderboard.js"></script>
+    <script src="assets/js/modules/theme.js"></script>
+    
+    <!-- 主應用 -->
+    <script src="assets/js/app.js"></script>
+    <!-- 新增：訓練模組 -->
+    <script src="assets/js/modules/workout.js"></script>
+    <!-- 熱量計算機模組 -->
+    <script src="assets/js/modules/calorie.js"></script>
+</body>
+</html> 
