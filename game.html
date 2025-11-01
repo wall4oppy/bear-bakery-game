@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小熊哥麵包坊 - 像素風行銷策略遊戲</title>
+    <link rel="icon" href="assets/images/小熊哥.png" type="image/png">
+    
+    <!-- 基本 meta 標籤 -->
+    <meta name="description" content="可愛的像素風格麵包坊行銷策略遊戲！扮演小熊哥，從零開始經營麵包坊，面對多變的市場景氣和各種挑戰，打造屬於你的烘焙帝國！">
+    <meta name="keywords" content="小熊哥,麵包坊,行銷策略遊戲,像素風格,烘焙,模擬經營">
+    <meta name="author" content="小熊哥遊戲團隊">
+    
+    <!-- Open Graph meta 標籤 (Facebook, LinkedIn 等) -->
+    <meta property="og:title" content="小熊哥捲土重來 - 像素風格麵包坊行銷策略遊戲">
+    <meta property="og:description" content="可愛的像素風格麵包坊行銷策略遊戲！扮演小熊哥，從零開始經營麵包坊，面對多變的市場景氣和各種挑戰，打造屬於你的烘焙帝國！">
+    <meta property="og:image" content="https://wall4oppy.github.io/bear-bakery-game/assets/images/小熊哥.png">
+    <meta property="og:url" content="https://wall4oppy.github.io/bear-bakery-game/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="小熊哥捲土重來">
+    <meta property="og:locale" content="zh_TW">
+    
+    <!-- Twitter Card meta 標籤 -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="小熊哥捲土重來 - 像素風格麵包坊行銷策略遊戲">
+    <meta name="twitter:description" content="可愛的像素風格麵包坊行銷策略遊戲！扮演小熊哥，從零開始經營麵包坊，面對多變的市場景氣和各種挑戰，打造屬於你的烘焙帝國！">
+    <meta name="twitter:image" content="https://wall4oppy.github.io/bear-bakery-game/assets/images/小熊哥.png">
+    
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+        // 捕捉瀏覽器擴充功能引起的錯誤訊息
+        window.addEventListener('error', function(e) {
+            if (e.message && (e.message.includes('message channel closed') || 
+                             e.message.includes('Extension context invalidated') ||
+                             e.message.includes('asynchronous response'))) {
+                e.preventDefault();
+                e.stopPropagation();
+                return true;
+            }
+        }, true);
+        
+        // 捕捉未處理的 Promise 錯誤（加強版）
+        window.addEventListener('unhandledrejection', function(e) {
+            const errorMsg = e.reason?.message || e.reason?.toString() || '';
+            if (errorMsg.includes('message channel closed') || 
+                errorMsg.includes('Extension context invalidated') ||
+                errorMsg.includes('asynchronous response') ||
+                errorMsg.includes('listener indicated')) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('⚠️ 已攔截瀏覽器擴充功能錯誤（不影響遊戲運作）');
+                return false;
+            }
+        });
+        
+        // 額外防護：覆寫 console.error 來過濾擴充功能錯誤
+        const originalError = console.error;
+        console.error = function(...args) {
+            const errorStr = args.join(' ');
+            if (errorStr.includes('message channel closed') || 
+                errorStr.includes('asynchronous response') ||
+                errorStr.includes('listener indicated') ||
+                errorStr.includes('runtime.lastError') ||
+                errorStr.includes('message port closed') ||
+                errorStr.includes('Extension context invalidated') ||
+                errorStr.includes('Unchecked runtime.lastError')) {
+                console.log('⚠️ 已過濾瀏覽器擴充功能錯誤訊息');
+                return;
+            }
+            originalError.apply(console, args);
+        };
+        
+        // 特別處理 runtime.lastError
+        if (typeof chrome !== 'undefined' && chrome.runtime) {
+            // 靜默處理擴展相關的錯誤
+            const originalLastError = chrome.runtime.lastError;
+            Object.defineProperty(chrome.runtime, 'lastError', {
+                get: function() {
+                    return null; // 總是返回 null，避免錯誤
+                },
+                configurable: true
+            });
+        }
+    </script>
+    <!-- Botpress 小熊助手聊天機器人 - 新配置 -->
+    <script src="https://cdn.botpress.cloud/webchat/v3.3/inject.js" defer></script>
+    <script src="https://files.bpcontent.cloud/2025/10/25/15/20251025153516-2WWLAXAP.js" defer></script>
+    <script>
+        // Botpress 配置（隱藏默認 UI，整合到聊天室）
+        window.botpressConfig = {
+            botId: 'default-bot',
+            clientId: 'webchat-client',
+            webchatId: 'webchat-widget',
+            host: 'https://cdn.botpress.cloud',
+            version: '3.3',
+            // 聊天機器人設定
+            botName: '小熊哥助手',
+            botAvatar: '🐻',
+            // 聊天室設定
+            chatTitle: '小熊哥麵包坊客服',
+            welcomeMessage: '你好！我是小熊哥助手，有什麼可以幫助你的嗎？',
+            // 功能設定
+            enableFileUpload: false,
+            enableVoice: false,
+            // 隱藏默認 UI 設定
+            hideWidget: true,
+            hideFAB: true,
+            disableAnimations: true,
+            // 樣式設定
+            theme: {
+                primaryColor: '#8B4513',
+                secondaryColor: '#D2B48C',
+                backgroundColor: '#FFF8DC'
+            }
+        };
+        
+        // 等待 Botpress 載入完成並隱藏默認 UI
+        window.addEventListener('load', function() {
+            console.log('🚀 頁面載入完成，初始化 Botpress（隱藏默認 UI）...');
+            
+            // 延遲初始化，確保所有腳本都已載入
+            setTimeout(() => {
+                if (window.botpressWebChat) {
+                    console.log('✅ Botpress WebChat 已載入');
+                    try {
+                        // 初始化但不顯示默認 UI
+                        window.botpressWebChat.init({
+                            hideWidget: true,
+                            hideFAB: true
+                        });
+                        console.log('✅ Botpress WebChat 初始化成功（隱藏 UI）');
+                        
+                        // 立即隱藏任何可能出現的 UI 元素
+                        setTimeout(() => {
+                            hideBotpressUI();
+                        }, 1000);
+                        
+                    } catch (error) {
+                        console.log('⚠️ Botpress WebChat 初始化失敗:', error);
+                    }
+                } else if (window.botpress) {
+                    console.log('✅ Botpress 已載入');
+                    try {
+                        window.botpress.init({
+                            hideWidget: true,
+                            hideFAB: true
+                        });
+                        console.log('✅ Botpress 初始化成功（隱藏 UI）');
+                        
+                        // 立即隱藏任何可能出現的 UI 元素
+                        setTimeout(() => {
+                            hideBotpressUI();
+                        }, 1000);
+                        
+                    } catch (error) {
+                        console.log('⚠️ Botpress 初始化失敗:', error);
+                    }
+                } else {
+                    console.log('⚠️ Botpress 尚未載入，將在聊天室中自動初始化');
+                }
+            }, 3000); // 增加等待時間到3秒
+        });
+        
+        // 隱藏 Botpress 默認 UI 的函數
+        function hideBotpressUI() {
+            console.log('🚫 隱藏 Botpress 默認 UI...');
+            
+            // 隱藏可能的 Botpress 聊天窗口
+            const selectors = [
+                '#botpress-webchat',
+                '.botpress-webchat',
+                '[data-botpress]',
+                '.bp-widget',
+                '#bp-widget',
+                '.webchat-container',
+                '#webchat-container',
+                '.bp-webchat',
+                '#bp-webchat'
+            ];
+            
+            selectors.forEach(selector => {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(element => {
+                    if (element) {
+                        element.style.display = 'none !important';
+                        element.style.visibility = 'hidden !important';
+                        element.style.opacity = '0 !important';
+                        console.log(`🚫 隱藏 Botpress 元素: ${selector}`);
+                    }
+                });
+            });
+            
+            // 隱藏可能的浮動按鈕
+            const fabSelectors = [
+                '.bp-fab',
+                '#bp-fab',
+                '.botpress-fab',
+                '.webchat-fab',
+                '.bp-floating-button',
+                '#bp-floating-button'
+            ];
+            
+            fabSelectors.forEach(selector => {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(element => {
+                    if (element) {
+                        element.style.display = 'none !important';
+                        element.style.visibility = 'hidden !important';
+                        console.log(`🚫 隱藏 Botpress 浮動按鈕: ${selector}`);
+                    }
+                });
+            });
+        }
+    </script>
+    <script>
+        // 詳細的 Botpress 診斷工具
+        window.checkBotpressLoaded = function() {
+            console.log('🔍 === Botpress 診斷工具 ===');
+            console.log('🔍 window.botpressWebChat:', typeof window.botpressWebChat, window.botpressWebChat);
+            console.log('🔍 window.botpress:', typeof window.botpress, window.botpress);
+            console.log('🔍 window.botpressConfig:', typeof window.botpressConfig, window.botpressConfig);
+            
+            // 列出所有包含 'bot' 的全局變數
+            const botGlobals = [];
+            for (let key in window) {
+                if (key.toLowerCase().includes('bot')) {
+                    botGlobals.push(key);
+                }
+            }
+            console.log('🔍 包含 "bot" 的全局變數:', botGlobals);
+            
+            if (window.botpressWebChat) {
+                console.log('✅ Botpress WebChat 已成功載入！');
+                console.log('🔍 可用方法:', Object.keys(window.botpressWebChat));
+                return true;
+            } else if (window.botpress) {
+                console.log('✅ Botpress 已成功載入（使用 window.botpress）！');
+                console.log('🔍 可用方法:', Object.keys(window.botpress));
+                return true;
+            } else {
+                console.log('⚠️ Botpress WebChat 尚未載入');
+                console.log('💡 建議：檢查網路連線或 Botpress 配置是否正確');
+                return false;
+            }
+        };
+        
+        // 多次檢查載入狀態
+        let checkCount = 0;
+        const checkInterval = setInterval(() => {
+            checkCount++;
+            console.log(`🔄 第 ${checkCount} 次檢查 Botpress...`);
+            
+            if (window.checkBotpressLoaded()) {
+                clearInterval(checkInterval);
+                console.log('🎉 Botpress 檢測成功，停止檢查');
+            } else if (checkCount >= 10) {
+                clearInterval(checkInterval);
+                console.log('❌ Botpress 載入失敗（已檢查 10 次）');
+                console.log('💡 將使用內建聊天機器人作為備用方案');
+            }
+        }, 1000);
+    </script>
+    <script src="js/game.js" defer></script>
+</head>
+<body>
+    <!-- 頂部狀態欄 -->
+    <header class="header">
+        <!-- 左側玩家資訊 -->
+        <div class="player-info">
+            <div class="avatar-cell">
+                <div class="player-avatar"></div>
+            </div>
+            <div class="name-cell">
+                <div class="player-name">BEAR</div>
+            </div>
+        </div>
+        
+        <!-- 右側資源欄 -->
+        <div class="resources">
+            <!-- 蜂蜜幣 -->
+            <div class="resource-item">
+                <div class="resource-icon honey-icon">
+                    <div class="resource-value">10000</div>
+                </div>
+            </div>
+            
+            <!-- 熊點數 -->
+            <div class="resource-item">
+                <div class="resource-icon bear-point-icon">
+                    <div class="resource-value">100</div>
+                </div>
+            </div>
+            
+            <!-- 勳章 -->
+            <div class="resource-item">
+                <div class="resource-icon medal-icon">
+                    <div class="resource-value">100</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 遊戲容器 -->
+    <div class="game-container">
+        <!-- 中央主視窗 -->
+        <main class="main-window">
+            <div class="window-frame">
+                <div class="window-content">
+                    <!-- 內容已清空 -->
+                </div>
+            </div>
+        </main>
+
+        <!-- 底部導航欄 -->
+        <nav class="navigation">
+            <button class="nav-button" id="navGashapon">
+                <span class="button-text">扭蛋機</span>
+            </button>
+            
+            <button class="nav-button" id="navStock">
+                <span class="button-text">進貨</span>
+            </button>
+            
+            <button class="nav-button" id="navMarketing">
+                <span class="button-text">行銷題庫</span>
+            </button>
+            
+            <button class="nav-button" id="navLeaderboard">
+                <span class="button-text">排行榜</span>
+            </button>
+            
+            <button class="nav-button" id="navChat">
+                <span class="button-text">聊天室</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- 排行榜彈窗 -->
+    <div id="leaderboardModal" class="modal-overlay" style="display: none;">
+        <div class="leaderboard-modal">
+            <!-- 標題 -->
+            <div class="leaderboard-header">
+                <div class="leaderboard-icon-title">
+                    <img src="assets/images/排行榜圖示.png" alt="排行榜圖示" class="leaderboard-icon-img">
+                </div>
+                <h2 class="leaderboard-title">排行榜</h2>
+            </div>
+            
+            <!-- 標籤切換 -->
+            <div class="leaderboard-tabs">
+                <button class="leaderboard-tab active" data-tab="all">蜂蜜幣</button>
+                <button class="leaderboard-tab" data-tab="friends">顧客滿意度</button>
+                <button class="leaderboard-tab" data-tab="reputation">聲望</button>
+            </div>
+            
+            <!-- 前三名展示區 -->
+            <div class="top-three-container">
+                <div class="top-rank-card rank-2">
+                    <div class="rank-icon">
+                        <img src="assets/images/第二名.png" alt="第二名" class="rank-icon-img">
+                    </div>
+                    <div class="player-avatar-small">🐻</div>
+                    <div class="rank-name">-</div>
+                    <div class="rank-score">-</div>
+                </div>
+                
+                <div class="top-rank-card rank-1">
+                    <div class="rank-icon">
+                        <img src="assets/images/第一名.png" alt="第一名" class="rank-icon-img">
+                    </div>
+                    <div class="player-avatar-small">🐻</div>
+                    <div class="rank-name">-</div>
+                    <div class="rank-score">-</div>
+                </div>
+                
+                <div class="top-rank-card rank-3">
+                    <div class="rank-icon">
+                        <img src="assets/images/第三名.png" alt="第三名" class="rank-icon-img">
+                    </div>
+                    <div class="player-avatar-small">🐻</div>
+                    <div class="rank-name">-</div>
+                    <div class="rank-score">-</div>
+                </div>
+            </div>
+            
+            <!-- 分隔線 -->
+            <div class="leaderboard-divider"></div>
+            
+            <!-- 排名列表 -->
+            <div class="leaderboard-list">
+                <div class="leaderboard-list-header">
+                    <span class="header-rank">排名</span>
+                    <span class="header-player">玩家</span>
+                    <span class="header-score" id="scoreLabel">蜂蜜幣</span>
+                </div>
+                
+                <div class="leaderboard-list-content">
+                    <div class="leaderboard-item">
+                        <span class="item-rank">#4</span>
+                        <span class="item-player">-</span>
+                        <span class="item-score">-</span>
+                    </div>
+                    
+                    <div class="leaderboard-item">
+                        <span class="item-rank">#5</span>
+                        <span class="item-player">-</span>
+                        <span class="item-score">-</span>
+                    </div>
+                    
+                    <div class="leaderboard-item">
+                        <span class="item-rank">#6</span>
+                        <span class="item-player">-</span>
+                        <span class="item-score">-</span>
+                    </div>
+                    
+                    <div class="leaderboard-item">
+                        <span class="item-rank">#7</span>
+                        <span class="item-player">-</span>
+                        <span class="item-score">-</span>
+                    </div>
+                    
+                    <div class="leaderboard-item">
+                        <span class="item-rank">#8</span>
+                        <span class="item-player">-</span>
+                        <span class="item-score">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 底部按鈕 -->
+            <div class="leaderboard-footer">
+                <button class="leaderboard-btn refresh-btn">🔄 刷新排行榜</button>
+                <button class="leaderboard-btn close-btn">關閉</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 背景音樂 -->
+    <audio id="backgroundMusic" loop>
+        <source src="assets/music/nostalgia2-fast.mp3" type="audio/mpeg">
+        您的瀏覽器不支援音頻播放。
+    </audio>
+    <script>
+        // 首次互動時，準備 WebAudio（給 SoundManager 使用）
+        document.addEventListener('pointerdown', function once(){
+            try {
+                const Ctor = window.AudioContext || window.webkitAudioContext;
+                if (Ctor) {
+                    window._globalClickAudioCtx = window._globalClickAudioCtx || new Ctor();
+                    if (window._globalClickAudioCtx.state === 'suspended') {
+                        window._globalClickAudioCtx.resume();
+                    }
+                }
+            } catch(e) {}
+            document.removeEventListener('pointerdown', once);
+        }, { passive: true });
+    </script>
+</body>
+</html>

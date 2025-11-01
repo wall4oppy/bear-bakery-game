@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小熊哥麵包坊 - 像素風行銷策略遊戲</title>
+    <link rel="icon" href="assets/images/小熊哥.png" type="image/png">
+    
+    <!-- 基本 meta 標籤 -->
+    <meta name="description" content="可愛的像素風格麵包坊行銷策略遊戲！扮演小熊哥，從零開始經營麵包坊，面對多變的市場景氣和各種挑戰，打造屬於你的烘焙帝國！">
+    <meta name="keywords" content="小熊哥,麵包坊,行銷策略遊戲,像素風格,烘焙,模擬經營">
+    <meta name="author" content="小熊哥遊戲團隊">
+    
+    <!-- Open Graph meta 標籤 (Facebook, LinkedIn 等) -->
+    <meta property="og:title" content="小熊哥捲土重來 - 像素風格麵包坊行銷策略遊戲">
+    <meta property="og:description" content="可愛的像素風格麵包坊行銷策略遊戲！扮演小熊哥，從零開始經營麵包坊，面對多變的市場景氣和各種挑戰，打造屬於你的烘焙帝國！">
+    <meta property="og:image" content="https://wall4oppy.github.io/bear-bakery-game/assets/images/小熊哥.png">
+    <meta property="og:url" content="https://wall4oppy.github.io/bear-bakery-game/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="小熊哥捲土重來">
+    <meta property="og:locale" content="zh_TW">
+    
+    <!-- Twitter Card meta 標籤 -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="小熊哥捲土重來 - 像素風格麵包坊行銷策略遊戲">
+    <meta name="twitter:description" content="可愛的像素風格麵包坊行銷策略遊戲！扮演小熊哥，從零開始經營麵包坊，面對多變的市場景氣和各種挑戰，打造屬於你的烘焙帝國！">
+    <meta name="twitter:image" content="https://wall4oppy.github.io/bear-bakery-game/assets/images/小熊哥.png">
+    
+    <style>
+        /* 像素風格字體 */
+        @font-face {
+            font-family: 'Zpix';
+            src: url('assets/fonts/Zpix.ttf') format('truetype');
+            font-display: swap;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #000;
+            position: relative;
+        }
+        
+        .game-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+        
+        .start-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, calc(-50% + 200px)) scale(1.5);
+            background: transparent;
+            border: none;
+            padding: 15px 30px;
+            color: #fff;
+            font-family: 'Zpix', 'Arial', sans-serif;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 
+                2px 2px 0px #333,
+                -2px -2px 0px #333,
+                2px -2px 0px #333,
+                -2px 2px 0px #333,
+                0px 2px 0px #333,
+                0px -2px 0px #333,
+                2px 0px 0px #333,
+                -2px 0px 0px #333;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+        
+        .start-button:hover {
+            transform: translate(-50%, calc(-50% + 200px)) scale(1.575);
+        }
+        
+        .start-button:active {
+            transform: translate(-50%, calc(-50% + 200px)) scale(1.425);
+        }
+    </style>
+</head>
+<body>
+    <img src="assets/images/灰色開始遊戲.png" alt="開始遊戲" class="game-image">
+    <button class="start-button" onclick="startGame()">PRESSㅤSTART</button>
+    
+    <script>
+        function startGame() {
+            // 跳轉到 intro.html
+            window.location.href = 'intro.html';
+        }
+        // 全域按鈕音效支援
+        (function(){
+            const Ctor = window.AudioContext || window.webkitAudioContext;
+            let ctx = null;
+            let isEnabled = localStorage.getItem('soundEnabled') !== 'false';
+            let lastPlayTime = 0;
+            
+            function playSound(soundFunction) {
+                if (!isEnabled) return;
+                const now = Date.now();
+                if (now - lastPlayTime < 50) return;
+                lastPlayTime = now;
+                
+                try{
+                    if(!ctx && Ctor){ ctx = new Ctor(); }
+                    if(!ctx) return;
+                    if(ctx.state === 'suspended'){ ctx.resume(); }
+                    soundFunction();
+                }catch(e){}
+            }
+            
+            function playNavClick(){
+                playSound(() => {
+                    const now = ctx.currentTime;
+                    const osc1 = ctx.createOscillator();
+                    const gain1 = ctx.createGain();
+                    osc1.type = 'square';
+                    osc1.frequency.setValueAtTime(2200, now);
+                    gain1.gain.setValueAtTime(0.08, now);
+                    gain1.gain.exponentialRampToValueAtTime(0.0001, now + 0.03);
+                    osc1.connect(gain1).connect(ctx.destination);
+                    osc1.start(now);
+                    osc1.stop(now + 0.04);
+                });
+            }
+            
+            function playStartGame(){
+                playSound(() => {
+                    const now = ctx.currentTime;
+                    // 開始遊戲的特別音效（上升音階）
+                    const osc1 = ctx.createOscillator();
+                    const gain1 = ctx.createGain();
+                    osc1.type = 'square';
+                    osc1.frequency.setValueAtTime(523, now); // C5
+                    gain1.gain.setValueAtTime(0.08, now);
+                    gain1.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
+                    osc1.connect(gain1).connect(ctx.destination);
+                    osc1.start(now);
+                    osc1.stop(now + 0.16);
+                    
+                    const osc2 = ctx.createOscillator();
+                    const gain2 = ctx.createGain();
+                    osc2.type = 'square';
+                    osc2.frequency.setValueAtTime(659, now + 0.1); // E5
+                    gain2.gain.setValueAtTime(0.08, now + 0.1);
+                    gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+                    osc2.connect(gain2).connect(ctx.destination);
+                    osc2.start(now + 0.1);
+                    osc2.stop(now + 0.26);
+                });
+            }
+            
+            // 為所有按鈕添加音效
+            function addClickSoundToAllButtons() {
+                const buttons = document.querySelectorAll('button, .button, .btn, [role="button"]');
+                buttons.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        if (this.classList.contains('start-button') || this.textContent.includes('START')) {
+                            playStartGame();
+                        } else {
+                            playNavClick();
+                        }
+                    });
+                });
+            }
+            
+            // 頁面載入時添加音效
+            document.addEventListener('DOMContentLoaded', addClickSoundToAllButtons);
+        })();
+    </script>
+</body>
+</html>
